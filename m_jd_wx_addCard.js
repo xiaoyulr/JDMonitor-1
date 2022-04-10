@@ -1,28 +1,12 @@
-/*
-
-M加购有礼
-https://raw.githubusercontent.com/msechen/jdrain/main/m_jd_wx_addCart.js
-
-环境变量
-M_WX_ADD_CART_URL  活动ID 
-
-即时任务，无需cron
-
-*/
-let mode = __dirname.includes('magic')
-const {Env} = mode ? require('../magic') : require('./magic')
-const $ = new Env('自动车-M加购有礼');
+/**
+ * cron: 0
+ */
+const {Env} = require('./magic')
+const $ = new Env('M加购有礼');
 $.lz = 'LZ_TOKEN_KEY=lztokef1eb8494b0af868bd18bdaf8;LZ_TOKEN_VALUE=Aa5RE8RuY4X3zA==;';
 $.activityUrl = process.env.M_WX_ADD_CART_URL
     ? process.env.M_WX_ADD_CART_URL
     : '';
-if (mode) {
-    // $.activityUrl = 'https://lzkj-isv.isvjcloud.com/wxCollectionActivity/activity2/12945e62d4334a6a9fd76253941d7c08?activityId=12945e62d4334a6a9fd76253941d7c08'
-    // $.activityUrl = 'https://lzkj-isv.isvjcloud.com/wxCollectionActivity/activity2/2f3c55901805489ab47b7cb657ce7a7f?activityId=2f3c55901805489ab47b7cb657ce7a7f'
-    $.activityUrl = 'https://cjhy-isv.isvjcloud.com/wxCollectionActivity/activity?activityId=d138c19abad74f3391ae862d089ab667'
-    //一键加购
-    $.activityUrl = 'https://lzkj-isv.isvjcloud.com/wxCollectionActivity/activity2/c3058177366745e08a7884382290b344?activityId=c3058177366745e08a7884382290b344'
-}
 
 $.s = 1
 if ($.activityUrl.includes('activityId') > -1) {
@@ -101,13 +85,16 @@ $.logic = async function () {
         `activityId=${$.activityId}`)
     if (shopInfo.result) {
         $.shopName = shopInfo.data.shopName;
-        $.log('shopInfo', shopInfo.data.sid, shopInfo.data.shopName);
+        $.log('店铺信息', shopInfo.data.sid, shopInfo.data.shopName);
     }
     await api('wxCommonInfo/getActMemberInfo',
         `venderId=${$.venderId}&activityId=${$.activityId}&pin=${$.Pin}`)
     await api('wxActionCommon/getUserInfo', `pin=${$.Pin}`)
     let info = await api(
         `miniProgramShareInfo/getInfo?activityId=${$.activityId}`);
+    if (info.result) {
+        $.shareMpTitle = info.data.shareMpTitle;
+    }
     if (content.needFollow && !content.hasFollow) {
         await api(`wxActionCommon/followShop`,
             `userId=${$.venderId}&activityId=${$.activityId}&buyerNick=${encodeURIComponent(
@@ -122,7 +109,7 @@ $.logic = async function () {
         return
     }
     //$.log(`needCollectionSize:${needCollectionSize} needFollow:${needFollow}`, );
-    $.log('drawInfo', JSON.stringify(content.drawInfo));
+    $.log('奖品信息', JSON.stringify(content.drawInfo.name));
     let productIds = [];
     for (let cpvo of $.randomArray(content.cpvos)) {
         if (oneKeyAddCart) {
@@ -171,7 +158,6 @@ $.after = async function () {
     }
     $.msg.push(`\n${$.shopName}\n${$.shareMpTitle}\n`);
     $.msg.push($.activityUrl)
-    $.msg.push('\n甘露殿【https://t.me/jdredrain】')
 }
 $.run({filename: __filename}).catch(
     reason => $.log(reason));
@@ -191,7 +177,7 @@ async function api(fn, body) {
         "User-Agent": $.UA,
     }
     let {data} = await $.request(url, headers, body)
-    $.log(fn, typeof data === 'string' ? '' : JSON.stringify(data))
+   //  $.log(fn, typeof data === 'string' ? '' : JSON.stringify(data))
     await $.wait(300, 500)
     return data;
 }
@@ -227,6 +213,8 @@ async function getLzToken() {
     let {data} = await $.request($.activityUrl, headers)
     return data;
 }
+
+
 $.run({whitelist: ['1-5'], wait: [30000, 50000]}).catch(
     reason => $.log(reason));
 

@@ -1,0 +1,35 @@
+----------TG------------
+BotToken 5081747694:AAHiqn5N3uzUdUhAffihrUf1VlErrtaIT9s
+USER_ID 5071041978
+api_id 10226121
+api_hash cf132b840e7c2daf6f54f1deeadfbde1
+
+----------傻妞-----------
+
+-------一键安装-------
+# 国内服务器用户
+s=sillyGirl;a=arm64;if [[ $(uname -a | grep "x86_64") != "" ]];then a=amd64;fi ;if [ ! -d $s ];then mkdir $s;fi ;cd $s;wget http://github.yanyuge.workers.dev/https://github.com/cdle/${s}/releases/download/main/${s}_linux_$a -O $s && chmod 777 $s;pkill -9 $s;$(pwd)/$s
+# 国外服务器用户
+s=sillyGirl;a=arm64;if [[ $(uname -a | grep "x86_64") != "" ]];then a=amd64;fi ;if [ ! -d $s ];then mkdir $s;fi ;cd $s;wget https://github.com/cdle/${s}/releases/download/main/${s}_linux_$a -O $s && chmod 777 $s;pkill -9 $s;$(pwd)/$s
+
+--------对接tg--------
+
+set sillyGirl enable_http_server true
+set tg token 5081747694:AAHiqn5N3uzUdUhAffihrUf1VlErrtaIT9s
+set tg masters 5071041978
+
+----------人型-----------
+
+-------一键安装-------
+
+
+-------设置白名单-------
+set pgm whiltelist 5060808191&-1001566609156&5071041978
+
+KR
+-shift set -1001659538110 5081747694 
+JD GROUP
+-shift set -1001148869730 5081747694 
+京东活动
+-shift set -1001263138437 5081747694
+
