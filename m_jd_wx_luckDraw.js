@@ -308,5 +308,3 @@ function taskPostUrl(url, body) {
         }
     }
 }
-$.run({whitelist: ['1-5'], wait: [30000, 50000]}).catch(
-    reason => $.log(reason));
