@@ -3,7 +3,7 @@ author:duck
 https://t.me/okyydsnb
 注意控制ck数量
 OWN_COOKIE_NUM 需要助力数量
-jd_fxyl_activityId 活动id
+SHARE_ACTIVITY_ID 活动id
 cron "1 1 1 1 1" jd_share.js
 */
 
@@ -20,8 +20,8 @@ let activityShopId = ''
 if (process.env.OWN_COOKIE_NUM && process.env.OWN_COOKIE_NUM != 4) {
     ownCookieNum = process.env.OWN_COOKIE_NUM;
 }
-if (process.env.jd_fxyl_activityId && process.env.jd_fxyl_activityId != "") {
-    activityId = process.env.jd_fxyl_activityId;
+if (process.env.SHARE_ACTIVITY_ID && process.env.SHARE_ACTIVITY_ID != "") {
+    activityId = process.env.SHARE_ACTIVITY_ID;
 }
 
 if ($.isNode()) {
