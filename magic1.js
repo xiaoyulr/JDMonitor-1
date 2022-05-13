@@ -93,6 +93,22 @@ function uuid(x = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx") {
     })
 }
 
+function retryGetSign(functionId, body, times){
+    return new Promise((resolve, reject)=>{
+        function run(){
+            getSignfromPanda(functionId, body).then(resolve).catch(err=>{
+                if(times--){
+                    console.log(`还有 ${times} 次尝试`)
+                    run()
+                }else{
+                    reject(err)
+                }
+            })
+        }
+        run()
+    })
+}
+
 	function getSignfromPanda(functionId, body) {
     var strsign = '';
 	let data = {
@@ -100,7 +116,7 @@ function uuid(x = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx") {
       "body": body
     }
     //console.log(JSON.stringify(data))
-    return new Promise(function(resolve) {
+    return new Promise(function(resolve, reject) {
             //var requestData = params
             request({
                 url: "https://api.zhezhe.cf/jd/sign",
@@ -114,9 +130,12 @@ function uuid(x = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx") {
             }, function (error, response, body) {
                 console.log(body)
                 if (!error && response.statusCode == 200) {
+                    console.log("----成功获取sign!---")
                     strsign={fn: body.data.fn, sign: body.data.sign};
                     //console.log(strsign)
                     resolve(strsign);
+                } else {
+                    reject("获取sign失败!")
                 }
                 
             });
@@ -888,7 +907,7 @@ class Env {
         try {
 			let pandaSign = undefined;
 			while(pandaSign == undefined) {
-				pandaSign = getSignfromPanda(fn,body)
+				pandaSign = retryGetSign(fn,body)
 			}
             return pandaSign
         } catch (e) {
