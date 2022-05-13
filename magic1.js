@@ -886,7 +886,11 @@ class Env {
     async sign(fn, body = {}) {
         let b = {"fn": fn, "body": body};
         try {
-            return getSignfromPanda(fn,body)
+			let pandaSign = undefined;
+			while(pandaSign == undefined) {
+				pandaSign = getSignfromPanda(fn,body)
+			}
+            return pandaSign
         } catch (e) {
             console.log("sign接口异常")
             //console.log("请自行配置sign实现")
