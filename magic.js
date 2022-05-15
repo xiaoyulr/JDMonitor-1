@@ -2,7 +2,7 @@
 
 const axios = require('axios');
 const fs = require("fs");
-const {format} = require("date-fns");
+const { format } = require("date-fns");
 const notify = require('./sendNotify');
 const jdCookieNode = require('./jdCookie.js');
 const CryptoJS = require("crypto-js");
@@ -53,7 +53,7 @@ const USER_AGENTS = [
     "jdapp;iPhone;10.0.2;14.1;network/wifi;Mozilla/5.0 (iPhone; CPU iPhone OS 14_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1",
 ]
 
-const $ = axios.create({timeout: 24000});
+const $ = axios.create({ timeout: 24000 });
 $.defaults.headers['Accept'] = '*/*';
 $.defaults.headers['User-Agent'] = USER_AGENTS[randomNumber(0,
     USER_AGENTS.length)];
@@ -182,7 +182,7 @@ class Env {
         }
         await this.after()
         console.log(`${this.now()} ${this.name} 运行结束,耗时 ${this.timestamp()
-        - this.start}ms\n`)
+            - this.start}ms\n`)
         testMode && this.msg.length > 0 ? console.log(this.msg.join("\n")) : ''
         if (!data?.o2o) {
             await this.send();
@@ -246,11 +246,11 @@ class Env {
             o => m += String.fromCharCode(o))
         this.appId = fn ? this.name.slice(0, 1)
             === String.fromCharCode(77)
-                ? (fn.includes(av(y)) ? '10032' :
-                    fn.includes(av(z)) ? '10028' :
-                        fn.includes(av(j)) ? '10001' :
-                            fn.includes(av(k)) ? '10038' :
-                                fn.includes(av(m)) ? 'wx' : '') : ''
+            ? (fn.includes(av(y)) ? '10032' :
+                fn.includes(av(z)) ? '10028' :
+                    fn.includes(av(j)) ? '10001' :
+                        fn.includes(av(k)) ? '10038' :
+                            fn.includes(av(m)) ? 'wx' : '') : ''
             : '';
         this.appId ? this.algo = await this._algo() : '';
     }
@@ -267,7 +267,7 @@ class Env {
     putMsg(msg) {
         this.log(msg)
         let r = [[' ', ''], ['优惠券', '券'], ['东券', '券'], ['店铺', ''],
-            ['恭喜', ''], ['获得', '']]
+        ['恭喜', ''], ['获得', '']]
         for (let ele of r) {
             msg = msg.replace(ele[0], ele[1])
         }
@@ -277,8 +277,8 @@ class Env {
             if (this.msg.length > 0 && this.msg[this.msg.length - 1].includes(
                 this.username)) {
                 this.msg[this.msg.length - 1] = this.msg[this.msg.length
-                - 1].split(" ")[0] + ' ' + [this.msg[this.msg.length - 1].split(
-                    " ")[1], msg].join(',')
+                    - 1].split(" ")[0] + ' ' + [this.msg[this.msg.length - 1].split(
+                        " ")[1], msg].join(',')
             } else {
                 this.msg.push(`【当前账号】${this.username} ${msg}`)
             }
@@ -336,16 +336,16 @@ class Env {
             }
             stk.split(',').map((item, index) => {
                 st += `${item}:${this.getQueryString(url, item)}${index
-                === stk.split(',').length - 1 ? '' : '&'}`;
+                    === stk.split(',').length - 1 ? '' : '&'}`;
             })
             ens = encodeURIComponent(
                 [''.concat(ts), ''.concat(fp),
-                    ''.concat(this.appId), ''.concat(tk),
-                    ''.concat(CryptoJS.HmacSHA256(st, hash.toString()).toString(
-                        CryptoJS.enc.Hex))].join(';'));
+                ''.concat(this.appId), ''.concat(tk),
+                ''.concat(CryptoJS.HmacSHA256(st, hash.toString()).toString(
+                    CryptoJS.enc.Hex))].join(';'));
             if (url.match(/[?|&]h5st=(.*?)&/)) {
                 url = url.replace(url.match(/[?|&]h5st=(.*?)&/)[1], 'H5ST')
-                .replace(/H5ST/, ens)
+                    .replace(/H5ST/, ens)
             }
             let matchArr = [/[?|&]_time=(\d+)/, /[?|&]__t=(\d+)/,
                 /[?|&]_ts=(\d+)/,
@@ -509,51 +509,69 @@ class Env {
     async get(url, headers) {
         url = this.appId ? this.build(url) : url
         return new Promise((resolve, reject) => {
-            $.get(url, {headers: headers}).then(
+            $.get(url, { headers: headers }).then(
                 data => resolve(this.handler(data) || data))
-            .catch(e => reject(e))
+                .catch(e => reject(e))
         })
     }
 
     async get2(url, headers) {
         return new Promise((resolve, reject) => {
-            $.get(url, {headers: headers}).then(
+            $.get(url, { headers: headers }).then(
                 data => resolve(data))
-            .catch(e => reject(e))
+                .catch(e => reject(e))
         })
     }
 
     async post(url, body, headers) {
         url = this.appId ? this.build(url) : url
         return new Promise((resolve, reject) => {
-            $.post(url, body, {headers: headers})
-            .then(data => resolve(this.handler(data) || data))
-            .catch(e => reject(e));
+            $.post(url, body, { headers: headers })
+                .then(data => resolve(this.handler(data) || data))
+                .catch(e => reject(e));
         })
     }
 
     //└
     async request(url, headers, body) {
         return new Promise((resolve, reject) => {
-            let __config = headers?.headers ? headers : {headers: headers};
+            let __config = headers?.headers ? headers : { headers: headers };
             (body ? $.post(url, body, __config) : $.get(url, __config))
-            .then(data => {
-                this.__lt(data);
-                resolve(data)
-            })
-            .catch(e => reject(e));
+                .then(data => {
+                    // if (null != data.headers) {
+                    //     // console.log("resquest data:" + JSON.stringify(data.headers))
+                    //     // let headers = data.headers['Set-Cookie'] || data.headers['set-cookie'] || ''
+                    //     // if (headers != '') {
+                    //     //     console.log(`headers:${headers.toString()}`)
+                    //     //     this.jsessionid = headers.toString().split(";")[0].split("=")[1]
+                    //     //     console.log(`jsessionid:${this.jsessionid}`)
+                    //     // }
+                    // }
+                    this.__lt(data);
+                    resolve(data)
+                })
+                .catch(e => reject(e));
         })
     }
 
-    __lt(data) {
-        if (this.appId.length !== 2) {
-            return
-        }
+    async requestLz(url, headers, body) {
+        return new Promise((resolve, reject) => {
+            let __config = headers?.headers ? headers : { headers: headers };
+            (body ? $.post(url, body, __config) : $.get(url, __config))
+                .then(data => {
+                    let data2 = this.getLzToken(data);
+                    resolve(data2)
+                })
+                .catch(e => reject(e));
+        })
+    }
+
+    getLzToken(data) {
         let scs = data?.headers['set-cookie'] || data?.headers['Set-Cookie']
             || ''
         if (!scs) {
             if (data?.data?.LZ_TOKEN_KEY && data?.data?.LZ_TOKEN_VALUE) {
-                this.lz = `LZ_TOKEN_KEY=${data.data.LZ_TOKEN_KEY};LZ_TOKEN_VALUE=${data.data.LZ_TOKEN_VALUE};`;
+                return `LZ_TOKEN_KEY=${data.data.LZ_TOKEN_KEY};LZ_TOKEN_VALUE=${data.data.LZ_TOKEN_VALUE};`;
             }
             return;
         }
@@ -569,13 +587,47 @@ class Env {
             }
         }
         if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE) {
+            return `${LZ_TOKEN_KEY}${LZ_TOKEN_VALUE}`
+        }
+        // this.log('lz', this.lz)
+    }
+
+    __lt(data) {
+        if (this.appId.length !== 2) {
+            // console.log("进入__it后直接返回了")
+            return
+        }
+        let scs = data?.headers['set-cookie'] || data?.headers['Set-Cookie']
+            || ''
+        if (!scs) {
+            console.log("scs:" + JSON.stringify(scs))
+            if (data?.data?.LZ_TOKEN_KEY && data?.data?.LZ_TOKEN_VALUE) {
+                this.lz = `LZ_TOKEN_KEY=${data.data.LZ_TOKEN_KEY};LZ_TOKEN_VALUE=${data.data.LZ_TOKEN_VALUE};`;
+            }
+            console.log("进入__it后，赋值lz")
+            return;
+        }
+        let LZ_TOKEN_KEY = '', LZ_TOKEN_VALUE = ''
+        let sc = typeof scs != 'object' ? scs.split(',') : scs
+        console.log("sc:" + JSON.stringify(sc))
+        for (let ck of sc) {
+            let name = ck.split(";")[0].trim()
+            if (name.split("=")[1]) {
+                name.includes('LZ_TOKEN_KEY=')
+                    ? LZ_TOKEN_KEY = name.replace(/ /g, '') + ';' : ''
+                name.includes('LZ_TOKEN_VALUE=')
+                    ? LZ_TOKEN_VALUE = name.replace(/ /g, '') + ';' : ''
+            }
+        }
+        if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE) {
+            console.log("用已有lz，赋值lz")
             this.lz = `${LZ_TOKEN_KEY}${LZ_TOKEN_VALUE}`
         }
-        // testMode ? this.log('lz', this.lz) : ''
+        // this.log('lz', this.lz)
     }
 
     handler(res) {
-        let data = res?.data || res?.body ||res;
+        let data = res?.data || res?.body || res;
         if (!data) {
             return;
         }
@@ -583,14 +635,14 @@ class Env {
             data = data.replace(/[\n\r| ]/g, '');
             if (data.includes("try{jsonpCB")) {
                 data = data.replace(/try{jsonpCB.*\({/, '{')
-                .replace(/}\)([;])?}catch\(e\){}/, '}')
+                    .replace(/}\)([;])?}catch\(e\){}/, '}')
             } else if (data.includes('jsonpCB')) {
                 let st = data.replace(/[\n\r]/g, '').replace(/jsonpCB.*\({/,
                     '{');
                 data = st.substring(0, st.length - 1)
             } else if (data.match(/try{.*\({/)) {
                 data = data.replace(/try{.*\({/, '{')
-                .replace(/}\)([;])?}catch\(e\){}/, '}')
+                    .replace(/}\)([;])?}catch\(e\){}/, '}')
             } else if (data.includes("jsonp")) {
                 data = /{(.*)}/g.exec(data)[0]
             } else {
@@ -639,7 +691,7 @@ class Env {
             'Cookie': this.cookie
         }
         headers['User-Agent'] = `Mozilla/5.0 (iPhone; CPU iPhone OS 14_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.4(0x1800042c) NetType/4G Language/zh_CN miniProgram`
-        let {data} = await this.request(url, headers, body);
+        let { data } = await this.request(url, headers, body);
         this.log(data.msg)
         return data;
     }
@@ -672,7 +724,7 @@ class Env {
     formatDate(date, fmt) {
         // noinspection JSCheckFunctionSignatures
         return format(typeof date === 'object' ? date : new Date(
-                typeof date === 'string' ? date * 1 : date),
+            typeof date === 'string' ? date * 1 : date),
             fmt || 'yyyy-MM-dd')
     }
 
@@ -690,11 +742,11 @@ class Env {
         }(40), ts = Date.now().toString(), tk = this.md5(
             '' + decodeURIComponent(this.username) + ts + id
             + 'tPOamqCuk9NLgVPAljUyIHcPRmKlVxDy');
-        return {ts: ts, id: id, tk: tk}
+        return { ts: ts, id: id, tk: tk }
     }
 
     async get_bean() {
-        let {data} = await $.post('https://api.m.jd.com/client.action',
+        let { data } = await $.post('https://api.m.jd.com/client.action',
             `functionId=plantBeanIndex&body=${escape(
                 JSON.stringify({
                     version: "9.0.0.1",
@@ -711,10 +763,10 @@ class Env {
     }
 
     async get_farm() {
-        let {data} = await $.post(
+        let { data } = await $.post(
             'https://api.m.jd.com/client.action?functionId=initForFarm',
             `body=${escape(
-                JSON.stringify({"version": 4}))}&appid=wh5&clientVersion=9.1.0`,
+                JSON.stringify({ "version": 4 }))}&appid=wh5&clientVersion=9.1.0`,
             {
                 "origin": "https://home.m.jd.com",
                 "referer": "https://home.m.jd.com/myJd/newhome.action",
@@ -742,12 +794,12 @@ class Env {
                 "platform": "web",
                 "expandParams": ''
             }), {
-                'Authority': 'cactus.jd.com',
-                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
-                'Content-Type': 'application/json',
-                'Origin': 'https://st.jingxi.com',
-                'Referer': 'https://st.jingxi.com/',
-            });
+            'Authority': 'cactus.jd.com',
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
+            'Content-Type': 'application/json',
+            'Origin': 'https://st.jingxi.com',
+            'Referer': 'https://st.jingxi.com/',
+        });
         return {
             fp: fp.toString(),
             tk: data?.data?.result?.tk || data?.result?.tk,
@@ -757,4 +809,4 @@ class Env {
     }
 }
 
-module.exports = {Env, CryptoJS};
+module.exports = { Env, CryptoJS };
