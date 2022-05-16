@@ -39,14 +39,8 @@ $.logic = async function () {
         // stop = true;
     }
     $.lz = lzToken
-    // console.log("lzToken is" + $.lz);
-    // $.domain.includes('lzkj-isv.isvjcloud.com') ? await api(
-    //     'wxCommonInfo/initActInfo', `activityId=${$.activityId}`) : ''
-
-    // await api('wxAssemblePage/getFloatlconStatus', `activityId=${$.activityId}`)
 
     let token = await getToken();
-    // console.log("token is" + JSON.stringify(token))
     if (token.code !== '0') {
         $.putMsg(`获取Token失败`);
         return
@@ -58,13 +52,11 @@ $.logic = async function () {
         $.log(`获取活动信息失败`);
         return
     }
-    // console.log("actInfo=" + JSON.stringify(actInfo.data));
+
     $.jdActivityId = actInfo.data.jdActivityId;
     $.venderId = actInfo.data.venderId;
     $.shopId = actInfo.data.shopId;
-    $.activityType = actInfo.data.activityType;
-
-    // await api('wxCommonInfo/getSystemConfigForNew', `activityId=${$.activityId}&activityType=${$.activityType}`)    
+    $.activityType = actInfo.data.activityType;  
 
     let myPing = await api('customer/getMyPing',
         `userId=${$.venderId}&token=${$.Token}&fromType=APP`)
@@ -98,7 +90,7 @@ $.logic = async function () {
         $.putMsg('获取不到店铺信息,结束运行')
         return
     }
-    // console.log("shopInfo=" + JSON.stringify(shopInfo));
+
     $.userId = shopInfo?.data?.userId
     $.shopName = shopInfo?.data?.shopName
 
@@ -110,7 +102,7 @@ $.logic = async function () {
         $.putMsg('获取不到活动信息,结束运行')
         return
     }
-    // console.log("activityContent=" + JSON.stringify(activityContent));
+
     $.startTime = activityContent.data.startTime || 0
     $.isGameEnd = activityContent.data.isGameEnd || false
     $.helpFriendStatus = activityContent.data.helpFriendStatus || 0
@@ -124,40 +116,21 @@ $.logic = async function () {
         stop = true;
         return;
     }
-    // await api('drawCenter/drawOkList',
-    //     `activityId=${$.activityId}&type=${$.activityType}`, true);
-
-    // await api('drawCenter/getPrizeList',
-    //     `activityId=${$.activityId}&activityType=${$.activityType}&venderId=${$.venderId}`, true);
-
-    // await api('drawCenter/getProduct',
-    //     `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&type=0`, true);
-
     let myInfo = await api('drawCenter/myInfo',
         `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`, true, true);
-    // console.log("myInfo=" + JSON.stringify(myInfo));
-    // console.log(`这个sessionId=${$.jsessionid}`);
 
-    // let myFriends = await api('/drawCenter/myFriends', `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&type=0`, true, true);
-    // console.log("myFriends=" + JSON.stringify(myFriends));
-    // $.jsessionid = myFriends.data.headers['Set-Cookie'].split(';')[0].split('=')[1]
-    // console.log("jsessionid is" + `${$.jsessionid}`)
     let taskList = myInfo?.data?.taskList;
-    // console.log("taskList:" + JSON.stringify(taskList))
+
     let listLength = taskList.length
-    console.log("length:" + JSON.stringify(listLength))
+ 
     for (var z = 0; z < listLength; z++) {
         let task = taskList[z]
-        console.log("task:" + JSON.stringify(task))
         if (task.curNum != task.maxNeed) {
-            console.log("------------进入---------------")
             let taskType = task.taskType;
-            console.log(taskType)
             let taskBody = '';
             let doResponse = { "result": "" }
             if (taskType == "followshop") {
                 taskBody = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&taskId=${task.taskId}&param=`
-                // console.log("taskBody:" + taskBody)
                 doResponse = await api("/drawCenter/doTask", taskBody, true)
                 if (doResponse.result) {
                     console.log("关注成功！")
@@ -180,26 +153,26 @@ $.logic = async function () {
                     await $.wait(1500, 1800)
                 }
             }
-            // if (taskType == "add2cart") {
-            //     let productList = await api("/drawCenter/getProduct", `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&type=1`, true)
-            //     if (productList.result) {
-            //         for (let product of $.randomArray(productList.data)) {
-            //             if (product.taskDone == null) {
-            //                 let skuId = product.skuId;
-            //                 let proName = product.name;
-            //                 $.log("本次加购商品：" + proName)
-            //                 taskBody = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&taskId=${task.taskId}&param=${skuId}`
-            //                 doResponse = await api("/drawCenter/doTask", taskBody, true)
-            //                 if (doResponse.result) {
-            //                     console.log("加购成功")
-            //                 } else {
-            //                     break;
-            //                 }
-            //             }
-            //             await $.wait(1500, 1800)
-            //         }
-            //     }
-            // }
+            if (taskType == "add2cart") {
+                let productList = await api("/drawCenter/getProduct", `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&type=1`, true)
+                if (productList.result) {
+                    for (let product of $.randomArray(productList.data)) {
+                        if (product.taskDone == null) {
+                            let skuId = product.skuId;
+                            let proName = product.name;
+                            $.log("本次加购商品：" + proName)
+                            taskBody = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&taskId=${task.taskId}&param=${skuId}`
+                            doResponse = await api("/drawCenter/doTask", taskBody, true)
+                            if (doResponse.result) {
+                                console.log("加购成功")
+                            } else {
+                                break;
+                            }
+                        }
+                        await $.wait(1500, 1800)
+                    }
+                }
+            }
         }
     }
 
@@ -228,44 +201,6 @@ $.logic = async function () {
         }
         await $.wait(parseInt(Math.random() * 1000 + 500, 10));
     }
-
-
-
-    // if ($.needFollow && !$.hasFollow) {
-    //     let fallow = await api($.domain.includes('cjhy-isv.isvjcloud.com')
-    //         ? '/wxActionCommon/newFollowShop'
-    //         : '/wxActionCommon/followShop',
-    //         $.domain.includes('cjhy-isv.isvjcloud.com')
-    //             ? `venderId=${$.userId}&activityId=${$.activityId}&buyerPin=${encodeURIComponent(
-    //                 encodeURIComponent($.Pin))}&activityType=${$.activityType}`
-    //             : `userId=${$.userId}&activityId=${$.activityId}&buyerNick=${encodeURIComponent(
-    //                 $.Pin)}&activityType=${$.activityType}`);
-    //     if (fallow.result) {
-    //         $.log('关注成功')
-    //     } else {
-    //         $.log(JSON.stringify(fallow));
-    //     }
-    //     await $.wait(2000);
-    // }
-    // for (let m = 1; $.canDrawTimes--; m++) {
-    //     let prize = await api('/wxDrawActivity/start',
-    //         $.domain.includes('cjhy-isv.isvjcloud.com')
-    //             ? `activityId=${$.activityId}&pin=${encodeURIComponent(
-    //                 encodeURIComponent($.Pin))}`
-    //             : `activityId=${$.activityId}&pin=${encodeURIComponent(
-    //                 $.Pin)}`);
-    //     if (prize.result && prize.data.drawOk) {
-    //         $.canDrawTimes = prize.data.canDrawTimes
-    //         $.putMsg(`获得 ${prize.data.name}`);
-    //     } else {
-    //         $.putMsg(`${prize.errorMessage}`);
-    //         break
-    //     }
-    //     await $.wait(parseInt(Math.random() * 1000 + 500, 10));
-    //     if (Number($.canDrawTimes) <= 0 || m >= 5) {
-    //         break
-    //     }
-    // }
 }
 // $.after = async function () {
 //     if ($.msg.length > 0) {
