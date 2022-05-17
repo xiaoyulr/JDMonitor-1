@@ -600,16 +600,16 @@ class Env {
         let scs = data?.headers['set-cookie'] || data?.headers['Set-Cookie']
             || ''
         if (!scs) {
-            console.log("scs:" + JSON.stringify(scs))
+            // console.log("scs:" + JSON.stringify(scs))
             if (data?.data?.LZ_TOKEN_KEY && data?.data?.LZ_TOKEN_VALUE) {
                 this.lz = `LZ_TOKEN_KEY=${data.data.LZ_TOKEN_KEY};LZ_TOKEN_VALUE=${data.data.LZ_TOKEN_VALUE};`;
             }
-            console.log("进入__it后，赋值lz")
+            // console.log("进入__it后，赋值lz")
             return;
         }
         let LZ_TOKEN_KEY = '', LZ_TOKEN_VALUE = ''
         let sc = typeof scs != 'object' ? scs.split(',') : scs
-        console.log("sc:" + JSON.stringify(sc))
+        // console.log("sc:" + JSON.stringify(sc))
         for (let ck of sc) {
             let name = ck.split(";")[0].trim()
             if (name.split("=")[1]) {
@@ -620,7 +620,7 @@ class Env {
             }
         }
         if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE) {
-            console.log("用已有lz，赋值lz")
+            // console.log("用已有lz，赋值lz")
             this.lz = `${LZ_TOKEN_KEY}${LZ_TOKEN_VALUE}`
         }
         // this.log('lz', this.lz)
