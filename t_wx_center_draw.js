@@ -199,7 +199,7 @@ $.logic = async function () {
         } else {
             $.putMsg(`${prize.errorMessage}`);
         }
-        await $.wait(parseInt(Math.random() * 1000 + 500, 10));
+        await $.wait(parseInt(Math.random() * 1000 + 500));
     }
 }
 // $.after = async function () {
