@@ -174,12 +174,6 @@ function joinShop() {
     if ($.openCardStatus) {
       console.log(`已经是会员了~`);
       resolve();
-    } else if ($.openCardBean === 0) {
-      console.log('查询该店入会没有送豆，不入会');
-      resolve();
-    } else if ($.openCardBean < OPENCARD_BEAN) {
-      console.log(`入会送【${$.openCardBean}】豆少于【${OPENCARD_BEAN}豆】,不入...`)
-      resolve();
     } else {
       let body = `{"venderId":"${$.joinVenderId}","shopId":"${$.joinVenderId}","bindByVerifyCodeFlag":1,"registerExtend":{},"writeChildFlag":0${activityId},"channel":401}`
       let h5st = await h5stSign(body) || 'undefined'
