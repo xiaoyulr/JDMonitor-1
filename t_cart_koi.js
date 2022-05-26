@@ -50,13 +50,22 @@ if ($.isNode()) {
                 continue
             }
             await jdmodule(false);
+            if ($.actMemberStatus == 1 && !$.openCardStatus) {
+                break;
+            }
         }
     }
-    console.log(`重新跑前第一个号`)
-    cookie = cookiesArr[0];
-    await jdmodule(true);
     if ($.isNode()) {
-        await notify.sendNotify(`购物车锦鲤：${$.activityName}` ,`开奖时间：${$.drawTime}\n跳转链接: ${$.activityUrl}\n记得定好闹钟嗷`);
+        if ($.actMemberStatus == 1 && !$.openCardStatus) {
+            await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `需要开卡，开卡命令为\nexport VENDER_ID=\"${$.venderId}\"\n跳转链接: ${$.activityUrl}`)
+        } else {
+            console.log(`重新跑前第一个号`)
+            cookie = cookiesArr[0];
+            await jdmodule(true);
+            let st = timeToTimestamp($.drawTime)
+            await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `开奖时间：${$.drawTime}\n跳转链接: ${$.activityUrl}\n格式化参数：\n{\"id\":\"${$.activityId}\", \"drawTime\":\"${st}\"}`);
+        }
+
     }
 })()
     .catch((e) => {
@@ -110,10 +119,10 @@ async function jdmodule(retry) {
     // await takePostRequest("info")
 
     await takePostRequest("getActMemberInfo");
-    // if ($.actMemberStatus == 1 && !$.openCardStatus) {
-    //     console.log("开始入会")
-    //     await joinShop()
-    // }
+    if ($.actMemberStatus == 1 && !$.openCardStatus) {
+        console.log("需要开卡")
+        return
+    }
     console.log(`当前助力：${$.friendUuid}`)
     if (retry) {
         await run();
@@ -624,6 +633,13 @@ function getCK() {
             }
         })
     })
+}
+function timeToTimestamp(time) {
+    let timestamp = Date.parse(new Date(time).toString());
+    //timestamp = timestamp / 1000; //时间戳为13位需除1000，时间戳为13位的话不需除1000
+    console.log(time + "的时间戳为：" + timestamp);
+    return timestamp;
+    //2021-11-18 22:14:24的时间戳为：1637244864707
 }
 
 function getPostRequest(url, body, method = "POST") {
