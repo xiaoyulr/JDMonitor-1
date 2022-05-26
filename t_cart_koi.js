@@ -56,7 +56,7 @@ if ($.isNode()) {
     cookie = cookiesArr[0];
     await jdmodule(true);
     if ($.isNode()) {
-        await notify.sendNotify(`购物车锦鲤【京东账号${$.index}】共加购${$.hasAddCartSize}件商品\n 跳转链接: ${$.activityUrl}`);
+        await notify.sendNotify(`购物车锦鲤：${$.activityName}` ,`开奖时间：${$.drawTime}\n跳转链接: ${$.activityUrl}\n记得定好闹钟嗷`);
     }
 })()
     .catch((e) => {
@@ -356,6 +356,7 @@ async function dealReturn(type, data) {
                     if (res.result && res.result === true) {
                         let activityVo = res.data.activityVo
                         if (typeof activityVo == 'object') {
+                            $.activityName = activityVo.activityName
                             $.drawTime = activityVo.drawTime
                             $.needFollow = activityVo.needFollow
                             $.actRule = activityVo.actRule

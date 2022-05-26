@@ -38,7 +38,7 @@ if ($.isNode()) {
             $.index = i + 1;
             $.isLogin = true;
             $.nickName = '';
-            message = '';
+            $.message = '';
             console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
             if (!$.isLogin) {
                 $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
@@ -52,6 +52,7 @@ if ($.isNode()) {
             //await showMsg();
         }
     }
+    if ($.isNode()) await notify.sendNotify(`${$.name}`, `${$.msg}`);
 })()
     .catch((e) => {
         $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
@@ -135,6 +136,7 @@ async function run() {
                 }
                 await takePostRequest("抽奖");
             }
+
         }
     } catch (e) {
         console.log(e);
@@ -190,8 +192,8 @@ async function takePostRequest(type) {
             url = `https://${$.domain}/drawCenter/getProduct`;
             body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&type=${$.task.type}`
             break;
-        case 'checkOpenCard':
-            url = `${domain}/dingzhi/linkgame/checkOpenCard`;
+        case 'share2help':
+            url = `https://${$.domain}/drawCenter/doTask`;
             body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&shareUuid=${$.shareUuid}`
             break;
         case 'info':
@@ -428,9 +430,9 @@ async function dealReturn(type, data) {
                             if (res.data.addBeanNum) {
                                 msg = `${res.data.addBeanNum}京豆`
                             }
-                            if (res.data.addPoint) {
-                                msg += ` ${res.data.addPoint}游戏机会`
-                            }
+                            // if (res.data.addPoint) {
+                            //     msg += ` ${res.data.addPoint}游戏机会`
+                            // }
                             if (type == 'followShop') {
                                 title = '关注'
                                 if (res.data.beanNumMember && res.data.assistSendStatus) {
@@ -450,8 +452,8 @@ async function dealReturn(type, data) {
                                 let drawData = typeof res.data.drawOk === 'object' && res.data.drawOk || res.data
                                 msg = drawData.drawOk == true && drawData.name || ''
                             }
-                            if (title == "抽奖" && msg && msg.indexOf('京豆') == -1) {
-                                if ($.isNode()) await notify.sendNotify(`${$.name}`, `【京东账号${$.index}】${$.nickName || $.UserName}\n${title}成功,获得 ${msg}\n活动地址: https://3.cn/-106MEjSh`);
+                            if (msg) {
+                                $.message += `【京东账号${$.index}】${$.nickName || $.UserName}\n${title}成功,获得 ${msg}\n`
                             }
                             if (!msg) {
                                 msg = '空气💨'
