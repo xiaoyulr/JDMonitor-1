@@ -53,7 +53,7 @@ if ($.isNode()) {
                 await jdmodule();
                 await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
             }
-            
+            await $.wait(parseInt(Math.random() * 3000 + 1000, 10))
 
         }
     }

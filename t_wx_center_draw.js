@@ -106,7 +106,7 @@ async function jdmodule() {
     for (let x = 0; x < $.chance; x++) {
 		console.log("开始抽奖");
         await takePostRequest("抽奖")
-        await $.wait(1500)
+        await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
     }
 }
 
@@ -119,7 +119,9 @@ async function run() {
             if ((vo.taskType == "followshop" || vo.taskType == "scanurl" || vo.taskType == "dailysign" || vo.taskType == "scanshop") && vo.curNum < vo.maxNeed) {
                 console.log(`开始做${vo.taskName}`);
                 await takePostRequest("followShop")
+				await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
                 await takePostRequest("抽奖");
+				await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
             }
             if ((vo.taskType == "add2cart" || vo.taskType == "scansku") && vo.curNum < vo.maxNeed) {
                 console.log(`开始做${vo.taskName}`);
@@ -128,6 +130,7 @@ async function run() {
                     $.pro = pro
                     if(!pro.taskDone) {
                          await takePostRequest("addSku")
+						 await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
                     }
                     vo.curNum++
                     if(vo.curNum == vo.maxNeed) {
@@ -135,6 +138,7 @@ async function run() {
                     }
                 }
                 await takePostRequest("抽奖");
+				await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
             }
 
         }
@@ -168,7 +172,6 @@ async function takePostRequest(type) {
             break;
         case 'getSimpleActInfoVo':
             url = `https://${$.domain}/customer/getSimpleActInfoVo`;
-            console.log(url)
             body = `activityId=${$.activityId}`;
             break;
         case 'getMyPing':
@@ -208,7 +211,6 @@ async function takePostRequest(type) {
             url = `https://${$.domain}/drawCenter/doTask`;
             // url = `${domain}/dingzhi/dz/openCard/saveTask`;
             body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&taskId=${$.task.taskId}&param=`
-            console.log("body:" + body)
             break;
         case 'sign':
         case 'addCart':
@@ -249,7 +251,6 @@ async function takePostRequest(type) {
             console.log(`错误${type}`);
     }
     let myRequest = getPostRequest(url, body, method);
-    // console.log(myRequest)
     return new Promise(async resolve => {
         $.post(myRequest, (err, resp, data) => {
             try {

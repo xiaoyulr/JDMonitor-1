@@ -162,7 +162,7 @@ async function run() {
             }
             if (taskId == "4") {
                 if ($.task4Share.finishedCount < $.task4Share.upLimit) {
-                    for (let i = 0; i < $.$.task4Share.upLimit; i++) {
+                    for (let i = 0; i < $.task4Share.upLimit; i++) {
                         console.log("去分享活动...")
                         await takePostRequest("doShareTask")
                         await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
