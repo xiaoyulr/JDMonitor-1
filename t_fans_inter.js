@@ -11,6 +11,7 @@ const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 const RUHUI = '888'
 const RUNCK = $.isNode() ? (process.env.RUNCK ? process.env.RUNCK : `9999`) : `9999`;
 $.activityId = process.env.T_FANS_INTER_ACTIVITY_ID ? process.env.T_FANS_INTER_ACTIVITY_ID : "";
+$.activityIds = process.env.T_FANS_INTER_ACTIVITY_IDS ? process.env.T_FANS_INTER_ACTIVITY_IDS : ""
 let cookiesArr = [], message = '';
 if ($.isNode()) {
     Object.keys(jdCookieNode).forEach((item) => {
@@ -28,19 +29,24 @@ let activityList = [
 ];
 !(async () => {
     activityList = getRandomArrayElements(activityList, activityList.length);
-    $.helpFalg = true;
-    for (let _0x2e674b = 0; _0x2e674b < activityList.length; _0x2e674b++) {
-        let _0x38a02d = activityList[_0x2e674b].id;
-        let _0x58a1ac = Date.now();
-        if (_0x58a1ac < activityList[_0x2e674b].endTime) {
-            let _0x3d2098 = 'https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/activity/' + _0x38a02d + '?activityId=' + _0x38a02d;
-            console.log('\n活动URL：' + _0x3d2098);
-            $.thisActivityUrl = _0x3d2098;
-            $.host = 'lzkjdz-isv.isvjcloud.com';
-            await main($);
-            await $.wait(3000);
-        } else {
-            console.log('\n活动ID：' + _0x38a02d + ',已过期');
+    if ($.activityIds.indexOf($.activityId)) {
+        console.log('\n活动ID：' + $.activityId + '已存在，退出');
+        await notify.sendNotify('粉丝互动ID：' + $.activityId, `已存在，退出`);
+    } else {
+        $.helpFalg = true;
+        for (let _0x2e674b = 0; _0x2e674b < activityList.length; _0x2e674b++) {
+            let _0x38a02d = activityList[_0x2e674b].id;
+            let _0x58a1ac = Date.now();
+            if (_0x58a1ac < activityList[_0x2e674b].endTime) {
+                let _0x3d2098 = 'https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/activity/' + _0x38a02d + '?activityId=' + _0x38a02d;
+                console.log('\n活动URL：' + _0x3d2098);
+                $.thisActivityUrl = _0x3d2098;
+                $.host = 'lzkjdz-isv.isvjcloud.com';
+                await main($);
+                await $.wait(3000);
+            } else {
+                console.log('\n活动ID：' + _0x38a02d + ',已过期');
+            }
         }
     }
 })().catch(_0xce13bb => {
@@ -66,6 +72,8 @@ async function main(_0x3f7ec5) {
         await _0x3f7ec5.wait(3000);
     } if (message) {
         await notify.sendNotify('粉丝互动ID：' + _0x3f7ec5.activityId, message);
+        let exports = `export T_FANS_INTER_ACTIVITY_IDS=\"${$.activityIds}&${$.activityId}\"`
+        await notify.sendNotify('将以下参数写入配置文件', exports);
     }
 }
 async function doInfo() {
