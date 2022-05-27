@@ -9,8 +9,10 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = true;//是否关闭通知，false打开通知推送，true关闭通知推送
 $.activityUrl = process.env.M_WX_CENTER_DRAW_URL ? process.env.M_WX_CENTER_DRAW_URL : "";
+$.activityUrls = process.env.M_WX_CENTER_DRAW_URLS ? process.env.M_WX_CENTER_DRAW_URLS : "";
 $.activityId = getQueryString($.activityUrl, 'activityId')
 $.Token = "";
+$.stop = false
 $.configCode = "bcc0b70305f649a580f310d8a3efc255";
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [], cookie = '', message;
@@ -31,28 +33,42 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    for (let i = 0; i < cookiesArr.length; i++) {
-        if (cookiesArr[i]) {
-            cookie = cookiesArr[i];
-            $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
-            $.index = i + 1;
-            $.isLogin = true;
-            $.nickName = '';
-            $.message = '';
-            console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
-            if (!$.isLogin) {
-                $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
+    if ($.activityUrls.indexOf($.activityId) != -1) {
+        console.log('\n活动Id：' + $.activityId + '已存在，退出');
+        await notify.sendNotify('活动ID：' + $.activityId, `已存在，退出`);
+    } else {
+        for (let i = 0; i < cookiesArr.length; i++) {
+            if (cookiesArr[i]) {
+                cookie = cookiesArr[i];
+                $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+                $.index = i + 1;
+                $.isLogin = true;
+                $.nickName = '';
+                $.message = '';
+                console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
+                if (!$.isLogin) {
+                    $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
 
-                if ($.isNode()) {
-                    await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
+                    if ($.isNode()) {
+                        await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
+                    }
+                    continue
                 }
-                continue
+                await jdmodule();
+                if (stop) {
+                    break
+                }
+                //await showMsg();
             }
-            await jdmodule();
-            //await showMsg();
+        }
+        if (isNode) {
+            let exports = `export M_WX_CENTER_DRAW_URLS=\"${$.activityUrls}@${$.activityUrl}\"`
+            await notify.sendNotify(`${$.name}`, `${$.msg}`);
+            await notify.sendNotify('将以下参数写入配置文件', exports);
+
         }
     }
-    if ($.isNode()) await notify.sendNotify(`${$.name}`, `${$.msg}`);
+
 })()
     .catch((e) => {
         $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
@@ -102,12 +118,13 @@ async function jdmodule() {
 
     await run();
 
-    
-    for (let x = 0; x < $.chance; x++) {
-		console.log("开始抽奖");
+    for (let x = 0; x < ($.chance > 3 ? 3 : $.chance); x++) {
+        console.log("开始抽奖");
         await takePostRequest("抽奖")
         await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
     }
+    if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+    if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
 }
 
 //运行
@@ -119,29 +136,30 @@ async function run() {
             if ((vo.taskType == "followshop" || vo.taskType == "scanurl" || vo.taskType == "dailysign" || vo.taskType == "scanshop") && vo.curNum < vo.maxNeed) {
                 console.log(`开始做${vo.taskName}`);
                 await takePostRequest("followShop")
-				await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
+                await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
                 await takePostRequest("抽奖");
-				await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
+                await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
             }
             if ((vo.taskType == "add2cart" || vo.taskType == "scansku") && vo.curNum < vo.maxNeed) {
                 console.log(`开始做${vo.taskName}`);
                 await takePostRequest("getProduct")
                 for (let pro of $.productList) {
                     $.pro = pro
-                    if(!pro.taskDone) {
-                         await takePostRequest("addSku")
-						 await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
+                    if (!pro.taskDone) {
+                        await takePostRequest("addSku")
+                        await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
                     }
                     vo.curNum++
-                    if(vo.curNum == vo.maxNeed) {
+                    if (vo.curNum == vo.maxNeed) {
                         break
                     }
                 }
                 await takePostRequest("抽奖");
-				await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
+                await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
             }
 
         }
+
     } catch (e) {
         console.log(e);
     }

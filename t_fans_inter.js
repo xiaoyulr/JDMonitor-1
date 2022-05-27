@@ -29,7 +29,7 @@ let activityList = [
 ];
 !(async () => {
     activityList = getRandomArrayElements(activityList, activityList.length);
-    if ($.activityIds.indexOf($.activityId)) {
+    if ($.activityIds.indexOf($.activityId) !=-1) {
         console.log('\n活动ID：' + $.activityId + '已存在，退出');
         await notify.sendNotify('粉丝互动ID：' + $.activityId, `已存在，退出`);
     } else {
@@ -48,6 +48,8 @@ let activityList = [
                 console.log('\n活动ID：' + _0x38a02d + ',已过期');
             }
         }
+        let exports = `export T_FANS_INTER_ACTIVITY_IDS=\"${$.activityIds}&${$.activityId}\"`
+        await notify.sendNotify('将以下参数写入配置文件', exports);
     }
 })().catch(_0xce13bb => {
     $.log('', '❌ ' + $.name + ', 失败! 原因: ' + _0xce13bb + '!', '');
@@ -72,8 +74,6 @@ async function main(_0x3f7ec5) {
         await _0x3f7ec5.wait(3000);
     } if (message) {
         await notify.sendNotify('粉丝互动ID：' + _0x3f7ec5.activityId, message);
-        let exports = `export T_FANS_INTER_ACTIVITY_IDS=\"${$.activityIds}&${$.activityId}\"`
-        await notify.sendNotify('将以下参数写入配置文件', exports);
     }
 }
 async function doInfo() {
