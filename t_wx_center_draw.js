@@ -61,7 +61,7 @@ if ($.isNode()) {
                 //await showMsg();
             }
         }
-        if (isNode) {
+        if ($.isNode) {
             let exports = `export M_WX_CENTER_DRAW_URLS=\"${$.activityUrls}@${$.activityUrl}\"`
             await notify.sendNotify(`${$.name}`, `${$.msg}`);
             await notify.sendNotify('将以下参数写入配置文件', exports);
