@@ -56,7 +56,7 @@ if ($.isNode()) {
         }
     }
     if ($.isNode()) {
-        if ($.actMemberStatus == 1 && !$.openCardStatus) {
+        if ($.actMemberStatus == 1 && !$.openCardStatus && ($.index == 2 || $.index == 3)) {
             await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `需要开卡，开卡命令为\nexport VENDER_ID=\"${$.venderId}\"\n跳转链接: ${$.activityUrl}`)
         } else {
             console.log(`重新跑前第一个号`)
@@ -183,12 +183,12 @@ async function takePostRequest(type) {
             break;
         case 'getMyPing':
             url = `https://${$.domain}/customer/getMyPing`;
-            body = `userId=${$.shopId || $.venderId || ''}&token=${$.Token}&fromType=APP`;
+            body = `userId=${$.venderId}&token=${$.Token}&fromType=APP`;
             break;
         case 'accessLogWithAD':
             url = `https://${$.domain}/common/accessLogWithAD`;
             let pageurl = `https://${$.domain}/drawCenter/activity?activityId=${$.activityId}&friendUuid=${$.friendUuid}`
-            body = `venderId=${$.shopId || $.venderId || ''}&code=2004&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
+            body = `venderId=${$.venderId}&code=2004&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
             break;
         case 'getUserInfo':
             url = `https://${$.domain}/wxActionCommon/getUserInfo`;
@@ -260,9 +260,9 @@ async function takePostRequest(type) {
         default:
             console.log(`错误${type}`);
     }
-    // console.log("body-----:" + body)
+    console.log("body-----:" + body)
     let myRequest = getPostRequest(url, body, method);
-    // console.log(myRequest)
+    console.log(myRequest)
     return new Promise(async resolve => {
         $.post(myRequest, (err, resp, data) => {
             try {
@@ -336,6 +336,7 @@ async function dealReturn(type, data) {
             case 'getMyPing':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
+                        console.log("MyPin" + res.data.secretPin)
                         if (res.data && typeof res.data.secretPin != 'undefined') $.Pin = res.data.secretPin
                         if (res.data && typeof res.data.nickname != 'undefined') $.nickname = res.data.nickname
                     } else if (res.errorMessage) {
@@ -414,6 +415,7 @@ async function dealReturn(type, data) {
                     if (res.result && res.result === true) {
                         $.actMemberStatus = res.data.actMemberStatus
                         $.openCardStatus = res.data.openCard
+                        console.log($.openCardStatus)
                         // let cardList1 = res.data.cardList1 || []
                         // let cardList2 = res.data.cardList2 || []
                         // let cardList = res.data.cardList || []

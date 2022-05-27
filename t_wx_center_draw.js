@@ -176,12 +176,12 @@ async function takePostRequest(type) {
             break;
         case 'getMyPing':
             url = `https://${$.domain}/customer/getMyPing`;
-            body = `userId=${$.shopId || $.venderId || ''}&token=${$.Token}&fromType=APP`;
+            body = `userId=${$.venderId}&token=${$.Token}&fromType=APP`;
             break;
         case 'accessLogWithAD':
             url = `https://${$.domain}/common/accessLogWithAD`;
             let pageurl = `https://${$.domain}/drawCenter/activity?activityId=${$.activityId}&shareUuid=`
-            body = `venderId=${$.shopId || $.venderId || ''}&code=2004&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
+            body = `venderId=${$.venderId}&code=2004&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
             break;
         case 'getUserInfo':
             url = `https://${$.domain}/wxActionCommon/getUserInfo`;
