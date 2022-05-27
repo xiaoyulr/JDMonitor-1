@@ -55,7 +55,7 @@ if ($.isNode()) {
                     continue
                 }
                 await jdmodule();
-                if (stop) {
+                if ($.stop) {
                     break
                 }
                 //await showMsg();
@@ -111,7 +111,7 @@ async function jdmodule() {
 
     if ($.isGameEnd) {
         $.putMsg(`活动已结束`)
-        stop = true;
+        $.stop = true;
         return;
     }
     await takePostRequest("info")
@@ -372,7 +372,7 @@ async function dealReturn(type, data) {
                         $.actorUuid = res.data.uid || ''
                         $.actRule = res.data.actRule
                         $.helpFriendStatus = res.data.helpFriendStatus || 0
-                        console.log($.actRule)
+                        // console.log($.actRule)
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
