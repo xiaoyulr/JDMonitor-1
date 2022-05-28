@@ -8,13 +8,10 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
-
-let activityList = [
-    { 'id': '21bb6b2c605d400a8e60db4ed3899828', 'drawTime': 1653932176000 },//
-    { 'id': '7ec61221978146358c0838c38e201d6b', 'drawTime': 1653932176000 },//
-    { 'id': '0250e85d2a1641c3b63e0788adc110e3', 'drawTime': 1653932176000 },//
-];
+$.ativityUrlPrefix = "https://lzkjdz-isv.isvjcloud.com/wxCartKoi/cartkoi/activity?activityId="
+$.activityIds = process.env.T_CART_KOI_ACTIVITY_IDS ? process.env.T_CART_KOI_ACTIVITY_IDS : "";
 $.activityId = ""
+$.activityUrl = ""
 $.Token = "";
 $.openCard = false
 $.friendUuid = ""
@@ -40,11 +37,16 @@ if ($.isNode()) {
     }
     let curtimestamp = Date.parse(new Date());
     console.log(curtimestamp)
-    for (let activity of activityList) {
-        let actStartTime = activity.drawTime
+    for (let activityInfo of $.activityIds.split("&")) {
+        $.activityId = activityInfo.split(";")[0]
+        let actStartTime = activityInfo.split(";")[1]
         if (actStartTime < curtimestamp && (curtimestamp - actStartTime) / 300 / 1000 < 5) {
+            $.activityUrl = $.ativityUrlPrefix + $.activityId
+            console.log(`跳转链接：${$.activityUrl}`)
             cookie = cookiesArr[0];
             await jdmodule(true);
+        } else {
+            console.log(`活动ID：${$.activityId}未到加购时间！`)
         }
     }
 
@@ -106,17 +108,18 @@ async function jdmodule(retry) {
 //运行
 async function run() {
     try {
-        $.productIds = []
-        if ($.addCarts < $.jsNum) {
-            for (let pro of $.productVos) {
-                console.log("开始加购商品:" + pro.title)
-                if (pro.seq < $.jsNum) {
-                    $.productIds.push(pro.skuId)
-                    continue
-                }
-            }
-            await takePostRequest("quickAddSku")
-        }
+        // $.productIds = []
+        // if ($.addCarts < $.jsNum) {
+        //     for (let pro of $.productVos) {
+        //         console.log("开始加购商品:" + pro.title)
+        //         if (pro.seq < $.jsNum) {
+        //             $.productIds.push(pro.skuId)
+        //             continue
+        //         }
+        //     }
+        //     await takePostRequest("quickAddSku")
+        console.log("-----开始抽奖----")
+        //}
 
 
     } catch (e) {
