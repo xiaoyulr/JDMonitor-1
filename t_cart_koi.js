@@ -1,7 +1,7 @@
 /*
 [task_local]
 # 购物车锦鲤
-7 7 7 7  t_wx_center_draw.js, tag=购物车锦鲤, enabled=true
+7 7 7 7  t_cart_koi.js, tag=购物车锦鲤, enabled=true
  */
 const $ = new Env('购物车锦鲤');
 const notify = $.isNode() ? require('./sendNotify') : '';
@@ -9,6 +9,7 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
 $.activityUrl = process.env.T_CART_KOI_URL ? process.env.T_CART_KOI_URL : "";
+$.activityIds = process.env.T_CART_KOI_ACTIVITY_IDS ? process.env.T_CART_KOI_ACTIVITY_IDS : "";
 $.activityId = getQueryString($.activityUrl, 'activityId')
 $.Token = "";
 $.openCard = false
@@ -33,6 +34,14 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
+    let curtimestamp = Date.parse(new Date());
+    for (let actInfo of $.activityIds.split("&")) {
+        let drawTime = actInfo.split(";")[1]
+        if ((curtimestamp - drawTime) / 60 / 1000 < 5) {
+            console.log(`活动Id：` + actInfo.split(";")[0] + `已加入export中`)
+            $.exportActivityIds = $.exportActivityIds == '' ? actInfo : `&${actInfo}`
+        }
+    }
     for (let i = 0; i < cookiesArr.length; i++) {
         if (cookiesArr[i]) {
             cookie = cookiesArr[i];
@@ -56,16 +65,13 @@ if ($.isNode()) {
         }
     }
     if ($.isNode()) {
-        if ($.actMemberStatus == 1 && !$.openCardStatus && ($.index == 2 || $.index == 3)) {
-            await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `需要开卡，开卡命令为\nexport VENDER_ID=\"${$.venderId}\"\n跳转链接: ${$.activityUrl}`)
-        } else {
-            console.log(`重新跑前第一个号`)
-            cookie = cookiesArr[0];
-            await jdmodule(true);
-            let st = timeToTimestamp($.drawTime)
-            await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `开奖时间：${$.drawTime}\n跳转链接: ${$.activityUrl}\n格式化参数：\n{\"id\":\"${$.activityId}\", \"drawTime\":\"${st}\"}`);
-        }
-
+        console.log(`重新跑前第一个号`)
+        cookie = cookiesArr[0];
+        await jdmodule(true);
+        let st = timeToTimestamp($.drawTime)
+        let temp = `${$.activityId};${st}`
+        let exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}&${temp}\"`
+        await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `开奖时间：${$.drawTime}\n跳转链接: ${$.activityUrl}\n将以下参数写进配置文件：\n${exports}`);
     }
 })()
     .catch((e) => {
