@@ -8,8 +8,9 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = true;//是否关闭通知，false打开通知推送，true关闭通知推送
-$.activityUrlArrays = process.env.M_WX_CENTER_DRAW_URLS ? process.env.M_WX_CENTER_DRAW_URLS : "";
+$.activityIds = process.env.M_WX_CENTER_DRAW_ACTIVITY_IDS ? process.env.M_WX_CENTER_DRAW_ACTIVITY_IDS : "";
 // $.activityId = getQueryString($.activityUrl, 'activityId')
+$.activityPrefix = "https://lzkj-isv.isvjcloud.com/drawCenter/activity?activityId="
 $.activityId = ""
 $.Token = "";
 $.stop = false
@@ -33,9 +34,9 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    for (let activityUrl of $.activityUrlArrays.split("@")) {
-        $.activityUrl = activityUrl
-        $.activityId = getQueryString($.activityUrl, 'activityId')
+    for (let id of $.activityIds.split("&")) {
+        $.activityId = id
+        $.activityUrl = $.activityPrefix + id
         $.stop = false
         for (let i = 0; i < cookiesArr.length; i++) {
             if (cookiesArr[i]) {
@@ -61,8 +62,9 @@ if ($.isNode()) {
                 //await showMsg();
             }
         }
+        if ($.isNode()) await notify.sendNotify(`${$.name}`, `${$.message}`);
     }
-    if ($.isNode()) await notify.sendNotify(`${$.name}`, `${$.msg}`);
+    
 })()
     .catch((e) => {
         $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
