@@ -9,7 +9,7 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = true;//是否关闭通知，false打开通知推送，true关闭通知推送
 $.activityUrl = process.env.M_WX_CENTER_DRAW_URL ? process.env.M_WX_CENTER_DRAW_URL : "";
-$.activityUrls = process.env.M_WX_CENTER_DRAW_URLS ? process.env.M_WX_CENTER_DRAW_URLS : "";
+$.activityIds = process.env.M_WX_CENTER_DRAW_ACTIVITY_IDS ? process.env.M_WX_CENTER_DRAW_ACTIVITY_IDS : "";
 $.activityId = getQueryString($.activityUrl, 'activityId')
 $.Token = "";
 $.stop = false
@@ -33,7 +33,7 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    if ($.activityUrls.indexOf($.activityId) != -1) {
+    if ($.activityIds.indexOf($.activityId) != -1) {
         console.log('\n活动Id：' + $.activityId + '已存在，退出');
         await notify.sendNotify('活动ID：' + $.activityId, `已存在，退出`);
     } else {
@@ -62,8 +62,8 @@ if ($.isNode()) {
             }
         }
         if ($.isNode) {
-            let exports = `export M_WX_CENTER_DRAW_URLS=\"${$.activityUrls}@${$.activityUrl}\"`
-            await notify.sendNotify(`${$.name}`, `${$.msg}`);
+            let exports = `export M_WX_CENTER_DRAW_ACTIVITY_IDS=\"${$.activityIds}&${$.activityId}\"`
+            await notify.sendNotify(`${$.name}`, `${$.message}`);
             await notify.sendNotify('将以下参数写入配置文件', exports);
 
         }
