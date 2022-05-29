@@ -1,11 +1,8 @@
 /*
  粉丝互动
- cron 1 0 * * * https://raw.githubusercontent.com/star261/jd/main/scripts/jd_fan.js
- 蚊子腿活动，不定时更新
- 环境变量：RUHUI,是否自动入会，开卡算法已失效，默认不开卡了
- 环境变量：RUNCK,执行多少CK，默认全执行，设置RUNCK=10，则脚本只会运行前10个CK
+ cron 0 0 * * * 
 * */
-const $ = new Env('粉丝互动-加密');
+const $ = new Env('粉丝互动_每日版');
 const notify = $.isNode() ? require('./sendNotify') : '';
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 const RUHUI = '888'
