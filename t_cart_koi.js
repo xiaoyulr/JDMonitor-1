@@ -42,7 +42,7 @@ if ($.isNode()) {
         if ((curtimestamp - drawTime) / 60 / 1000 < 5) {
             let actInfoId = actInfo.split(";")[0];
             if ($.exportActivityIds.indeOf(actInfoId) != -1) {
-                coutinue;
+                continue;
             }
             console.log(`活动Id：` + actInfoId + `已加入export中`)
             $.exportActivityIds = $.exportActivityIds == '' ? `${actInfo}` : `${$.exportActivityIds}&${actInfo}`
