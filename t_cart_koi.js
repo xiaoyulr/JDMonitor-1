@@ -41,7 +41,7 @@ if ($.isNode()) {
         let drawTime = actInfo.split(";")[1]
         if ((curtimestamp - drawTime) / 60 / 1000 < 5) {
             let actInfoId = actInfo.split(";")[0];
-            if ($.exportActivityIds.indeOf(actInfoId) != -1) {
+            if ($.exportActivityIds.indexOf(actInfoId) != -1) {
                 continue;
             }
             console.log(`活动Id：` + actInfoId + `已加入export中`)
