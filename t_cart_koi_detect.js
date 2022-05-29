@@ -1,13 +1,12 @@
 /*
 [task_local]
 # 购物车锦鲤_自动抢
-7 7 7 7  t_wx_center_draw.js, tag=购物车锦鲤, enabled=true
+0,59 * * * t_cart_koi_detect.js, tag=购物车锦鲤_自动抢, enabled=true
  */
-const $ = new Env('购物车锦鲤');
+const $ = new Env('购物车锦鲤_自动抢');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
-let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
 $.ativityUrlPrefix = "https://lzkjdz-isv.isvjcloud.com/wxCartKoi/cartkoi/activity?activityId="
 $.activityIds = process.env.T_CART_KOI_ACTIVITY_IDS ? process.env.T_CART_KOI_ACTIVITY_IDS : "";
 $.activityId = ""
@@ -16,6 +15,7 @@ $.Token = "";
 $.openCard = false
 $.friendUuid = ""
 $.canRunUrl = []
+$.message = ""
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
@@ -47,6 +47,11 @@ if ($.isNode()) {
             await jdmodule(true);
         } else {
             console.log(`活动ID：${$.activityId}未到加购时间！`)
+        }
+    }
+    if ($.isNode) {
+        if ($.message != '') {
+            await notify.sendNotify("购物车锦鲤开奖结果", `${$.message}`)
         }
     }
 
@@ -118,7 +123,9 @@ async function run() {
         //         }
         //     }
         //     await takePostRequest("quickAddSku")
-        console.log("-----开始抽奖----")
+        console.log("---查看中奖结果---")
+        await takePostRequest("drawResult");
+
         //}
 
 
@@ -204,6 +211,11 @@ async function takePostRequest(type) {
         case 'browseGoods':
             url = `${domain}/dingzhi/opencard/${type}`;
             body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            if (type == 'browseGoods') body += `&value=${$.visitSkuValue}`
+            break;
+        case 'drawResult':
+            url = `${domain}/wxCartKoi/cartkoi/drawResult`;
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&uuid=${$.uuid}`
             if (type == 'browseGoods') body += `&value=${$.visitSkuValue}`
             break;
         case '邀请':
@@ -432,7 +444,19 @@ async function dealReturn(type, data) {
                     }
                 }
                 break;
-            case 'followShop':
+            case 'drawResult':
+                if (typeof res == 'object') {
+                    if (res.result && res.result === true) {
+                        if (typeof res.data == 'object') {
+                            if (res.data.message == '中奖') {
+                                $.message += `购物车锦鲤：${$.activityName}\n京东账号${$.UserName}获得${res.data.drawName}\n`
+                            } else {
+                                $.message += `购物车锦鲤：${$.activityName}\n京东账号${$.UserName}未中奖\n`
+                            }
+                        }
+                    }
+                }
+                break;
             case 'viewVideo':
             case 'visitSku':
             case 'toShop':
