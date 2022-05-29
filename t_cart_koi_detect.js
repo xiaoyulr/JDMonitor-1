@@ -40,13 +40,18 @@ if ($.isNode()) {
     for (let activityInfo of $.activityIds.split("&")) {
         $.activityId = activityInfo.split(";")[0]
         let actStartTime = activityInfo.split(";")[1]
-        if (actStartTime < curtimestamp && (curtimestamp - actStartTime) / 300 / 1000 < 5) {
+        if (actStartTime <= curtimestamp && (curtimestamp - actStartTime) / 60 / 1000 <= 10) {
             $.activityUrl = $.ativityUrlPrefix + $.activityId
             console.log(`跳转链接：${$.activityUrl}`)
             cookie = cookiesArr[0];
+            $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
             await jdmodule(true);
-        } else {
+        }
+        if (actStartTime > curtimestamp) {
             console.log(`活动ID：${$.activityId}未到加购时间！`)
+        }
+        if ((curtimestamp - actStartTime) / 60 / 1000 > 10) {
+            console.log(`活动ID：${$.activityId}已过加购时间！`)
         }
     }
     if ($.isNode) {
@@ -214,9 +219,8 @@ async function takePostRequest(type) {
             if (type == 'browseGoods') body += `&value=${$.visitSkuValue}`
             break;
         case 'drawResult':
-            url = `${domain}/wxCartKoi/cartkoi/drawResult`;
+            url = `https://${domain}/wxCartKoi/cartkoi/drawResult`;
             body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&uuid=${$.uuid}`
-            if (type == 'browseGoods') body += `&value=${$.visitSkuValue}`
             break;
         case '邀请':
         case '助力':
@@ -266,7 +270,7 @@ async function takePostRequest(type) {
                     console.log(`${$.toStr(err, err)}`)
                     console.log(`${type} API请求失败，请检查网路重试`)
                 } else {
-                    // console.log(data);
+                    console.log(data);
                     dealReturn(type, data);
                 }
             } catch (e) {
@@ -447,6 +451,7 @@ async function dealReturn(type, data) {
             case 'drawResult':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
+                        console.log(JSON.stringify(res))
                         if (typeof res.data == 'object') {
                             if (res.data.message == '中奖') {
                                 $.message += `购物车锦鲤：${$.activityName}\n京东账号${$.UserName}获得${res.data.drawName}\n`
