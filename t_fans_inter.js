@@ -1,11 +1,11 @@
 /*
  粉丝互动
- cron 1 0 * * * https://raw.githubusercontent.com/star261/jd/main/scripts/jd_fan.js
+ cron 7 7 7 7 7
  蚊子腿活动，不定时更新
  环境变量：RUHUI,是否自动入会，开卡算法已失效，默认不开卡了
  环境变量：RUNCK,执行多少CK，默认全执行，设置RUNCK=10，则脚本只会运行前10个CK
 * */
-const $ = new Env('粉丝互动-加密');
+const $ = new Env('粉丝互动');
 const notify = $.isNode() ? require('./sendNotify') : '';
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 const RUHUI = '888'
@@ -28,8 +28,21 @@ let activityList = [
     { 'id': $.activityId, 'endTime': 1653932176000 },//
 ];
 !(async () => {
+    let curtimestamp = Date.parse(new Date());
+    for (let actInfo of $.activityIds.split("&")) {
+        if (actInfo.indexOf(";") != -1) {
+            let actEndTime = actInfo.split(";")[1]
+            if (curtimestamp - actEndTime < 0) {
+                console.log(`活动Id：` + actInfo.split(";")[0] + `已加入export中`)
+                $.exportActivityIds = $.exportActivityIds == '' ? actInfo : `${$.exportActivityIds}&${actInfo}`
+            }
+        } else {
+            console.log(`活动Id：` + actInfo + `已加入export中`)
+            $.exportActivityIds = $.exportActivityIds == '' ? actInfo : `${$.exportActivityIds}&${actInfo}`
+        }
+    }
     activityList = getRandomArrayElements(activityList, activityList.length);
-    if ($.activityIds.indexOf($.activityId) !=-1) {
+    if ($.activityIds.indexOf($.activityId) != -1) {
         console.log('\n活动ID：' + $.activityId + '已存在，退出');
         await notify.sendNotify('粉丝互动ID：' + $.activityId, `已存在，退出`);
     } else {
@@ -48,7 +61,7 @@ let activityList = [
                 console.log('\n活动ID：' + _0x38a02d + ',已过期');
             }
         }
-        let exports = `export T_FANS_INTER_ACTIVITY_IDS=\"${$.activityIds}&${$.activityId}\"`
+        let exports = `export T_FANS_INTER_ACTIVITY_IDS=\"${$.exportActivityIds}&${$.activityId};${$.endTime}\"`
         await notify.sendNotify('将以下参数写入配置文件', exports);
     }
 })().catch(_0xce13bb => {
@@ -166,6 +179,7 @@ async function runMain(_0x40ebb9) {
     _0x40ebb9.activityData = _0x11a7bd.data || {};
     _0x40ebb9.actinfo = _0x40ebb9.activityData.actInfo;
     _0x40ebb9.actorInfo = _0x40ebb9.activityData.actorInfo;
+    $.endTime = _0x40ebb9.activityData.actInfo.endTime
     _0x40ebb9.nowUseValue = (Number(_0x40ebb9.actorInfo.fansLoveValue) + Number(_0x40ebb9.actorInfo.energyValue));
     if (JSON.stringify(_0x40ebb9.activityData) === '{}') {
         console.log('获取活动信息失败');
