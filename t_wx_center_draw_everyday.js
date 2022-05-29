@@ -1,9 +1,9 @@
 /*
 [task_local]
-# 中心抽奖
-7 7 7 7  t_wx_center_draw.js, tag=中心抽奖, enabled=true
+# 中心抽奖_每日版
+0 * * * *  t_wx_center_draw_everyday.js, tag=中心抽奖_每日版, enabled=true
  */
-const $ = new Env('中心抽奖');
+const $ = new Env('中心抽奖_每日版');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
@@ -14,7 +14,6 @@ $.activityPrefix = "https://lzkj-isv.isvjcloud.com/drawCenter/activity?activityI
 $.activityId = ""
 $.Token = "";
 $.stop = false
-$.configCode = "bcc0b70305f649a580f310d8a3efc255";
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
@@ -62,9 +61,13 @@ if ($.isNode()) {
                 //await showMsg();
             }
         }
-        if ($.isNode()) await notify.sendNotify(`${$.name}`, `${$.message}`);
+        if ($.isNode()) {
+            if ($.message != '') {
+                await notify.sendNotify(`${$.name}`, `${$.message}`);
+            }
+        }
     }
-    
+
 })()
     .catch((e) => {
         $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
