@@ -1,7 +1,7 @@
 /*
 [task_local]
 # 购物车锦鲤
-7 7 7 7  t_cart_koi.js, tag=购物车锦鲤, enabled=true
+7 7 7 7 7  t_cart_koi.js, tag=购物车锦鲤, enabled=true
  */
 const $ = new Env('购物车锦鲤');
 const notify = $.isNode() ? require('./sendNotify') : '';
@@ -13,8 +13,9 @@ $.activityIds = process.env.T_CART_KOI_ACTIVITY_IDS ? process.env.T_CART_KOI_ACT
 $.activityId = getQueryString($.activityUrl, 'activityId')
 $.Token = "";
 $.openCard = false
-$.configCode = "bcc0b70305f649a580f310d8a3efc255";
+$.exportActivityIds = ""
 $.friendUuid = ""
+$.message = ""
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
@@ -36,10 +37,15 @@ if ($.isNode()) {
     }
     let curtimestamp = Date.parse(new Date());
     for (let actInfo of $.activityIds.split("&")) {
+        console.log(actInfo)
         let drawTime = actInfo.split(";")[1]
         if ((curtimestamp - drawTime) / 60 / 1000 < 5) {
-            console.log(`活动Id：` + actInfo.split(";")[0] + `已加入export中`)
-            $.exportActivityIds = $.exportActivityIds == '' ? actInfo : `&${actInfo}`
+            let actInfoId = actInfo.split(";")[0];
+            if ($.exportActivityIds.indeOf(actInfoId) != -1) {
+                coutinue;
+            }
+            console.log(`活动Id：` + actInfoId + `已加入export中`)
+            $.exportActivityIds = $.exportActivityIds == '' ? `${actInfo}` : `${$.exportActivityIds}&${actInfo}`
         }
     }
     for (let i = 0; i < cookiesArr.length; i++) {
@@ -60,7 +66,7 @@ if ($.isNode()) {
             }
             await jdmodule(false);
             if ($.actMemberStatus == 1 && !$.openCardStatus) {
-                break;
+                continue;
             }
         }
     }
@@ -71,7 +77,8 @@ if ($.isNode()) {
         let st = timeToTimestamp($.drawTime)
         let temp = `${$.activityId};${st}`
         let exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}&${temp}\"`
-        await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `开奖时间：${$.drawTime}\n跳转链接: ${$.activityUrl}\n将以下参数写进配置文件：\n${exports}`);
+        await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}如需开卡，开卡命令为\nexport VENDER_ID=${$.venderId}\n并重跑一次该任务！`)
+        await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `被助力账号本次加购${$.addCarts}/${$.totals}件商品\n开奖时间：${$.drawTime}\n跳转链接: ${$.activityUrl}\n将以下参数写进配置文件：\n${exports}`);
     }
 })()
     .catch((e) => {
@@ -126,9 +133,10 @@ async function jdmodule(retry) {
 
     await takePostRequest("getActMemberInfo");
     if ($.actMemberStatus == 1 && !$.openCardStatus) {
-        console.log("需要开卡")
+        $.message += `京东账号 ${$.UserName} 需要开卡\n`
         return
     }
+    $.message += `京东账号 ${$.UserName} 已成功助力\n`
     console.log(`当前助力：${$.friendUuid}`)
     if (retry) {
         await run();
