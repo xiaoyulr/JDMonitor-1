@@ -1,7 +1,7 @@
 /*
 [task_local]
 # 中心抽奖
-7 7 7 7  t_wx_center_draw.js, tag=中心抽奖, enabled=true
+7 7 7 7 7  t_wx_center_draw.js, tag=中心抽奖, enabled=true
  */
 const $ = new Env('中心抽奖');
 const notify = $.isNode() ? require('./sendNotify') : '';
