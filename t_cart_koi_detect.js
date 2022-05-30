@@ -43,9 +43,13 @@ if ($.isNode()) {
         if (actStartTime <= curtimestamp && (curtimestamp - actStartTime) / 60 / 1000 <= 10) {
             $.activityUrl = $.ativityUrlPrefix + $.activityId
             console.log(`跳转链接：${$.activityUrl}`)
-            cookie = cookiesArr[0];
-            $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
-            await jdmodule(true);
+            for (let i = 0; i < cookiesArr.length; i++) {
+                if (cookiesArr[i]) {
+                    cookie = cookiesArr[i];
+                    $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+                    await jdmodule(true);
+                }
+            }
         }
         if (actStartTime > curtimestamp) {
             console.log(`活动ID：${$.activityId}未到加购时间！`)
@@ -454,9 +458,9 @@ async function dealReturn(type, data) {
                         console.log(JSON.stringify(res))
                         if (typeof res.data == 'object') {
                             if (res.data.message == '中奖') {
-                                $.message += `购物车锦鲤：${$.activityName}\n京东账号${$.UserName}获得${res.data.drawName}\n`
+                                $.message += `${$.activityName}\n京东账号${$.UserName}获得${res.data.drawName}\n`
                             } else {
-                                $.message += `购物车锦鲤：${$.activityName}\n京东账号${$.UserName}未中奖\n`
+                                $.message += `${$.activityName}\n京东账号${$.UserName}未中奖\n`
                             }
                         }
                     }

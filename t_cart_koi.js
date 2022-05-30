@@ -15,7 +15,12 @@ $.Token = "";
 $.openCard = false
 $.exportActivityIds = ""
 $.friendUuid = ""
+$.friendUuids = []
 $.message = ""
+$.helpTimes = -1
+$.hasHelpedTimes = 0
+$.restartNo = 1
+$.friendUuidId = 0
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
@@ -65,20 +70,32 @@ if ($.isNode()) {
                 continue
             }
             await jdmodule(false);
-            if ($.actMemberStatus == 1 && !$.openCardStatus) {
-                continue;
+            if ($.helpTimes != 0 && $.helpTimes == $.hasHelpedTimes) {
+                $.friendUuidId++
+                $.friendUuid = $.friendUuids[$.friendUuidId]
+                $.hasHelpedTimes = 0
+                console.log(`上一个账号已助力完成，接下来都会助力${$.friendUuid}`)
             }
         }
     }
     if ($.isNode()) {
-        console.log(`重新跑前第一个号`)
-        cookie = cookiesArr[0];
-        await jdmodule(true);
+        let restartTime = cookiesArr.length
+        if ($.helpTimes != 0) {
+            restartTime = Math.ceil(cookiesArr.length / $.helpTimes)
+        }
+        console.log(`重新跑前${restartTime}个号`)
+        for (let i = 0; i < restartTime; i++) {
+            if (cookiesArr[i]) {
+                cookie = cookiesArr[0];
+                await jdmodule(true);
+                $.message += `被助力账号${i+1}本次加购${$.addCarts}/${$.totals}件商品\n`
+            }
+        }
         let st = timeToTimestamp($.drawTime)
         let temp = `${$.activityId};${st}`
         let exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}&${temp}\"`
-        await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}如需开卡，开卡命令为\nexport VENDER_ID=${$.venderId}\n并重跑一次该任务！`)
-        await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `被助力账号本次加购${$.addCarts}/${$.totals}件商品\n开奖时间：${$.drawTime}\n跳转链接: ${$.activityUrl}\n将以下参数写进配置文件：\n${exports}`);
+        // await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}如需开卡，开卡命令为\n\n并重跑一次该任务！`)
+        await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}开奖时间：${$.drawTime}\n如果出现加购0件，则需要开卡后重跑任务，开卡命令：export VENDER_ID=${$.venderId}\n跳转链接: ${$.activityUrl}\n将以下参数写进配置文件：\n${exports}`);
     }
 })()
     .catch((e) => {
@@ -116,6 +133,13 @@ async function jdmodule(retry) {
 
     await takePostRequest("accessLogWithAD")
 
+    if ($.index != 1) {
+        // $.message += `京东账号 ${$.UserName} 已成功助力\n`
+        console.log(`京东账号${$.UserName}成功助力 ${$.friendUuid}`)
+        $.hasHelpedTimes++
+    }
+
+
     await takePostRequest("getUserInfo")
 
     await takePostRequest("activityContent")
@@ -129,15 +153,12 @@ async function jdmodule(retry) {
         console.log(`关注店铺`)
         await takePostRequest("followShop")
     }
-    // await takePostRequest("info")
 
     await takePostRequest("getActMemberInfo");
-    if ($.actMemberStatus == 1 && !$.openCardStatus) {
-        $.message += `京东账号 ${$.UserName} 需要开卡\n`
-        return
-    }
-    $.message += `京东账号 ${$.UserName} 已成功助力\n`
-    console.log(`当前助力：${$.friendUuid}`)
+    // if ($.actMemberStatus == 1 && !$.openCardStatus) {
+    //     $.message += `京东账号 ${$.UserName} 需要开卡\n`
+    //     return
+    // }
     if (retry) {
         await run();
     }
@@ -391,15 +412,22 @@ async function dealReturn(type, data) {
                         let joinRecord = res.data.joinRecord
                         if (typeof joinRecord == 'object') {
                             $.uuid = joinRecord.myUuid
-                            if ($.index == 1) {
-                                $.friendUuid = $.uuid
-                            }
+                            $.friendUuids.push($.uuid)
+                            // if ($.index == 1) {
+                            //     $.friendUuid = $.uuid
+                            // }
                             // $.friendUuidArrays.push($.uuid)
                             // console.log("当前助力池为:" + JSON.stringify($.friendUuidArrays))
                         }
                         $.addCarts = res.data.addCarts
                         $.jsNum = res.data.jsNum
                         $.totals = res.data.totals
+                        if ($.index == 1) {
+                            $.helpTimes = $.totals - $.jsNum
+                            console.log(`每个账号需要助力的次数为${$.helpTimes}次`)
+                            $.friendUuid = $.friendUuids[0]
+                            console.log(`接下来都会助力${$.friendUuid}`)
+                        }
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {

@@ -13,7 +13,7 @@ $.activityIds = process.env.M_WX_CENTER_DRAW_ACTIVITY_IDS ? process.env.M_WX_CEN
 $.activityId = getQueryString($.activityUrl, 'activityId')
 $.Token = "";
 $.stop = false
-$.configCode = "bcc0b70305f649a580f310d8a3efc255";
+$.message = ""
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
@@ -44,7 +44,6 @@ if ($.isNode()) {
                 $.index = i + 1;
                 $.isLogin = true;
                 $.nickName = '';
-                $.message = '';
                 console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
                 if (!$.isLogin) {
                     $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
@@ -118,13 +117,14 @@ async function jdmodule() {
 
     await run();
 
-    for (let x = 0; x < ($.chance > 3 ? 3 : $.chance); x++) {
-        console.log("开始抽奖");
+    console.log(`剩余抽奖机会：${$.chance}`)
+    for (let x = 0; x < ($.chance > 5 ? 5 : $.chance); x++) {
+        console.log("继续抽奖...");
         await takePostRequest("抽奖")
         await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
     }
     if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-    if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
+    if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 100, 10))
 }
 
 //运行
@@ -132,7 +132,7 @@ async function run() {
     try {
         for (let vo of $.taskList) {
             $.task = vo;
-            console.log("task:" + JSON.stringify($.task))
+            // console.log("task:" + JSON.stringify($.task))
             if ((vo.taskType == "followshop" || vo.taskType == "scanurl" || vo.taskType == "dailysign" || vo.taskType == "scanshop") && vo.curNum < vo.maxNeed) {
                 console.log(`开始做${vo.taskName}`);
                 await takePostRequest("followShop")
@@ -385,9 +385,9 @@ async function dealReturn(type, data) {
             case 'info':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
-                        console.log(JSON.stringify(res))
+                        // console.log("myInfo:" + JSON.stringify(res))
                         $.taskList = res.data.taskList
-                        $.chance = res.chance
+                        $.chance = res.data.chance
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
