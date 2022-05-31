@@ -70,7 +70,6 @@ if ($.isNode()) {
                 continue
             }
             await jdmodule(false);
-
             if ($.helpTimes != 0 && $.helpTimes == $.hasHelpedTimes) {
                 $.friendUuidId++
                 $.friendUuid = $.friendUuids[$.friendUuidId]
@@ -93,8 +92,8 @@ if ($.isNode()) {
                 await jdmodule(true);
                 $.message += `被助力账号${i + 1}本次加购${$.addCarts}/${$.totals}件商品\n`
             }
-            if (i + 1 % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-            if (i + 1 % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
+            if (i+1 % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+            if (i+1 % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
         }
         let st = timeToTimestamp($.drawTime)
         let temp = `${$.activityId};${st}`
@@ -168,7 +167,6 @@ async function jdmodule(retry) {
     if (retry) {
         await run();
     }
-
 }
 
 //运行
