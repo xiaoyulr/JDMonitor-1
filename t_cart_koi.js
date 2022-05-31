@@ -92,12 +92,17 @@ if ($.isNode()) {
                 await jdmodule(true);
                 $.message += `被助力账号${i + 1}本次加购${$.addCarts}/${$.totals}件商品\n`
             }
-            if (i+1 % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-            if (i+1 % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
+            if (i + 1 % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+            if (i + 1 % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
         }
         let st = timeToTimestamp($.drawTime)
         let temp = `${$.activityId};${st}`
-        let exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}&${temp}\"`
+        let exports = ""
+        if ($.exportActivityIds.indexOf($.activityId) != -1) {
+            exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}\"`
+        } else {
+            exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}&${temp}\"`
+        }
         // await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}如需开卡，开卡命令为\n\n并重跑一次该任务！`)
         await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}开奖时间：${$.drawTime}\n如果出现加购0件，则需要开卡后重跑任务，开卡命令：\nexport VENDER_ID=${$.venderId}\n跳转链接: ${$.activityUrl}\n`);
         await notify.sendNotify(`将以下参数写进配置文件：`, `\n${exports}`)
