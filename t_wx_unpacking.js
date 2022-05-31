@@ -56,7 +56,7 @@ if ($.isNode()) {
                 continue
             }
             await jdmodule();
-            if ($.helpTimes != 0 && $.helpTimes == $.hasHelpedTimes) {
+            if (($.helpTimes > 0 && $.helpTimes == $.hasHelpedTimes) || $.helpTimes == 0) {
                 break;
             }
             //     $.friendUuidId++
@@ -66,7 +66,6 @@ if ($.isNode()) {
             // }
         }
     }
-    console.log(`开始拆包...`)
     $.index = 0
     cookie = cookiesArr[0];
     $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
@@ -122,7 +121,7 @@ async function jdmodule() {
 
     // await takePostRequest("getMyFriendInfo")
 
-    if ($.index != 1) {
+    if ($.index > 1) {
         console.log("开始助力拆包")
         await takePostRequest("unPacking")
     }
@@ -131,8 +130,9 @@ async function jdmodule() {
         console.log("获取拆包奖励")
         await takePostRequest("hasPrize")
         if ($.hasDrawPrize) {
-            message += `京东账号${$.UserName} 获得 ${$.drawInfoName}\n`
+            $.message += `京东账号${$.UserName} 获得 ${$.drawInfoName}\n`
         }
+
     }
 }
 
@@ -261,7 +261,7 @@ async function takePostRequest(type) {
         default:
             console.log(`错误${type}`);
     }
-    console.log("body-----:" + body)
+    // console.log("body-----:" + body)
     let myRequest = getPostRequest(url, body, method);
     // console.log(myRequest)
     return new Promise(async resolve => {
@@ -365,7 +365,7 @@ async function dealReturn(type, data) {
             case 'activityContent':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
-                        console.log(JSON.stringify(res.data))
+                        // console.log(JSON.stringify(res.data))
                         let wucvo = res.data.wucvo
                         if (typeof wucvo == 'object') {
                             $.uuid = wucvo.mySelfId
@@ -378,9 +378,9 @@ async function dealReturn(type, data) {
                         let wuivo = res.data.wuivo
                         if (typeof wuivo == 'object') {
                             if ($.index == 1) {
-                                $.helpTimes = wuivo.needUnpackingPeople - wuivo.hasUnpackingPeople
-                                $.hasDrawPrize = wuivo.hasDrawPrize
+                                $.helpTimes = wuivo.needUnpackingPeople
                             }
+                            $.hasDrawPrize = wuivo.hasDrawPrize
                             // $.friendUuidArrays.push($.uuid)
                             // console.log("当前助力池为:" + JSON.stringify($.friendUuidArrays))
                         }
