@@ -41,7 +41,7 @@ if ($.isNode()) {
     for (let activityInfo of $.activityIds.split("&")) {
         $.activityId = activityInfo.split(";")[0]
         let actStartTime = activityInfo.split(";")[1]
-        if (actStartTime <= curtimestamp && (curtimestamp - actStartTime) / 60 / 1000 <= 10) {
+        if (actStartTime <= curtimestamp && (curtimestamp - actStartTime) / 60 / 1000 <= 50) {
             $.activityUrl = $.ativityUrlPrefix + $.activityId
             console.log(`跳转链接：${$.activityUrl}`)
             for (let i = 0; i < cookiesArr.length; i++) {
@@ -58,7 +58,7 @@ if ($.isNode()) {
         if (actStartTime > curtimestamp) {
             console.log(`活动ID：${$.activityId}未到加购时间！`)
         }
-        if ((curtimestamp - actStartTime) / 60 / 1000 > 10) {
+        if ((curtimestamp - actStartTime) / 60 / 1000 > 50) {
             console.log(`活动ID：${$.activityId}已过加购时间！`)
         }
     }
@@ -180,12 +180,12 @@ async function takePostRequest(type) {
             break;
         case 'getMyPing':
             url = `https://${$.domain}/customer/getMyPing`;
-            body = `userId=${$.shopId || $.venderId || ''}&token=${$.Token}&fromType=APP`;
+            body = `userId=${$.venderId}&token=${$.Token}&fromType=APP`;
             break;
         case 'accessLogWithAD':
             url = `https://${$.domain}/common/accessLogWithAD`;
             let pageurl = `https://${$.domain}/drawCenter/activity?activityId=${$.activityId}&friendUuid=${$.friendUuid}`
-            body = `venderId=${$.shopId || $.venderId || ''}&code=2004&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
+            body = `venderId=${$.venderId}&code=2004&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
             break;
         case 'getUserInfo':
             url = `https://${$.domain}/wxActionCommon/getUserInfo`;
