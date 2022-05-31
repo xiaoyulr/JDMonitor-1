@@ -49,12 +49,9 @@ if ($.isNode()) {
                     cookie = cookiesArr[i];
                     $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
                     await jdmodule(true);
-<<<<<<< HEAD
-=======
                     $.index++
                     if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
                     if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
->>>>>>> 63afc6a (修改koi)
                 }
             }
         }
@@ -466,11 +463,6 @@ async function dealReturn(type, data) {
                         if (typeof res.data == 'object') {
                             if (res.data.message == '中奖') {
                                 $.message += `${$.activityName}\n京东账号${$.UserName}获得${res.data.drawName}\n`
-<<<<<<< HEAD
-                            } else {
-                                $.message += `${$.activityName}\n京东账号${$.UserName}未中奖\n`
-=======
->>>>>>> 63afc6a (修改koi)
                             }
                         }
                     }
