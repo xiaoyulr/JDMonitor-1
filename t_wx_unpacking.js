@@ -55,19 +55,31 @@ if ($.isNode()) {
                 }
                 continue
             }
-            await jdmodule();
-            if (($.helpTimes > 0 && $.helpTimes == $.hasHelpedTimes) || $.helpTimes == 0) {
-                break;
+            await jdmodule(false);
+            if ($.helpTimes != 0 && $.helpTimes == $.hasHelpedTimes) {
+                $.friendUuidId++
+                $.friendUuid = $.friendUuids[$.friendUuidId]
+                $.hasHelpedTimes = 0
+                console.log(`上一个账号已助力完成，接下来都会助力${$.friendUuid}`)
             }
-            //     $.friendUuidId++
-            //     $.friendUuid = $.friendUuids[$.friendUuidId]
-            //     $.hasHelpedTimes = 0
-            //     console.log(`上一个账号已助力完成，接下来都会助力${$.friendUuid}`)
-            // }
+            if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+            if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
         }
     }
-    $.index = 0
-    cookie = cookiesArr[0];
+    let restartTime = cookiesArr.length
+    if ($.helpTimes != 0) {
+        restartTime = Math.ceil(cookiesArr.length / $.helpTimes)
+    }
+    console.log(`重新跑前${restartTime}个号`)
+    for (let i = 0; i < restartTime; i++) {
+        if (cookiesArr[i]) {
+            cookie = cookiesArr[i];
+            $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+            await jdmodule(true);
+        }
+        if (i + 1 % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+        if (i + 1 % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
+    }
     $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
     await jdmodule();
     if ($.isNode()) {
@@ -91,7 +103,7 @@ function showMsg() {
 }
 
 
-async function jdmodule() {
+async function jdmodule(retry) {
     $.domain = $.activityUrl.match(/https?:\/\/([^/]+)/) && $.activityUrl.match(
         /https?:\/\/([^/]+)/)[1] || ''
     $.UA = `jdapp;iPhone;10.2.2;13.1.2;${uuid()};M/5.0;network/wifi;ADID/;model/iPhone8,1;addressid/2308460611;appBuild/167863;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS 13_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
@@ -121,16 +133,16 @@ async function jdmodule() {
 
     // await takePostRequest("getMyFriendInfo")
 
-    if ($.index > 1) {
+    if (!retry) {
         console.log("开始助力拆包")
         await takePostRequest("unPacking")
     }
 
-    if ($.index == 0) {
+    if (retry) {
         console.log("获取拆包奖励")
         await takePostRequest("hasPrize")
         if ($.hasDrawPrize) {
-            $.message += `京东账号${$.UserName} 获得 ${$.drawInfoName}\n`
+            $.message += `京东账号${$.UserName} 获得 ${$.prise}\n`
         }
 
     }
@@ -370,19 +382,21 @@ async function dealReturn(type, data) {
                         if (typeof wucvo == 'object') {
                             $.uuid = wucvo.mySelfId
                             $.myFriendHelpOpenScanUrl = wucvo.myFriendHelpOpenScanUrl
-                            if ($.index == 1) {
-                                $.friendUuid = $.uuid
-                                $.drawInfoName = wucvo.drawInfoName
-                            }
+                            $.friendUuids.push($.uuid)
                         }
                         let wuivo = res.data.wuivo
                         if (typeof wuivo == 'object') {
                             if ($.index == 1) {
                                 $.helpTimes = wuivo.needUnpackingPeople
+                                console.log(`每个账号需要助力的次数为${$.helpTimes}次`)
                             }
                             $.hasDrawPrize = wuivo.hasDrawPrize
                             // $.friendUuidArrays.push($.uuid)
                             // console.log("当前助力池为:" + JSON.stringify($.friendUuidArrays))
+                        }
+                        if ($.index == 1) {
+                            $.friendUuid = $.friendUuids[0]
+                            console.log(`接下来都会助力${$.friendUuid}`)
                         }
                         let wdifo = res.data.wdifo
                         if (typeof wdifo == 'object') {
@@ -404,13 +418,12 @@ async function dealReturn(type, data) {
             case 'unPacking':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
-                        // console.log(JSON.stringify(res))
-                        if ($.errorMessage.indexOf("成功") != -1) {
+                        if (res.errorMessage.indexOf("成功") != -1) {
+                            console.log(JSON.stringify(res))
                             $.hasHelpedTimes++
+                            $.message += `京东账号${$.UserName} ${res.errorMessage}\n`
+                            $.prise = res.data.priceInfo
                         }
-                        $.message += `京东账号${$.UserName} ${$.errorMessage}\n`
-                        // } else if (res.errorMessage) {
-                        //     console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
                         console.log(`${type} ${data}`)
                     }
