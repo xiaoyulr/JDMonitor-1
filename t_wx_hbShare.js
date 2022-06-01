@@ -1,9 +1,9 @@
 /*
 [task_local]
-# 购物车锦鲤
-7 7 7 7 7  t_cart_koi.js, tag=购物车锦鲤, enabled=true
+# 抢红包
+7 7 7 7 7  t_wx_hbShare.js, tag=抢红包, enabled=true
  */
-const $ = new Env('购物车锦鲤');
+const $ = new Env('抢红包');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';

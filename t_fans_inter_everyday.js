@@ -9,6 +9,7 @@ const RUHUI = '888'
 const RUNCK = $.isNode() ? (process.env.RUNCK ? process.env.RUNCK : `9999`) : `9999`;
 $.activityIds = process.env.T_FANS_INTER_ACTIVITY_IDS ? process.env.T_FANS_INTER_ACTIVITY_IDS : ""
 let cookiesArr = [], message = '';
+$.exportParam = ""
 if ($.isNode()) {
 	Object.keys(jdCookieNode).forEach((item) => {
 		cookiesArr.push(jdCookieNode[item])
@@ -23,13 +24,14 @@ if ($.isNode()) {
 
 let activityList = []
 // let activityList = [
-// 	{ 'id': '21bb6b2c605d400a8e60db4ed3899828', 'endTime': 1653932176000 },//
+// 	{ 'id': '21bb6b2c605d400a8e60db4ed3899828', 'endTime': 1903932176000 },//
 // 	{ 'id': '7ec61221978146358c0838c38e201d6b', 'endTime': 1653932176000 },//
 // 	{ 'id': '0250e85d2a1641c3b63e0788adc110e3', 'endTime': 1653932176000 },//
 // ];
 !(async () => {
 	for (let activity of $.activityIds.split("&")) {
-		activityList.push({ "id": activity, "endTime": 1653932176000 })
+        let activityId = activity.split(";")[0]
+		activityList.push({ "id": activityId, "endTime": 2053932176000 })
 	}
 	activityList = getRandomArrayElements(activityList, activityList.length);
 	$.helpFalg = true;
@@ -43,6 +45,7 @@ let activityList = []
 			$.host = 'lzkjdz-isv.isvjcloud.com';
 			await main($);
 			await $.wait(3000);
+			$.exportParam += $.exportParam == "" ? `${activityList[_0x2e674b].id};${activityList[_0x2e674b].endTime}` : `&${activityList[_0x2e674b].id};${activityList[_0x2e674b].endTime}`
 		} else {
 			console.log('\n活动ID：' + _0x38a02d + ',已过期');
 		}

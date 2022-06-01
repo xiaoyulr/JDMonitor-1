@@ -13,6 +13,7 @@ const RUNCK = $.isNode() ? (process.env.RUNCK ? process.env.RUNCK : `9999`) : `9
 $.activityId = process.env.T_FANS_INTER_ACTIVITY_ID ? process.env.T_FANS_INTER_ACTIVITY_ID : "";
 $.activityIds = process.env.T_FANS_INTER_ACTIVITY_IDS ? process.env.T_FANS_INTER_ACTIVITY_IDS : ""
 let cookiesArr = [], message = '';
+$.exportActivityIds = "";
 if ($.isNode()) {
     Object.keys(jdCookieNode).forEach((item) => {
         cookiesArr.push(jdCookieNode[item])
@@ -25,7 +26,7 @@ if ($.isNode()) {
         ...$.toObj($.getdata("CookiesJD") || "[]").map((item) => item.cookie)].filter((item) => !!item);
 }
 let activityList = [
-    { 'id': $.activityId, 'endTime': 1653932176000 },//
+    { 'id': $.activityId, 'endTime': 20539321760000 },//
 ];
 !(async () => {
     let curtimestamp = Date.parse(new Date());
@@ -34,11 +35,11 @@ let activityList = [
             let actEndTime = actInfo.split(";")[1]
             if (curtimestamp - actEndTime < 0) {
                 console.log(`活动Id：` + actInfo.split(";")[0] + `已加入export中`)
-                $.exportActivityIds = $.exportActivityIds == '' ? actInfo : `${$.exportActivityIds}&${actInfo}`
+                $.exportActivityIds += $.exportActivityIds == "" ? `${actInfo}` : `&${actInfo}`
             }
         } else {
             console.log(`活动Id：` + actInfo + `已加入export中`)
-            $.exportActivityIds = $.exportActivityIds == '' ? actInfo : `${$.exportActivityIds}&${actInfo}`
+            $.exportActivityIds += $.exportActivityIds == "" ? `${actInfo}` : `&${actInfo}`
         }
     }
     activityList = getRandomArrayElements(activityList, activityList.length);
