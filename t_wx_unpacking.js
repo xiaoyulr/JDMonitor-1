@@ -70,6 +70,7 @@ if ($.isNode()) {
     if ($.helpTimes != 0) {
         restartTime = Math.ceil(cookiesArr.length / $.helpTimes)
     }
+    $.message += `------拆包奖励-------\n`
     console.log(`重新跑前${restartTime}个号`)
     for (let i = 0; i < restartTime; i++) {
         if (cookiesArr[i]) {
