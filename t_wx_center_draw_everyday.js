@@ -55,10 +55,11 @@ if ($.isNode()) {
                     continue
                 }
                 await jdmodule();
-                if ($.stop) {
-                    break
-                }
                 //await showMsg();
+            }
+            if ($.stop) {
+                console.log(`活动id${$.activityId}已结束`)
+                break
             }
         }
         if ($.isNode()) {
@@ -94,7 +95,7 @@ async function jdmodule() {
     await takePostRequest("isvObfuscator");
     console.log('Token:' + $.Token)
     if ($.Token == '') {
-        $.putMsg(`获取Token失败`);
+        console.log(`获取Token失败`);
         return
     }
 
@@ -108,8 +109,7 @@ async function jdmodule() {
 
     await takePostRequest("activityContent")
 
-    if ($.isGameEnd) {
-        $.putMsg(`活动已结束`)
+    if ($.hasEnd) {
         $.stop = true;
         return;
     }
@@ -366,6 +366,7 @@ async function dealReturn(type, data) {
             case 'activityContent':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
+                        console.log(JSON.stringify(res.data))
                         $.hasEnd = res.data.isGameEnd || false
                         $.drawCount = res.data.chance || 0
                         $.actorUuid = res.data.uid || ''
