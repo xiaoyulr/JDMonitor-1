@@ -54,10 +54,10 @@ if ($.isNode()) {
                     continue
                 }
                 await jdmodule();
-                if ($.stop) {
-                    break
-                }
                 //await showMsg();
+            }
+            if ($.stop) {
+                console.log(`活動Id---${$.activityId}----已結束`)
             }
         }
         if ($.isNode) {
@@ -108,8 +108,7 @@ async function jdmodule() {
 
     await takePostRequest("activityContent")
 
-    if ($.isGameEnd) {
-        $.putMsg(`活动已结束`)
+    if ($.hasEnd) {
         $.stop = true;
         return;
     }
