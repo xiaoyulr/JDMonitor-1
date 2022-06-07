@@ -146,7 +146,7 @@ async function jdmodule(retry) {
 
     await takePostRequest("accessLogWithAD")
 
-    if ($.index != 1) {
+    if ($.index != 1 && !retry) {
         // $.message += `京东账号 ${$.UserName} 已成功助力\n`
         console.log(`京东账号${$.UserName}成功助力 ${$.friendUuid}`)
         $.hasHelpedTimes++
@@ -168,7 +168,7 @@ async function jdmodule(retry) {
     }
 
     await takePostRequest("getActMemberInfo");
-    if ($.actMemberStatus == 1 && !$.openCardStatus) {
+    if ($.actMemberStatus == 1 && !$.openCardStatus && retry) {
         await opencard()
         if ($.joinErrorTimes > 4) {
             return

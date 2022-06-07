@@ -60,9 +60,9 @@ if ($.isNode()) {
                 console.log(`活動Id---${$.activityId}----已結束`)
             }
         }
-        if ($.isNode) {
+        if ($.isNode && $.message != '') {
             let exports = `export M_WX_CENTER_DRAW_ACTIVITY_IDS=\"${$.activityIds}&${$.activityId}\"`
-            await notify.sendNotify(`${$.name}`, `${$.message}`);
+            await notify.sendNotify(`${$.activityName}`, `${$.message}\n 跳转链接：${$.activityUrl}`);
             await notify.sendNotify('将以下参数写入配置文件', exports);
 
         }
@@ -107,6 +107,10 @@ async function jdmodule() {
     await takePostRequest("getUserInfo")
 
     await takePostRequest("activityContent")
+
+    if ($.stop) {
+        return
+    }
 
     if ($.hasEnd) {
         $.stop = true;
@@ -371,9 +375,13 @@ async function dealReturn(type, data) {
                         $.actorUuid = res.data.uid || ''
                         $.actRule = res.data.actRule
                         $.helpFriendStatus = res.data.helpFriendStatus || 0
+                        $.activityName = res.data.activityName
                         // console.log($.actRule)
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
+                        if (res.errorMessage.indexOf("已结束")) {
+                            $.stop = true
+                        }
                     } else {
                         console.log(`${type} ${data}`)
                     }

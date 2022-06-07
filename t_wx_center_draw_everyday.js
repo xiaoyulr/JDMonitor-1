@@ -15,6 +15,8 @@ $.activityId = ""
 $.Token = "";
 $.stop = false
 $.message = '';
+$.notifyExport = '';
+$.needExpire = 0
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
@@ -58,15 +60,21 @@ if ($.isNode()) {
                 //await showMsg();
             }
             if ($.stop) {
-                console.log(`活动id${$.activityId}已结束`)
+                console.log(`活动id ${$.activityId} 已结束`)
+                $.needExpire = 1
                 break
             }
+            $.notifyExport += $.notifyExport == '' ? id : `;${id}`
         }
         if ($.isNode()) {
             if ($.message != '') {
-                await notify.sendNotify(`${$.name}`, `${$.message}`);
+                await notify.sendNotify(`${$.activityName}`, `${$.message}\n 跳转链接：${$.activityPrefix}${id}`);
             }
+
         }
+    }
+    if ($.isNode() && $.needExpire == 1) {
+        await notify.sendNotify(`导入中心抽奖系统参数`, `export M_WX_CENTER_DRAW_ACTIVITY_IDS=\"${$.notifyExport}\"`);
     }
 
 })()
@@ -109,6 +117,10 @@ async function jdmodule() {
 
     await takePostRequest("activityContent")
 
+    if ($.stop) {
+        return
+    }
+
     if ($.hasEnd) {
         $.stop = true;
         return;
@@ -118,7 +130,7 @@ async function jdmodule() {
     await run();
 
 
-    for (let x = 0; x < ($.chance > 5 ? 5 : $.chance); x++) {
+    for (let x = 0; x < ($.chance > 9 ? 9 : $.chance); x++) {
         console.log("开始抽奖");
         await takePostRequest("抽奖")
         await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
@@ -366,7 +378,8 @@ async function dealReturn(type, data) {
             case 'activityContent':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
-                        console.log(JSON.stringify(res.data))
+                        // console.log(JSON.stringify(res.data))
+                        $.activityName = res.data.activityName
                         $.hasEnd = res.data.isGameEnd || false
                         $.drawCount = res.data.chance || 0
                         $.actorUuid = res.data.uid || ''
@@ -375,6 +388,9 @@ async function dealReturn(type, data) {
                         console.log($.actRule)
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
+                        if (res.errorMessage.indexOf("已结束")) {
+                            $.stop = true
+                        }
                     } else {
                         console.log(`${type} ${data}`)
                     }

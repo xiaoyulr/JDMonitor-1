@@ -127,7 +127,6 @@ async function jdmodule() {
 
 
     await takePostRequest("getUserInfo")
-
     // await takePostRequest("activityContent")
 
     // if ($.isGameEnd) {
@@ -145,6 +144,9 @@ async function jdmodule() {
     //     $.message += `京东账号 ${$.UserName} 需要开卡\n`
     //     return
     // }
+
+    await takePostRequest("getInviterByUUid")
+
     if ($.index == 1) {
         await takePostRequest("getSendUUid")
     } else {
@@ -152,7 +154,7 @@ async function jdmodule() {
     }
 
 
-    await takePostRequest("getCountByPin")
+    // await takePostRequest("getCountByPin")
 }
 
 //运行
@@ -238,7 +240,7 @@ async function takePostRequest(type) {
             break;
         case 'addShareOpen':
             url = `https://${$.domain}/wxHbShareActivity/addShareOpen`;
-            body = `activityId=${$.activityId}&inviteePin=${encodeURIComponent($.Pin)}&venderId=${$.venderId}&uuid=${$.friendUuid}&yunSmaImageUrl=${encodeURIComponent($.attrTouXiang)}`
+            body = `activityId=${$.activityId}&inviteePin=${encodeURIComponent($.Pin)}&venderId=${$.venderId}&uuid=${$.friendUuid}&yunSmaImageUrl=${encodeURIComponent($.inviterImgUrl)}`
             break;
         case 'getActMemberInfo':
             url = `https://${$.domain}/wxCommonInfo/getActMemberInfo`;
@@ -440,12 +442,12 @@ async function dealReturn(type, data) {
                     console.log(`${type} ${data}`)
                 }
                 break;
-            case 'info':
+            case 'getInviterByUUid':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
-                        console.log(JSON.stringify(res))
-                        $.taskList = res.data.taskList
-                        $.chance = res.chance
+                        console.log(JSON.stringify(res.data))
+                        let data = res.data
+                        $.inviterImgUrl = data.imageUrl
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
@@ -505,6 +507,8 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     if (res.ok && res.ok === true) {
                         console.log(`助力成功！`)
+                    } else {
+                        console.log(res.errorMessage)
                     }
                 }
                 break;

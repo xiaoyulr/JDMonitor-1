@@ -459,10 +459,14 @@ async function dealReturn(type, data) {
             case 'drawResult':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
-                        console.log(JSON.stringify(res))
+                        // console.log(JSON.stringify(res))
                         if (typeof res.data == 'object') {
                             if (res.data.message == '中奖') {
                                 $.message += `${$.activityName}\n京东账号${$.UserName}获得${res.data.drawName}\n`
+                                console.log(`恭喜中奖~获得${res.data.drawName}`)
+                            }
+                            else {
+                                console.log(`恭喜获得了空气- -`)
                             }
                         }
                     }

@@ -423,7 +423,7 @@ async function dealReturn(type, data) {
                             console.log(JSON.stringify(res))
                             $.hasHelpedTimes++
                             $.message += `京东账号${$.UserName} ${res.errorMessage}\n`
-                            $.prise = res.data.priceInfo
+                            $.prise = res.data.name
                         }
                     } else {
                         console.log(`${type} ${data}`)
