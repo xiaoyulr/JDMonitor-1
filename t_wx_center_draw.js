@@ -8,9 +8,9 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = true;//是否关闭通知，false打开通知推送，true关闭通知推送
-$.activityUrl = process.env.M_WX_CENTER_DRAW_URL ? process.env.M_WX_CENTER_DRAW_URL : "";
 $.activityIds = process.env.M_WX_CENTER_DRAW_ACTIVITY_IDS ? process.env.M_WX_CENTER_DRAW_ACTIVITY_IDS : "";
-$.activityId = getQueryString($.activityUrl, 'activityId')
+$.activityId =process.env.jd_drawCenter_activityId ? process.env.jd_drawCenter_activityId : "";
+$.activityUrl = `https://lzkj-isv.isvjcloud.com/drawCenter/activity?activityId=${$.activityId}`;
 $.Token = "";
 $.stop = false
 $.message = ""
@@ -143,7 +143,7 @@ async function run() {
                 await takePostRequest("抽奖");
                 await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
             }
-            if ((vo.taskType == "add2cart" || vo.taskType == "scansku") && vo.curNum < vo.maxNeed) {
+            if ((vo.taskType == "add2cart" || vo.taskType == "scansku" || vo.taskType == "followsku") && vo.curNum < vo.maxNeed) {
                 console.log(`开始做${vo.taskName}`);
                 await takePostRequest("getProduct")
                 for (let pro of $.productList) {
@@ -158,6 +158,11 @@ async function run() {
                     }
                 }
                 await takePostRequest("抽奖");
+                await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
+            }
+            if (vo.taskType == "share2help") {
+                console.log(`开始助力`)
+                await takePostRequest("share2help");
                 await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
             }
 
@@ -218,7 +223,7 @@ async function takePostRequest(type) {
             break;
         case 'share2help':
             url = `https://${$.domain}/drawCenter/doTask`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&shareUuid=${$.shareUuid}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&shareUuid=${encodeURIComponent($.shareUuid)}`
             break;
         case 'info':
             url = `https://${$.domain}/drawCenter/myInfo`;
@@ -358,6 +363,9 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
                         if (res.data && typeof res.data.yunMidImageUrl != 'undefined') $.attrTouXiang = res.data.yunMidImageUrl || "https://img10.360buyimg.com/imgzone/jfs/t1/7020/27/13511/6142/5c5138d8E4df2e764/5a1216a3a5043c5d.png"
+                        if ($.index == 1) {
+                            $.shareUuid = res.data.pin
+                        }
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
