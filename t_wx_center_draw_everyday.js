@@ -64,7 +64,9 @@ if ($.isNode()) {
                 $.needExpire = 1
                 break
             }
-            $.notifyExport += $.notifyExport == '' ? id : `;${id}`
+            if ($.index == 1) {
+                $.notifyExport += $.notifyExport == '' ? id : `;${id}`
+            }
         }
         if ($.isNode()) {
             if ($.message != '') {
