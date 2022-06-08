@@ -68,6 +68,20 @@ if ($.isNode()) {
                 $.notifyExport += $.notifyExport == '' ? id : `;${id}`
             }
         }
+        console.log(`重跑第一个号`)
+        cookie = cookiesArr[0];
+        $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+        $.isLogin = true;
+        $.nickName = '';
+        console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
+        if (!$.isLogin) {
+            $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
+
+            if ($.isNode()) {
+                await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
+            }
+        }
+        await jdmodule();
         if ($.isNode()) {
             if ($.message != '') {
                 await notify.sendNotify(`${$.activityName}`, `${$.message}\n 跳转链接：${$.activityPrefix}${id}`);
@@ -131,14 +145,14 @@ async function jdmodule() {
 
     await run();
 
-
-    for (let x = 0; x < ($.chance > 9 ? 9 : $.chance); x++) {
-        console.log("开始抽奖");
+    console.log(`剩余抽奖机会：${$.chance}`)
+    for (let x = 0; x < $.chance; x++) {
+        console.log("继续抽奖...");
         await takePostRequest("抽奖")
         await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
     }
     if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-    if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
+    if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 100, 10))
 }
 
 //运行
@@ -146,33 +160,41 @@ async function run() {
     try {
         for (let vo of $.taskList) {
             $.task = vo;
-            // console.log("task:" + JSON.stringify($.task))
+            // console.log("---task:" + JSON.stringify($.task))
             if ((vo.taskType == "followshop" || vo.taskType == "scanurl" || vo.taskType == "dailysign" || vo.taskType == "scanshop") && vo.curNum < vo.maxNeed) {
                 console.log(`开始做${vo.taskName}`);
                 await takePostRequest("followShop")
                 await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
                 await takePostRequest("抽奖");
                 await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
+                $.endFlag = 0
             }
-            if ((vo.taskType == "add2cart" || vo.taskType == "scansku") && vo.curNum < vo.maxNeed) {
-                console.log(`开始做${vo.taskName}`);
+            if ((vo.taskType == "add2cart" || vo.taskType == "scansku" || vo.taskType == "followsku" || vo.taskType == "ordersku") && vo.curNum < vo.maxNeed) {
+                console.log(`开始${vo.taskName}...`);
                 await takePostRequest("getProduct")
+                console.log("---task:" + JSON.stringify($.productList))
                 for (let pro of $.productList) {
                     $.pro = pro
-                    if (!pro.taskDone) {
+                    if (pro.taskDone == null || !pro.taskDone) {
                         await takePostRequest("addSku")
                         await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
                     }
-                    vo.curNum++
-                    if (vo.curNum == vo.maxNeed) {
+                    if ($.endFlag) {
                         break
                     }
                 }
                 await takePostRequest("抽奖");
                 await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
+                $.endFlag = 0
+            }
+            if (vo.taskType == "share2help") {
+                console.log(`开始助力`)
+                await takePostRequest("helpFriend");
+                await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
             }
 
         }
+
     } catch (e) {
         console.log(e);
     }
@@ -211,7 +233,7 @@ async function takePostRequest(type) {
             break;
         case 'accessLogWithAD':
             url = `https://${$.domain}/common/accessLogWithAD`;
-            let pageurl = `https://${$.domain}/drawCenter/activity?activityId=${$.activityId}&shareUuid=`
+            let pageurl = `https://${$.domain}/drawCenter/activity?activityId=${$.activityId}&shareUuid=${encodeURIComponent($.shareUuid)}`
             body = `venderId=${$.venderId}&code=2004&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
             break;
         case 'getUserInfo':
@@ -226,9 +248,9 @@ async function takePostRequest(type) {
             url = `https://${$.domain}/drawCenter/getProduct`;
             body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&type=${$.task.type}`
             break;
-        case 'share2help':
-            url = `https://${$.domain}/drawCenter/doTask`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&shareUuid=${$.shareUuid}`
+        case 'helpFriend':
+            url = `https://${$.domain}/drawCenter/helpFriend`;
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&shareUuid=${encodeURIComponent($.shareUuid)}`
             break;
         case 'info':
             url = `https://${$.domain}/drawCenter/myInfo`;
@@ -368,6 +390,7 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
                         if (res.data && typeof res.data.yunMidImageUrl != 'undefined') $.attrTouXiang = res.data.yunMidImageUrl || "https://img10.360buyimg.com/imgzone/jfs/t1/7020/27/13511/6142/5c5138d8E4df2e764/5a1216a3a5043c5d.png"
+
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
@@ -380,14 +403,17 @@ async function dealReturn(type, data) {
             case 'activityContent':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
-                        // console.log(JSON.stringify(res.data))
-                        $.activityName = res.data.activityName
                         $.hasEnd = res.data.isGameEnd || false
                         $.drawCount = res.data.chance || 0
                         $.actorUuid = res.data.uid || ''
                         $.actRule = res.data.actRule
                         $.helpFriendStatus = res.data.helpFriendStatus || 0
-                        console.log($.actRule)
+                        $.activityName = res.data.activityName
+                        if ($.index == 1) {
+                            $.shareUuid = res.data.uid
+                            console.log(`接下来都会助力${$.shareUuid}`)
+                        }
+                        // console.log($.actRule)
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                         if (res.errorMessage.indexOf("已结束")) {
@@ -403,7 +429,7 @@ async function dealReturn(type, data) {
             case 'info':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
-                        // console.log(JSON.stringify(res))
+                        // console.log("myInfo:" + JSON.stringify(res))
                         $.taskList = res.data.taskList
                         $.chance = res.data.chance
                     } else if (res.errorMessage) {
@@ -450,11 +476,24 @@ async function dealReturn(type, data) {
                     console.log(`${type} ${data}`)
                 }
                 break;
-            case 'followShop':
+            case 'helpFriend':
+                if (typeof res == 'object') {
+                    if (res.result && res.result === true) {
+                        console.log(`助力成功`)
+                    }
+                }
+                break;
             case 'viewVideo':
             case 'visitSku':
             case 'toShop':
             case 'addSku':
+                if (typeof res == 'object') {
+                    if (res.result && res.result === true) {
+                        console.log(JSON.stringify(res))
+                        $.endFlag = res.data
+                    }
+                }
+                break;
             case 'sign':
             case 'addCart':
             case 'browseGoods':
