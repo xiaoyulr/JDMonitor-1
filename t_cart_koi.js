@@ -77,35 +77,34 @@ if ($.isNode()) {
                 $.friendUuidId++
                 $.friendUuid = $.friendUuids[$.friendUuidId]
                 $.hasHelpedTimes = 0
+                if ($.friendUuidId > 0) {
+                    $.helpTimes = $.otherHelpTime
+                }
                 console.log(`上一个账号已助力完成，接下来都会助力${$.friendUuid}`)
             }
             if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
             if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
         }
     }
+    console.log(`重新跑前10个号`)
+    for (let i = 0; i < 10; i++) {
+        if (cookiesArr[i]) {
+            cookie = cookiesArr[i];
+            await jdmodule(true);
+            $.message += `被助力账号${i + 1}本次加购${$.hasAddCartSize}/${$.drawCondition}/${$.totals}件商品\n`
+        }
+        if (i + 1 % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+        if (i + 1 % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
+    }
+    let st = timeToTimestamp($.drawTime)
+    let temp = `${$.activityId};${st}`
+    let exports = ""
+    if ($.exportActivityIds.indexOf($.activityId) != -1) {
+        exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}\"`
+    } else {
+        exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}&${temp}\"`
+    }
     if ($.isNode()) {
-        let restartTime = cookiesArr.length
-        if ($.helpTimes != 0) {
-            restartTime = Math.ceil(cookiesArr.length / $.helpTimes)
-        }
-        console.log(`重新跑前${restartTime}个号`)
-        for (let i = 0; i < restartTime; i++) {
-            if (cookiesArr[i]) {
-                cookie = cookiesArr[i];
-                await jdmodule(true);
-                $.message += `被助力账号${i + 1}本次加购${$.addCarts}/${$.totals}件商品\n`
-            }
-            if (i + 1 % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-            if (i + 1 % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
-        }
-        let st = timeToTimestamp($.drawTime)
-        let temp = `${$.activityId};${st}`
-        let exports = ""
-        if ($.exportActivityIds.indexOf($.activityId) != -1) {
-            exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}\"`
-        } else {
-            exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}&${temp}\"`
-        }
         // await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}如需开卡，开卡命令为\n\n并重跑一次该任务！`)
         await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}开奖时间：${$.drawTime}\n如果出现加购0件，则需要开卡后重跑任务，开卡命令：\nexport VENDER_ID=${$.venderId}\n跳转链接: ${$.activityUrl}\n`);
         await notify.sendNotify(`将以下参数写进配置文件：`, `\n${exports}`)
@@ -462,20 +461,19 @@ async function dealReturn(type, data) {
                         if (typeof joinRecord == 'object') {
                             $.uuid = joinRecord.myUuid
                             $.friendUuids.push($.uuid)
-                            // if ($.index == 1) {
-                            //     $.friendUuid = $.uuid
-                            // }
-                            // $.friendUuidArrays.push($.uuid)
-                            // console.log("当前助力池为:" + JSON.stringify($.friendUuidArrays))
                         }
                         $.addCarts = res.data.addCarts
                         $.jsNum = res.data.jsNum
                         $.totals = res.data.totals
+                        $.drawCondition = res.data.drawCondition
                         if ($.index == 1) {
-                            $.helpTimes = $.totals - $.jsNum
-                            console.log(`每个账号需要助力的次数为${$.helpTimes}次`)
+                            $.headHelpTimes = $.totals - $.jsNum
+                            console.log(`车头账号需要助力的次数为${$.helpTimes}次`)
+                            $.otherHelpTime = $.drawCondition - $.jsNum
+                            console.log(`其他账号需要助力的次数为${$.helpTimes}次`)
                             $.friendUuid = $.friendUuids[0]
                             console.log(`接下来都会助力${$.friendUuid}`)
+                            $.helpTimes = $.headHelpTimes
                         }
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
@@ -543,7 +541,7 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
                         if (typeof res.data == 'object') {
-                            $.addCarts = res.data.hasAddCartSize;
+                            $.hasAddCartSize = res.data.hasAddCartSize;
                             console.log(`本次加购${res.data.hasAddCartSize}件商品`)
                         }
                     }
