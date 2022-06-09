@@ -465,7 +465,7 @@ async function dealReturn(type, data) {
                         $.addCarts = res.data.addCarts
                         $.jsNum = res.data.jsNum
                         $.totals = res.data.totals
-                        $.drawCondition = res.data.drawCondition
+                        $.drawCondition = res.data.activityVo.drawCondition
                         if ($.index == 1) {
                             $.headHelpTimes = $.totals - $.jsNum
                             console.log(`车头账号需要助力的次数为${$.headHelpTimes}次`)
