@@ -468,9 +468,9 @@ async function dealReturn(type, data) {
                         $.drawCondition = res.data.drawCondition
                         if ($.index == 1) {
                             $.headHelpTimes = $.totals - $.jsNum
-                            console.log(`车头账号需要助力的次数为${$.helpTimes}次`)
+                            console.log(`车头账号需要助力的次数为${$.headHelpTimes}次`)
                             $.otherHelpTime = $.drawCondition - $.jsNum
-                            console.log(`其他账号需要助力的次数为${$.helpTimes}次`)
+                            console.log(`其他账号需要助力的次数为${$.otherHelpTime}次`)
                             $.friendUuid = $.friendUuids[0]
                             console.log(`接下来都会助力${$.friendUuid}`)
                             $.helpTimes = $.headHelpTimes
