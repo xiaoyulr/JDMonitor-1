@@ -24,18 +24,19 @@ function main() {
         exports["M_WX_ADD_CART_URL"] = "https://cjhy-isv.isvjcloud.com/" + jcode.split("&")[0]
     }
     if (jcode.indexOf("wxPointShopView") != -1) {
-        let arrays = jcode.split("&")
         let venderId = ""
         let giftId = ""
+        let prefix = jcode.split("?")[0]
+        let arrays = jcode.split("&")
         for (let it of arrays) {
             if (it.indexOf(`venderId`) != -1) {
-                venderId = it.split("venderId=")[1]              
+                venderId = it.split("venderId=")[1]
             }
             if (it.indexOf(`giftId`) != -1) {
-                giftId = it.split("giftId=")[1]              
+                giftId = it.split("giftId=")[1]
             }
         }
-        exports["T_POINT_SHOW_TURL"] = `https://cjhy-isv.isvjcloud.com/venderId=${venderId}&giftId=${giftId}`
+        exports["T_POINT_EXCHANGE_URL"] = `https://cjhy-isv.isvjcloud.com/${prefix}?venderId=${venderId}&giftId=${giftId}`
     }
 
     var text = []
