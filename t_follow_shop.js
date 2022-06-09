@@ -406,6 +406,7 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     if (res.ok && res.ok === true) {
                         $.prise = res.data.name
+                        $.message += `【京东账号${$.index}】${$.nickName} 获得 ${msg}`
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
