@@ -103,8 +103,6 @@ async function jdmodule() {
 
     await takePostRequest("getUserInfo")
 
-    await takePostRequest("activityContent")
-
     await takePostRequest("getActMemberInfo");
 
     // await takePostRequest("unpackingInfo")
@@ -113,6 +111,7 @@ async function jdmodule() {
 
     await takePostRequest("follow")
 
+    console.log(`开始抽奖`)
     await takePostRequest("getPrize")
 }
 
@@ -404,11 +403,13 @@ async function dealReturn(type, data) {
                 break;
             case 'getPrize':
                 if (typeof res == 'object') {
-                    if (res.ok && res.ok === true) {
+                    if (res.result && res.result === true && res.data.drawOk) {
                         $.prise = res.data.name
-                        $.message += `【京东账号${$.index}】${$.nickName} 获得 ${msg}`
+                        console.log(`获得 ${$.prise}`)
+                        $.message += `【京东账号${$.index}】${$.nickName} 获得 ${$.prise}\n`
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
+                        $.message += `【京东账号${$.index}】${$.nickName} ${res.errorMessage}\n`
                     } else {
                         console.log(`${type} ${data}`)
                     }
