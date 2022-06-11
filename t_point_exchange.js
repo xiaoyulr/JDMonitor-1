@@ -20,6 +20,7 @@ $.helpTimes = -1
 $.hasHelpedTimes = 0
 $.restartNo = 1
 $.friendUuidId = 0
+$.retryCookies = []
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
@@ -55,14 +56,36 @@ if ($.isNode()) {
                 }
                 continue
             }
-            await jdmodule();
+            await jdmodule(false);
             if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
             if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
         }
     }
-    if ($.isNode()) {
-        if ($.message != '') {
-            await notify.sendNotify("关注店铺抽奖", `${$.message}\n跳转链接\n${$.activityUrl}`)
+    console.log(`有异常账号，开始重跑`)
+    for (let i = 0; i < $.retryCookies.length; i++) {
+        if ($.retryCookies[i]) {
+            cookie = $.retryCookies[i];
+            $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+            $.index = i + 1;
+            $.isLogin = true;
+            $.nickName = '';
+            console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
+            if (!$.isLogin) {
+                $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
+
+                if ($.isNode()) {
+                    await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
+                }
+                continue
+            }
+            await jdmodule(true);
+            if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+            if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
+            if ($.isNode()) {
+                if ($.message != '') {
+                    await notify.sendNotify("关注店铺抽奖", `${$.message}\n跳转链接\n${$.activityUrl}`)
+                }
+            }
         }
     }
 })()
@@ -81,7 +104,7 @@ function showMsg() {
 }
 
 
-async function jdmodule() {
+async function jdmodule(retry) {
     $.domain = $.activityUrl.match(/https?:\/\/([^/]+)/) && $.activityUrl.match(
         /https?:\/\/([^/]+)/)[1] || ''
     $.UA = `jdapp;iPhone;10.2.2;13.1.2;${uuid()};M/5.0;network/wifi;ADID/;model/iPhone8,1;addressid/2308460611;appBuild/167863;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS 13_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
@@ -99,40 +122,47 @@ async function jdmodule() {
 
     await takePostRequest("getMyPing");
 
-    await takePostRequest("getBuyerPoints")
-
     await takePostRequest("accessLog")
 
     await takePostRequest("activityContent")
+    if (!retry) {
+        await takePostRequest("getBuyerPoints")
+        if ($.exist <= $.canExgByPeopDay) {
+            console.log(`剩余豆子不足以兑换，退出！`)
+            $.message += `剩余豆子不足以兑换，退出！`
+            $.stop = true
+        }
+        if ($.canExgByPeopDay == 0) {
+            console.log(`今日已兑换过！！`)
+            $.message += `京东账号${$.index} ${$.UserName} 今日已兑换过！\n`
+            return
+        }
+        if ($.canExgByActivity == 0) {
+            console.log(`本次活动京豆已全部兑换`)
+            $.message += `京东账号${$.index} ${$.UserName} 本次活动京豆已全部兑换！\n`
+            return
+        }
+        $.pointRate = $.point1
+        if ($.userGrade == 2) {
+            $.pointRate = $.point2
+        } else if ($.userGrade == 3) {
+            $.pointRate = $.point3
+        } else if ($.userGrade == 4) {
+            $.pointRate = $.point4
+        } else if ($.userGrade == 5) {
+            $.pointRate = $.point5
+        }
+        if ($.userGrade > 0) {
+            $.maxExgBeans = Math.floor($.buyerPoints / $.pointRate)
+            $.canExgBeans = Math.min($.canExgByPeopDay, $.maxExgBeans)
+            $.retryExgBeans = $.canExgBeans
+        }
 
-    if ($.exist <= $.canExgByPeopDay) {
-        console.log(`剩余豆子不足以兑换，退出！`)
-        $.message += `剩余豆子不足以兑换，退出！`
-        $.stop = true
+        console.log(`可兑换的京豆为${$.canExgBeans}`)
+    } else {
+        $.canExgBeans = $.retryExgBeans
     }
-    if ($.canExgByPeopDay == 0) {
-        console.log(`今日已兑换过！！`)
-        $.message += `京东账号${$.index} ${$.UserName} 今日已兑换过！\n`
-        return
-    }
-    if ($.canExgByActivity == 0) {
-        console.log(`本次活动京豆已全部兑换`)
-        $.message += `京东账号${$.index} ${$.UserName} 本次活动京豆已全部兑换！\n`
-        return
-    }
-    $.pointRate = $.point1
-    if ($.userGrade == 2) {
-        $.pointRate = $.point2
-    } else if ($.userGrade == 3) {
-        $.pointRate = $.point3
-    } else if ($.userGrade == 4) {
-        $.pointRate = $.point4
-    } else if ($.userGrade == 5) {
-        $.pointRate = $.point5
-    }
-    $.maxExgBeans = Math.floor($.buyerPoints / $.pointRate)
-    $.canExgBeans = Math.min($.canExgByPeopDay, $.maxExgBeans)
-    console.log(`可兑换的京豆为${$.canExgBeans}`)
+
     await takePostRequest("exgBeans")
     if ($.exchangeError.indexOf(`火爆`) != -1) {
         console.log(`活动火爆，重新兑换1次`)
@@ -198,9 +228,9 @@ async function takePostRequest(type) {
             body = `userId=${$.venderId}&token=${$.Token}&fromType=APP`;
             break;
         case 'accessLog':
-            url = `https://${$.domain}/common/accessLogWithAD`;
+            url = `https://${$.domain}/common/accessLog`;
             let pageurl = `${$.activityUrl}`
-            body = `venderId=${$.venderId}&code=${$.activityType}&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
+            body = `venderId=${$.venderId}&code=${$.activityType}&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=`
             break;
         case 'getBuyerPoints':
             url = `https://${$.domain}/mc/wxPointShop/getBuyerPoints`;
@@ -219,7 +249,7 @@ async function takePostRequest(type) {
     }
     // console.log("body-----:" + body)
     let myRequest = getPostRequest(url, body, method);
-    // console.log(myRequest)
+    // console.log(type + '-->'+ JSON.stringify(myRequest))
     return new Promise(async resolve => {
         $.post(myRequest, (err, resp, data) => {
             try {
@@ -294,7 +324,7 @@ async function dealReturn(type, data) {
             case 'getMyPing':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
-                        console.log("MyPin" + res.data.secretPin)
+                        console.log("MyPin " + res.data.secretPin)
                         if (res.data && typeof res.data.secretPin != 'undefined') $.Pin = res.data.secretPin
                         if (res.data && typeof res.data.nickname != 'undefined') $.nickname = res.data.nickname
                     } else if (res.errorMessage) {
@@ -310,9 +340,16 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
                         let data = res.data;
+                        console.log(JSON.stringify(data))
                         $.userGrade = data.grade
                         $.buyerPoints = data.buyerPoints
                         console.log(`当前用户等级为${$.userGrade}级，可用积分为${$.buyerPoints}`)
+                        if ($.userGrade == 0) {
+                            console.log(`当前用户等级异常，之后重新跑`)
+                            $.retryCookies.push(cookie)
+                        } else {
+                            $.retyPoint = $.buyerPoints
+                        }
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
