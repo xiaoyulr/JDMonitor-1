@@ -8,9 +8,10 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
-$.activityUrl = process.env.T_CART_KOI_URL ? process.env.T_CART_KOI_URL : "";
+$.activityUrlPrefix = 'https://lzkjdz-isv.isvjcloud.com/wxCartKoi/cartkoi/activity?activityId='
+$.activityId = process.env.jd_wxCartKoi_activityId ? process.env.jd_wxCartKoi_activityId : "";
 $.activityIds = process.env.T_CART_KOI_ACTIVITY_IDS ? process.env.T_CART_KOI_ACTIVITY_IDS : "";
-$.activityId = getQueryString($.activityUrl, 'activityId')
+$.activityUrl = $.activityUrlPrefix + $.activityId
 $.Token = "";
 $.openCard = false
 CryptoScripts()
