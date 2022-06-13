@@ -57,35 +57,40 @@ if ($.isNode()) {
                 continue
             }
             await jdmodule(false);
+            if ($.stop) {
+                break;
+            }
             if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
             if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
         }
     }
-    console.log(`有异常账号，开始重跑`)
-    for (let i = 0; i < $.retryCookies.length; i++) {
-        if ($.retryCookies[i]) {
-            cookie = $.retryCookies[i];
-            $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
-            $.index = i + 1;
-            $.isLogin = true;
-            $.nickName = '';
-            console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
-            if (!$.isLogin) {
-                $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
+    if (!$.stop) {
+        console.log(`有异常账号，开始重跑`)
+        for (let i = 0; i < $.retryCookies.length; i++) {
+            if ($.retryCookies[i]) {
+                cookie = $.retryCookies[i];
+                $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+                $.index = i + 1;
+                $.isLogin = true;
+                $.nickName = '';
+                console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
+                if (!$.isLogin) {
+                    $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
 
-                if ($.isNode()) {
-                    await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
+                    if ($.isNode()) {
+                        await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
+                    }
+                    continue
                 }
-                continue
+                await jdmodule(true);
+                if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+                if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
             }
-            await jdmodule(true);
-            if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-            if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
-            if ($.isNode()) {
-                if ($.message != '') {
-                    await notify.sendNotify("关注店铺抽奖", `${$.message}\n跳转链接\n${$.activityUrl}`)
-                }
-            }
+        }
+    }
+    if ($.isNode()) {
+        if ($.message != '') {
+            await notify.sendNotify("关注店铺抽奖", `${$.message}\n跳转链接\n${$.activityUrl}`)
         }
     }
 })()
@@ -127,10 +132,11 @@ async function jdmodule(retry) {
     await takePostRequest("activityContent")
     if (!retry) {
         await takePostRequest("getBuyerPoints")
-        if ($.exist <= $.canExgByPeopDay) {
+        if ($.exist < $.canExgByPeopDay) {
             console.log(`剩余豆子不足以兑换，退出！`)
             $.message += `剩余豆子不足以兑换，退出！`
             $.stop = true
+            return
         }
         if ($.canExgByPeopDay == 0) {
             console.log(`今日已兑换过！！`)
@@ -156,9 +162,8 @@ async function jdmodule(retry) {
             $.maxExgBeans = Math.floor($.buyerPoints / $.pointRate)
             $.canExgBeans = Math.min($.canExgByPeopDay, $.maxExgBeans)
             $.retryExgBeans = $.canExgBeans
+            console.log(`可兑换的京豆为${$.canExgBeans}`)
         }
-
-        console.log(`可兑换的京豆为${$.canExgBeans}`)
     } else {
         $.canExgBeans = $.retryExgBeans
     }
