@@ -168,30 +168,31 @@ async function jdmodule(retry) {
         $.canExgBeans = $.retryExgBeans
     }
 
-    if ($.userGrade > 0 && $.buyerPoints > 0)
+    if ($.userGrade > 0 && $.buyerPoints > 0) {
         await takePostRequest("exgBeans")
-    if ($.exchangeError.indexOf(`火爆`) != -1) {
-        console.log(`活动火爆，重新兑换1次`)
-        await takePostRequest("exgBeans")
-    }
-    if ($.exchangeError.indexOf(`火爆`) != -1) {
-        console.log(`活动火爆，重新兑换2次`)
-        await takePostRequest("exgBeans")
-    }
-    if ($.exchangeError.indexOf(`火爆`) != -1) {
-        console.log(`活动火爆，重新兑换3次`)
-        await takePostRequest("exgBeans")
-    }
-    if ($.exchangeError.indexOf(`火爆`) != -1) {
-        console.log(`活动火爆，重新兑换4次`)
-        await takePostRequest("exgBeans")
-    }
-    if ($.exchangeError.indexOf(`火爆`) != -1) {
-        console.log(`活动火爆，重新兑换5次`)
-        await takePostRequest("exgBeans")
-    }
-    if ($.exchangeError.indexOf(`火爆`) != -1) {
-        console.log(`活动火爆，重新兑换失败！`)
+        if ($.exchangeError.indexOf(`火爆`) != -1) {
+            console.log(`活动火爆，重新兑换1次`)
+            await takePostRequest("exgBeans")
+        }
+        if ($.exchangeError.indexOf(`火爆`) != -1) {
+            console.log(`活动火爆，重新兑换2次`)
+            await takePostRequest("exgBeans")
+        }
+        if ($.exchangeError.indexOf(`火爆`) != -1) {
+            console.log(`活动火爆，重新兑换3次`)
+            await takePostRequest("exgBeans")
+        }
+        if ($.exchangeError.indexOf(`火爆`) != -1) {
+            console.log(`活动火爆，重新兑换4次`)
+            await takePostRequest("exgBeans")
+        }
+        if ($.exchangeError.indexOf(`火爆`) != -1) {
+            console.log(`活动火爆，重新兑换5次`)
+            await takePostRequest("exgBeans")
+        }
+        if ($.exchangeError.indexOf(`火爆`) != -1) {
+            console.log(`活动火爆，重新兑换失败！`)
+        }
     }
 }
 
