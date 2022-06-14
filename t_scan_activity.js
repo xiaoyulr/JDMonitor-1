@@ -30,7 +30,7 @@ $.koiChange = false
 $.recordPoint = process.env.RECORD_POINT ? process.env.RECORD_POINT : "RECORD_POINT";
 $.pointChange = false
 $.recordSign = process.env.RECORD_SIGN ? process.env.RECORD_SIGN : "RECORD_SIGN";
-$.needScanIndex = process.env.HAS_SCAN_INDEX ? process.env.HAS_SCAN_INDEX : 1;
+$.needScanIndex = process.env.HAS_SCAN_INDEX ? process.env.HAS_SCAN_INDEX : "1";
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
 let activityCookie = ''
@@ -49,9 +49,9 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    $.keyWord = $.keyWords[$.needScanIndex]
+    $.keyWord = $.keyWords[parseInt($.needScanIndex)]
     console.log(`本次运行关键字为：${$.keyWord}`)
-    $.nextScanIndex = $.needScanIndex + 1 >= $.keyWords.length ? 0 : $.needScanIndex
+    $.nextScanIndex = $.needScanIndex + 1 >= $.keyWords.length ? 0 : $.needScanIndex + 1
     let randIndex = Math.floor(Math.random() * cookiesArr.length)
     while (cookiesArr[randIndex]) {
         cookie = cookiesArr[randIndex];
@@ -130,7 +130,7 @@ async function jdmodule() {
         console.log(`已获取第${$.pageNo}页内容，休息一下`)
         await $.wait(parseInt(Math.random() * 50000 + 1000, 10))
     }
-    await notify.sendNotify(`下次扫描索引`, `export HAS_SCAN_INDEX=${$.nextScanIndex}`)
+    await notify.sendNotify(`下次扫描索引`, `export HAS_SCAN_INDEX=\"${$.nextScanIndex}\"`)
     if ($.koiChange) {
         await notify.sendNotify(`检测到购物车锦鲤变量变动`, `export RECORD_CART_KOI=\"${$.recordCartKoi}\"`)
     }
