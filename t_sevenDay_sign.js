@@ -47,7 +47,7 @@ if ($.isNode()) {
     if ($.activityUrls.indexOf($.activityId) != -1) {
         console.log(`签到ID已存在，退出`)
     } else {
-        result = $.activityUrls == null ? $.activityUrl : $.activityUrls + `;${$.activityUrl}`
+        result = $.activityUrls == null || $.activityUrls == "" ? $.activityUrl : $.activityUrls + `;${$.activityUrl}`
         for (let i = 0; i < cookiesArr.length; i++) {
             if (cookiesArr[i]) {
                 cookie = cookiesArr[i];
@@ -340,7 +340,7 @@ async function dealReturn(type, data) {
                         signResult = res.signResult
                         giftName = signResult.gift.giftName == null ? '空气' : signResult.gift.giftName
                         console.log(`签到成功，获得${giftName}`)
-                        $.message += `京东账号${$.UserName} 获得 ${giftName}`
+                        $.message += `京东账号${$.UserName} 获得 ${giftName}\n`
                     } else {
                         console.log(`${type} ${data}`)
                     }

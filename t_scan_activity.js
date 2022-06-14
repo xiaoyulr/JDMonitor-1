@@ -16,7 +16,7 @@ $.exportActivityIds = ""
 $.message = ""
 $.nextPage = 1
 $.pageNo = 0
-$.keyWords = ['关注店铺有礼', '互动', '福袋', '砸金蛋', '上上签', '老虎机', '购物车锦鲤']
+$.keyWords = ['关注店铺有礼', '互动', '福袋', '砸金蛋', '上上签', '老虎机', '购物车锦鲤', '签到']
 $.recordFollowShop = process.env.RECORD_FOLLOW_SHOP ? process.env.RECORD_FOLLOW_SHOP : "RECORD_FOLLOW_SHOP";
 $.followChange = false
 $.recordInteractive = process.env.RECORD_INTERACTIVE ? process.env.RECORD_INTERACTIVE : "RECORD_INTERACTIVE";
@@ -30,6 +30,7 @@ $.koiChange = false
 $.recordPoint = process.env.RECORD_POINT ? process.env.RECORD_POINT : "RECORD_POINT";
 $.pointChange = false
 $.recordSign = process.env.RECORD_SIGN ? process.env.RECORD_SIGN : "RECORD_SIGN";
+$.signChange = false
 $.needScanIndex = process.env.HAS_SCAN_INDEX ? process.env.HAS_SCAN_INDEX : "1";
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
@@ -202,14 +203,15 @@ function dealExportByUrl(url, id) {
             return `export T_FOLLOW_SHOP_URL=\"${url}\"`
         }
     }
-    // // 七日签到
-    // else if (url.indexOf("sevenDay") != -1) {
-    //     if ($.recordFollowShop.indexOf(id) != 1) {
-    //         $.followChange = true
-    //         $.recordFollowShop += `&${id}`
-    //         return `export T_FOLLOW_SHOP_URL=\"${url}\"`
-    //     }
-    // }
+    // 七日签到
+    else if (url.indexOf("sevenDay") != -1) {
+        if ($.recordSign.indexOf(id) != 1) {
+            $.signChange = true
+            $.recordSign += `&${id}`
+            url = uel.split("&")[0]
+            return `export T_SEVENDAY_SIGN_URL=\"${url}\"`
+        }
+    }
     // 积分兑换京豆
     else if (url.indexOf("wxPointShopView") != -1) {
         if ($.recordPoint.indexOf(id) != 1) {
