@@ -30,7 +30,7 @@ $.koiChange = false
 $.recordPoint = process.env.RECORD_POINT ? process.env.RECORD_RECORD_POINT : "RECORD_RECORD_POINT";
 $.pointChange = false
 $.recordSign = process.env.RECORD_SIGN ? process.env.RECORD_SIGN : "RECORD_SIGN";
-$.needScanIndex = process.env.HAS_SCAN_INDEX ? process.env.HAS_SCAN_INDEX : 0;
+$.needScanIndex = process.env.HAS_SCAN_INDEX ? process.env.HAS_SCAN_INDEX : 1;
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
 let activityCookie = ''
@@ -68,11 +68,6 @@ if ($.isNode()) {
         }
         await jdmodule();
         break;
-    }
-    if ($.isNode()) {
-        if ($.message != '') {
-            await notify.sendNotify("关注店铺抽奖", `${$.message}\n跳转链接\n${$.activityUrl}`)
-        }
     }
 })()
     .catch((e) => {
@@ -114,6 +109,9 @@ async function jdmodule() {
 
     while ($.nextPage != $.pageNo || $.nextPage != -1) {
         $.pageNo = $.nextPage
+        if ($.nextPage == -1) {
+            break
+        }
         await takePostRequest("queryActInfo")
         if ($.homeInfoResultVOList.length > 0) {
             for (let activityInfo of $.homeInfoResultVOList) {
@@ -285,10 +283,6 @@ async function takePostRequest(type) {
             url = `https://${$.domain}/wxAssemblePage/queryActInfo`;
             body = `pageNo=${$.pageNo}&pageSize=20&pin=${encodeURIComponent($.Pin)}&name=${encodeURIComponent($.keyWord)}`
             break;
-        case 'exgBeans':
-            url = `https://${$.domain}/mc/wxPointShop/exgBeans`;
-            body = `giftId=${$.activityId}&venderId=${$.venderId}&buyerNick=${encodeURIComponent($.nickname)}&buyerPin=${$.Pin}&beansLevel=&exgBeanNum=${$.canExgBeans}`
-            break;
         default:
             console.log(`错误${type}`);
     }
@@ -397,26 +391,10 @@ async function dealReturn(type, data) {
                         // console.log(JSON.stringify(res.data))
                         let data = res.data
                         $.nextPage = data.nextPage
-                        console.log(`下一页页码为${$.nextPage}`)
                         $.homeInfoResultVOList = data.homeInfoResultVOList
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
-                        console.log(`${type} ${data}`)
-                    }
-                } else {
-                    console.log(`${type} ${data}`)
-                }
-                break;
-            case 'exgBeans':
-                if (typeof res == 'object') {
-                    if (res.result && res.result === true) {
-                        console.log(`兑换成功！`)
-                        $.message += `京东账号${$.index} ${$.UserName} 成功兑换${$.canExgBeans}\n`
-                        $.exchangeError = ''
-                    } else {
-                        console.log(`兑换失败！`)
-                        $.exchangeError = res.errorMessage
                         console.log(`${type} ${data}`)
                     }
                 } else {
