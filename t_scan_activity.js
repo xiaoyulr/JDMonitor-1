@@ -16,7 +16,7 @@ $.exportActivityIds = ""
 $.message = ""
 $.nextPage = 1
 $.pageNo = 0
-$.keyWords = ['关注店铺有礼', '互动赢好礼', '福袋', '砸金蛋', '上上签', '老虎机', '购物车锦鲤', '积分兑换京豆']
+$.keyWords = ['关注店铺有礼', '互动', '福袋', '砸金蛋', '上上签', '老虎机', '购物车锦鲤', '积分兑换京豆']
 $.recordFollowShop = process.env.RECORD_FOLLOW_SHOP ? process.env.RECORD_FOLLOW_SHOP : "RECORD_FOLLOW_SHOP";
 $.followChange = false
 $.recordInteractive = process.env.RECORD_INTERACTIVE ? process.env.RECORD_INTERACTIVE : "RECORD_INTERACTIVE";
@@ -50,6 +50,7 @@ if ($.isNode()) {
         return;
     }
     $.keyWord = $.keyWords[$.needScanIndex]
+    console.log(`本次运行关键字为：${$.keyWord}`)
     $.nextScanIndex = $.needScanIndex + 1 >= $.keyWords.length ? 0 : $.needScanIndex
     let randIndex = Math.floor(Math.random() * cookiesArr.length)
     while (cookiesArr[randIndex]) {
@@ -109,7 +110,7 @@ async function jdmodule() {
 
     while ($.nextPage != $.pageNo || $.nextPage != -1) {
         $.pageNo = $.nextPage
-        if ($.nextPage == -1) {
+        if ($.nextPage <= 0) {
             break
         }
         await takePostRequest("queryActInfo")
