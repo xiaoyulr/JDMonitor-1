@@ -51,7 +51,7 @@ if ($.isNode()) {
     }
     $.keyWord = $.keyWords[parseInt($.needScanIndex)]
     console.log(`本次运行关键字为：${$.keyWord}`)
-    $.nextScanIndex = $.needScanIndex + 1 >= $.keyWords.length ? 0 : $.needScanIndex + 1
+    $.nextScanIndex = parseInt($.needScanIndex) + 1 >= $.keyWords.length ? 0 : parseInt($.needScanIndex) + 1
     let randIndex = Math.floor(Math.random() * cookiesArr.length)
     while (cookiesArr[randIndex]) {
         cookie = cookiesArr[randIndex];
