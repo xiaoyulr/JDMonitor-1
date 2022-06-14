@@ -65,7 +65,7 @@ if ($.isNode()) {
                 break
             }
             if ($.index == 1) {
-                $.notifyExport += $.notifyExport == '' ? id : `;${id}`
+                $.notifyExport += $.notifyExport == '' ? id : `&${id}`
             }
         }
         console.log(`重跑第一个号`)

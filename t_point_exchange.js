@@ -168,7 +168,8 @@ async function jdmodule(retry) {
         $.canExgBeans = $.retryExgBeans
     }
 
-    await takePostRequest("exgBeans")
+    if ($.userGrade > 0 && $.buyerPoints > 0)
+        await takePostRequest("exgBeans")
     if ($.exchangeError.indexOf(`火爆`) != -1) {
         console.log(`活动火爆，重新兑换1次`)
         await takePostRequest("exgBeans")
