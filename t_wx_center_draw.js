@@ -1,24 +1,26 @@
 /*
 [task_local]
-# 中心抽奖
-7 7 7 7 7  t_wx_center_draw.js, tag=中心抽奖, enabled=true
+# 中心抽奖_每日版
+0 * * * *  t_wx_center_draw_everyday.js, tag=中心抽奖_每日版, enabled=true
  */
-const $ = new Env('中心抽奖');
+const $ = new Env('中心抽奖_每日版');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = true;//是否关闭通知，false打开通知推送，true关闭通知推送
 $.activityIds = process.env.M_WX_CENTER_DRAW_ACTIVITY_IDS ? process.env.M_WX_CENTER_DRAW_ACTIVITY_IDS : "";
-$.activityId = process.env.jd_drawCenter_activityId ? process.env.jd_drawCenter_activityId : "";
-$.activityUrl = `https://lzkj-isv.isvjcloud.com/drawCenter/activity?activityId=${$.activityId}`;
+// $.activityId = getQueryString($.activityUrl, 'activityId')
+$.activityPrefix = "https://lzkj-isv.isvjcloud.com/drawCenter/activity?activityId="
+$.activityId = ""
 $.Token = "";
 $.stop = false
-$.message = ""
+$.message = '';
+$.notifyExport = '';
+$.needExpire = 0
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
 let activityCookie = ''
-$.endFlag = 0
 if ($.isNode()) {
     Object.keys(jdCookieNode).forEach((item) => {
         cookiesArr.push(jdCookieNode[item])
@@ -34,10 +36,10 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    if ($.activityIds.indexOf($.activityId) != -1) {
-        console.log('\n活动Id：' + $.activityId + '已存在，退出');
-        await notify.sendNotify('活动ID：' + $.activityId, `已存在，退出`);
-    } else {
+    for (let id of $.activityIds.split("&")) {
+        $.activityId = id
+        $.activityUrl = $.activityPrefix + id
+        $.stop = false
         for (let i = 0; i < cookiesArr.length; i++) {
             if (cookiesArr[i]) {
                 cookie = cookiesArr[i];
@@ -58,17 +60,37 @@ if ($.isNode()) {
                 //await showMsg();
             }
             if ($.stop) {
-                console.log(`活動Id---${$.activityId}----已結束`)
+                console.log(`活动id ${$.activityId} 已结束`)
+                $.needExpire = 1
+                break
+            }
+            if ($.index == 1) {
+                $.notifyExport += $.notifyExport == '' ? id : `&${id}`
             }
         }
-        if ($.isNode) {
-            let exports = `export M_WX_CENTER_DRAW_ACTIVITY_IDS=\"${$.activityIds}&${$.activityId}\"`
-            if ($.message != '') {
-                await notify.sendNotify(`${$.activityName}`, `${$.message}\n 跳转链接：${$.activityUrl}`);
+        console.log(`重跑第一个号`)
+        cookie = cookiesArr[0];
+        $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+        $.isLogin = true;
+        $.nickName = '';
+        console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
+        if (!$.isLogin) {
+            $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
+
+            if ($.isNode()) {
+                await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
             }
-            await notify.sendNotify('将以下参数写入配置文件', exports);
+        }
+        await jdmodule();
+        if ($.isNode()) {
+            if ($.message != '') {
+                await notify.sendNotify(`${$.activityName}`, `${$.message}\n 跳转链接：${$.activityPrefix}${id}`);
+            }
 
         }
+    }
+    if ($.isNode() && $.needExpire == 1) {
+        await notify.sendNotify(`导入中心抽奖系统参数`, `export M_WX_CENTER_DRAW_ACTIVITY_IDS=\"${$.notifyExport}\"`);
     }
 
 })()
@@ -97,7 +119,7 @@ async function jdmodule() {
     await takePostRequest("isvObfuscator");
     console.log('Token:' + $.Token)
     if ($.Token == '') {
-        $.putMsg(`获取Token失败`);
+        console.log(`获取Token失败`);
         return
     }
 
