@@ -165,10 +165,10 @@ function dealExportByUrl(url, id) {
     else if (url.indexOf("wxSecond") != -1) {
         return `export jd_wxSecond_activityId=\"${id}\"`
     }
-    // 分享有礼
-    else if (url.indexOf("wxShareActivity") != -1) {
-        return `export jd_fxyl_activityId=\"${id}\"`
-    }
+    // // 分享有礼
+    // else if (url.indexOf("wxShareActivity") != -1) {
+    //     return `export jd_fxyl_activityId=\"${id}\"`
+    // }
     // 中心抽奖
     else if (url.indexOf("drawCenter") != -1) {
         if ($.recordCenterDraw.indexOf(id) == -1) {
