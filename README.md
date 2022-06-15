@@ -3,4 +3,4 @@
 
 拉库命令
 
-ql repo https://github.com/tttccz/JDMonitor.git "jd_|t_" "backup" "JS_|notify|pk_|magic|USER_AGENTS|jdCookie|sendNotify" "main"
+ql repo https://github.com/tttccz/TczMonitor.git "jd_|t_" "backup" "JS_|notify|pk_|magic|USER_AGENTS|jdCookie|sendNotify" "main"
