@@ -1,16 +1,14 @@
 /*
 [task_local]
-# 7日签到
-7 7 7 7 7  t_sevenDay_sign.js, tag=7日签到, enabled=true
+# 7日签到每日版
+0 0 * * *  t_sevenDay_sign.js, tag=7日签到每日版, enabled=true
  */
-const $ = new Env('7日签到');
+const $ = new Env('7日签到每日版');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
-$.activityUrl = process.env.T_SEVENDAY_SIGN_URL ? process.env.T_SEVENDAY_SIGN_URL : "";
 $.activityUrls = process.env.T_SEVENDAY_SIGN_URLS ? process.env.T_SEVENDAY_SIGN_URLS : "";
-$.activityId = getQueryString($.activityUrl, 'activityId')
 $.Token = "";
 $.openCard = false
 $.exportActivityIds = ""
@@ -24,6 +22,7 @@ $.friendUuidId = 0
 $.signFlag = false
 $.giftInfoId = []
 $.giftName = []
+$.exportResult = ""
 CryptoScripts()
 $.CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;
 //IOS等用户直接用NobyDa的jd cookie
@@ -44,41 +43,35 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    if ($.activityUrls.indexOf($.activityId) != -1) {
-        console.log(`签到ID已存在，退出`)
-    } else {
-        console.log(`跳转链接：\n${$.activityUrl}`)
-        result = $.activityUrls == null || $.activityUrls == "" ? $.activityUrl : $.activityUrls + `;${$.activityUrl}`
-        for (let i = 0; i < cookiesArr.length; i++) {
-            if (cookiesArr[i]) {
-                cookie = cookiesArr[i];
-                $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
-                $.index = i + 1;
-                $.isLogin = true;
-                $.nickName = '';
-                console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
-                if (!$.isLogin) {
-                    $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
+    for (let i = 0; i < cookiesArr.length; i++) {
+        if (cookiesArr[i]) {
+            cookie = cookiesArr[i];
+            $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+            $.index = i + 1;
+            $.isLogin = true;
+            $.nickName = '';
+            console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
+            if (!$.isLogin) {
+                $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
 
-                    if ($.isNode()) {
-                        await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
-                    }
-                    continue
+                if ($.isNode()) {
+                    await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
                 }
-                await jdmodule();
-                if ($.stop) {
-                    console.log(`签到不给京豆，不跑！`)
-                    break
-                }
-                if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-                if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 2000, 10))
+                continue
             }
+            for (let a of $.activityUrls.split(";")) {
+                $.activityUrl = a
+                $.activityId = getQueryString($.activityUrl, 'activityId')
+                await jdmodule()
+
+            }
+            if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+            if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 2000, 10))
         }
-    }
-    if ($.isNode()) {
-        if ($.message != '') {
-            await notify.sendNotify("7日签到", `${$.message}\n跳转链接\n${$.activityUrl}`)
-            await notify.sendNotify("7日签到变量", `export T_SEVENDAY_SIGN_URLS=\"${result}\"`)
+        if ($.isNode()) {
+            if ($.message != '') {
+                await notify.sendNotify("7日签到", `export T_SEVENDAY_SIGN_URLS=\"${$.exportResult}\"`)
+            }
         }
     }
 
@@ -98,9 +91,7 @@ async function jdmodule() {
     $.UA = `jdapp;iPhone;10.2.2;13.1.2;${uuid()};M/5.0;network/wifi;ADID/;model/iPhone8,1;addressid/2308460611;appBuild/167863;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS 13_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
 
     await getCK();
-    console.log("lzToken=" + activityCookie)
     await takePostRequest("isvObfuscator");
-    console.log('Token:' + $.Token)
     if ($.Token == '') {
         $.putMsg(`获取Token失败`);
         return
@@ -118,8 +109,16 @@ async function jdmodule() {
 
     await takePostRequest("getActMemberInfo");
 
+    if ($.isOver === 'n' || $.contiSignDays == 7) {
+        console.log(`活动已结束或已签到7天`)
+        return
+    }
+
+    if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
+        $.exportResult = $.exportResult == "" ? $.activityUrl : `;${$.activityUrl}`
+    }
+
     if (!$.signFlag) {
-        $.stop = true
         return
     }
     if ($.actMemberStatus == 1 && !$.openCardStatus && $.signFlag) {
@@ -134,6 +133,8 @@ async function jdmodule() {
         return
     }
     await takePostRequest("signUp")
+
+    await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
 }
 
 //运行
@@ -296,7 +297,7 @@ async function dealReturn(type, data) {
             case 'getSignInfo':
                 if (typeof res == 'object') {
                     if (res.isOk && res.isOk === true) {
-                        console.log(JSON.stringify(res))
+                        // console.log(JSON.stringify(res))
                         if ($.index == 1) {
                             giftConditions = res.giftConditions
                             for (let giftCondition of giftConditions) {
@@ -326,6 +327,8 @@ async function dealReturn(type, data) {
                     if (res.isOk && res.isOk === true) {
                         // console.log(JSON.stringify(res.data))
                         $.shopName = res.shopInfo.shopName
+                        console.log(`${$.shopName}`)
+                        console.log(`活动链接\n${$.activityUrl}`)
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
@@ -343,7 +346,7 @@ async function dealReturn(type, data) {
                         console.log(`签到成功，获得${giftName}`)
                         $.message += `京东账号${$.UserName} 获得 ${giftName}\n`
                     } else {
-                        console.log(`${type} ${data}`)
+                        console.log(`签到失败 ${res.msg}`)
                     }
                 } else {
                     console.log(`${type} ${data}`)
