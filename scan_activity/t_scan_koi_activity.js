@@ -108,7 +108,7 @@ async function jdmodule() {
                 let exports = dealExportByUrl(activityLink, activityId)
                 if (exports) {
                     console.log(`店铺名称：${shopName}\n活动名称：${activityTitle}\n活动链接\n${activityLink}`)
-                    await notify.sendNotify(`${activityTitle}`, `店铺名称：${shopName}\n活动名称：${activityTitle}\n${exports}`)
+                    await notify.sendNotify(`${activityTitle}`, `店铺名称：${shopName}\n活动名称：${activityTitle}\n活动链接\n${activityLink}\n${exports}`)
                 }
             }
         }
@@ -123,7 +123,7 @@ async function jdmodule() {
 function dealExportByUrl(url, id) {
     // 购物车锦鲤
     if (url.indexOf("wxCartKoi/cartkoi") != -1) {
-        if ($.recordCartKoi.indexOf(id) != 1) {
+        if ($.recordCartKoi.indexOf(id) == -1) {
             $.koiChange = true
             $.recordCartKoi += `&${id}`
             return `export jd_wxCartKoi_activityId=\"${id}\"`
