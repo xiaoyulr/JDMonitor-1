@@ -47,6 +47,7 @@ if ($.isNode()) {
     if ($.activityUrls.indexOf($.activityId) != -1) {
         console.log(`签到ID已存在，退出`)
     } else {
+        console.log(`跳转链接：\n${$.activityUrl}`)
         result = $.activityUrls == null || $.activityUrls == "" ? $.activityUrl : $.activityUrls + `;${$.activityUrl}`
         for (let i = 0; i < cookiesArr.length; i++) {
             if (cookiesArr[i]) {

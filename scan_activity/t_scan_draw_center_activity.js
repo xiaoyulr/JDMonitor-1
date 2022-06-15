@@ -1,9 +1,9 @@
 /*
 [task_local]
-# 活動扫描
-7 7 7 7 7  t_scan_activity.js, tag=活動扫描, enabled=true
+# 抽奖中心活動扫描
+7 7 7 7 7  t_scan_draw_center_activity.js, tag=抽奖中心活動扫描, enabled=true
  */
-const $ = new Env('活动扫描');
+const $ = new Env('抽奖中心活动扫描');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
@@ -16,22 +16,9 @@ $.exportActivityIds = ""
 $.message = ""
 $.nextPage = 1
 $.pageNo = 0
-$.keyWords = ['关注店铺有礼', '互动', '福袋', '砸金蛋', '上上签', '老虎机', '购物车锦鲤', '签到']
-$.recordFollowShop = process.env.RECORD_FOLLOW_SHOP ? process.env.RECORD_FOLLOW_SHOP : "RECORD_FOLLOW_SHOP";
-$.followChange = false
-$.recordInteractive = process.env.RECORD_INTERACTIVE ? process.env.RECORD_INTERACTIVE : "RECORD_INTERACTIVE";
-$.fansChange = false
-$.recordLuckPack = process.env.RECORD_LUCK_PACK ? process.env.RECORD_LUCK_PACK : "RECORD_LUCK_PACK";
-$.packChange = false
+$.keyWords = ['砸金蛋', '上上签', '老虎机']
 $.recordCenterDraw = process.env.RECORD_CENTER_DRAW ? process.env.RECORD_CENTER_DRAW : "RECORD_CENTER_DRAW";
 $.centerChange = false
-$.recordCartKoi = process.env.RECORD_CART_KOI ? process.env.RECORD_CART_KOI : "RECORD_CART_KOI";
-$.koiChange = false
-$.recordPoint = process.env.RECORD_POINT ? process.env.RECORD_POINT : "RECORD_POINT";
-$.pointChange = false
-$.recordSign = process.env.RECORD_SIGN ? process.env.RECORD_SIGN : "RECORD_SIGN";
-$.signChange = false
-$.needScanIndex = process.env.HAS_SCAN_INDEX ? process.env.HAS_SCAN_INDEX : "1";
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
 let activityCookie = ''
@@ -50,9 +37,8 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    $.keyWord = $.keyWords[parseInt($.needScanIndex)]
+    $.keyWord = $.keyWords[Math.floor(Math.random() * keyWords.length)]
     console.log(`本次运行关键字为：${$.keyWord}`)
-    $.nextScanIndex = parseInt($.needScanIndex) + 1 >= $.keyWords.length ? 0 : parseInt($.needScanIndex) + 1
     let randIndex = Math.floor(Math.random() * cookiesArr.length)
     while (cookiesArr[randIndex]) {
         cookie = cookiesArr[randIndex];
@@ -124,14 +110,13 @@ async function jdmodule() {
                 let exports = dealExportByUrl(activityLink, activityId)
                 if (exports) {
                     console.log(`店铺名称：${shopName}\n活动名称：${activityTitle}\n活动链接\n${activityLink}`)
-                    await notify.sendNotify(`${activityTitle}`, `店铺名称：${shopName}\n活动名称：${activityTitle}\n活动链接\n${activityLink}\n${exports}`)
+                    await notify.sendNotify(`${activityTitle}`, `店铺名称：${shopName}\n活动名称：${activityTitle}\n${exports}`)
                 }
             }
         }
         console.log(`已获取第${$.pageNo}页内容，休息一下`)
         await $.wait(parseInt(Math.random() * 50000 + 1000, 10))
     }
-    await notify.sendNotify(`下次扫描索引`, `export HAS_SCAN_INDEX=\"${$.nextScanIndex}\"`)
     if ($.koiChange) {
         await notify.sendNotify(`检测到购物车锦鲤变量变动`, `export RECORD_CART_KOI=\"${$.recordCartKoi}\"`)
     }
@@ -155,7 +140,7 @@ async function jdmodule() {
 function dealExportByUrl(url, id) {
     // 购物车锦鲤
     if (url.indexOf("wxCartKoi/cartkoi") != -1) {
-        if ($.recordCartKoi.indexOf(id) != 1) {
+        if ($.recordCartKoi.indexOf(id) == -1) {
             $.koiChange = true
             $.recordCartKoi += `&${id}`
             return `export jd_wxCartKoi_activityId=\"${id}\"`
@@ -163,7 +148,7 @@ function dealExportByUrl(url, id) {
     }
     // 拆福袋
     else if (url.indexOf("wxUnPackingActivity") != -1) {
-        if ($.recordLuckPack.indexOf(id) != 1) {
+        if ($.recordLuckPack.indexOf(id) == -1) {
             $.packChange = true
             $.recordLuckPack += `&${id}`
             return `export T_WX_UNPACKING_URL=\"${url}\"`
@@ -171,7 +156,7 @@ function dealExportByUrl(url, id) {
     }
     // 粉丝互动
     else if (url.indexOf("wxFansInterActionActivity") != -1) {
-        if ($.recordInteractive.indexOf(id) != 1) {
+        if ($.recordInteractive.indexOf(id) == -1) {
             $.fansChange = true
             $.recordInteractive += `&${id}`
             return `export T_FANS_INTER_ACTIVITY_ID=\"${id}\"`
@@ -188,7 +173,7 @@ function dealExportByUrl(url, id) {
     }
     // 中心抽奖
     else if (url.indexOf("drawCenter") != -1) {
-        if ($.recordCenterDraw.indexOf(id) != 1) {
+        if ($.recordCenterDraw.indexOf(id) == -1) {
             $.centerChange = true
             $.recordCenterDraw += `&${id}`
             return `export jd_drawCenter_activityId=\"${id}\"`
@@ -197,7 +182,7 @@ function dealExportByUrl(url, id) {
     }
     // 店铺关注有礼
     else if (url.indexOf("wxShopFollowActivity") != -1) {
-        if ($.recordFollowShop.indexOf(id) != 1) {
+        if ($.recordFollowShop.indexOf(id) == -1) {
             $.followChange = true
             $.recordFollowShop += `&${id}`
             return `export T_FOLLOW_SHOP_URL=\"${url}\"`
@@ -205,7 +190,7 @@ function dealExportByUrl(url, id) {
     }
     // 七日签到
     else if (url.indexOf("sevenDay") != -1) {
-        if ($.recordSign.indexOf(id) != 1) {
+        if ($.recordSign.indexOf(id) == -1) {
             $.signChange = true
             $.recordSign += `&${id}`
             url = uel.split("&")[0]
@@ -214,7 +199,7 @@ function dealExportByUrl(url, id) {
     }
     // 积分兑换京豆
     else if (url.indexOf("wxPointShopView") != -1) {
-        if ($.recordPoint.indexOf(id) != 1) {
+        if ($.recordPoint.indexOf(id) == -1) {
             $.pointChange = true
             $.recordPoint += `&${id}`
             venderId = ""
