@@ -176,7 +176,7 @@ async function takePostRequest(type) {
             body = `venderId=${$.venderId}&code=3&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
             break;
         case 'getSignInfo':
-            url = `https://${$.domain}/sign/sevenDay/wx/getSignInfo`;
+            url = `https://${$.domain}/sign/wx/getSignInfo`;
             body = `actId=${$.activityId}&venderId=${$.venderId}&pin=${encodeURIComponent($.Pin)}`;
             break;
         case 'getShopInfo':
@@ -184,7 +184,7 @@ async function takePostRequest(type) {
             body = `venderId=${$.venderId}`
             break;
         case 'signUp':
-            url = `https://${$.domain}/sign/sevenDay/wx/signUp`;
+            url = `https://${$.domain}/sign/wx/signUp`;
             body = `actId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
             break;
         case 'getActMemberInfo':
