@@ -323,9 +323,14 @@ async function dealReturn(type, data) {
                     if (res.isOk) {
                         signResult = res.gift
                         // console.log(JSON.stringify(signResult))
-                        giftName = signResult.giftName
-                        console.log(`签到成功，获得${giftName}`)
-                        $.message += `京东账号${$.UserName} 获得 ${giftName}\n`
+                        if (signResult !=null && signResult.giftName) {
+                            giftName = signResult.giftName
+                            console.log(`签到成功，获得${giftName}`)
+                            $.message += `京东账号${$.UserName} 获得 ${giftName}\n`
+                        } else {
+                            console.log(`签到成功，签了个寂寞...`)
+                        }
+
                     } else {
                         console.log(`签到失败 ${res.msg}`)
                     }
