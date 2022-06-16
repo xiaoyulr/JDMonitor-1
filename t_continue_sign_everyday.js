@@ -23,7 +23,7 @@ $.signFlag = false
 $.giftInfoId = []
 $.priseMsg = ""
 $.giftName = []
-$.exportResult == ""
+$.exportResult = ""
 CryptoScripts()
 $.CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;
 //IOS等用户直接用NobyDa的jd cookie
@@ -44,7 +44,7 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    for (let id of activityIds) {
+    for (let id of $.activityIds.split("&")) {
         $.activityUrl = $.prefixUrl + id
         $.activityId = id
         console.log(`跳转链接：\n${$.activityUrl}`)
@@ -81,8 +81,6 @@ if ($.isNode()) {
             }
         }
     }
-
-
 })()
     .catch((e) => {
         $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
