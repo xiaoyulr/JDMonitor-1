@@ -15,7 +15,6 @@ $.Token = "";
 $.openCard = false
 $.friendUuid = ""
 $.canRunUrl = []
-$.message = ""
 $.index = 1
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [], cookie = '', message;
@@ -41,9 +40,16 @@ if ($.isNode()) {
     for (let activityInfo of $.activityIds.split("&")) {
         $.activityId = activityInfo.split(";")[0]
         let actStartTime = activityInfo.split(";")[1]
+        if (actStartTime > curtimestamp) {
+            console.log(`活动ID：${$.activityId}未到加购时间！`)
+        }
+        if ((curtimestamp - actStartTime) / 60 / 1000 > 50) {
+            console.log(`活动ID：${$.activityId}已过加购时间！`)
+        }
         if (actStartTime <= curtimestamp && (curtimestamp - actStartTime) / 60 / 1000 <= 50) {
             $.activityUrl = $.ativityUrlPrefix + $.activityId
             console.log(`跳转链接：${$.activityUrl}`)
+            $.message = ""
             for (let i = 0; i < cookiesArr.length; i++) {
                 if (cookiesArr[i]) {
                     cookie = cookiesArr[i];
@@ -54,21 +60,13 @@ if ($.isNode()) {
                     if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
                 }
             }
-        }
-        if (actStartTime > curtimestamp) {
-            console.log(`活动ID：${$.activityId}未到加购时间！`)
-        }
-        if ((curtimestamp - actStartTime) / 60 / 1000 > 50) {
-            console.log(`活动ID：${$.activityId}已过加购时间！`)
-        }
-    }
-    if ($.isNode) {
-        if ($.message != '') {
-            await notify.sendNotify("购物车锦鲤开奖结果", `${$.message}`)
+            if ($.isNode) {
+                if ($.message != '') {
+                    await notify.sendNotify("购物车锦鲤开奖结果", `${$.activityName}\n${$.message}\n跳转链接：${$.activityUrl}`)
+                }
+            }
         }
     }
-
-
 })()
     .catch((e) => {
         $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
@@ -462,7 +460,7 @@ async function dealReturn(type, data) {
                         // console.log(JSON.stringify(res))
                         if (typeof res.data == 'object') {
                             if (res.data.message == '中奖') {
-                                $.message += `${$.activityName}\n京东账号${$.UserName}获得${res.data.drawName}\n`
+                                $.message += `京东账号${$.UserName}获得${res.data.drawName}\n`
                                 console.log(`恭喜中奖~获得${res.data.drawName}`)
                             }
                             else {

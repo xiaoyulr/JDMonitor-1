@@ -63,18 +63,14 @@ if ($.isNode()) {
                 $.activityUrl = a
                 $.activityId = getQueryString($.activityUrl, 'activityId')
                 await jdmodule()
-
             }
-            if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-            if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 2000, 10))
         }
-        if ($.isNode()) {
-            if ($.message != '') {
-                await notify.sendNotify("7日签到", `export T_SEVENDAY_SIGN_URLS=\"${$.exportResult}\"`)
-            }
+        if ($.index % 2 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+        if ($.index % 2 == 0) await $.wait(parseInt(Math.random() * 50000 + 2000, 10))
+        if ($.message != '' && $.index == 1) {
+            await notify.sendNotify("7日签到", `export T_SEVENDAY_SIGN_URLS=\"${$.exportResult}\"`)
         }
     }
-
 })()
     .catch((e) => {
         $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
@@ -109,13 +105,13 @@ async function jdmodule() {
 
     await takePostRequest("getActMemberInfo");
 
-    if ($.isOver === 'n' || $.contiSignDays == 7) {
+    if ($.isOver === 'y' || $.contiSignDays == 7) {
         console.log(`活动已结束或已签到7天`)
         return
     }
 
     if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
-        $.exportResult = $.exportResult == "" ? $.activityUrl : `;${$.activityUrl}`
+        $.exportResult += $.exportResult == "" ? $.activityUrl : `;${$.activityUrl}`
     }
 
     if (!$.signFlag) {
@@ -134,7 +130,7 @@ async function jdmodule() {
     }
     await takePostRequest("signUp")
 
-    await $.wait(parseInt(Math.random() * 2000 + 1000, 10))
+    await $.wait(parseInt(Math.random() * 10000 + 1000, 10))
 }
 
 //运行

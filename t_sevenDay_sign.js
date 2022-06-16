@@ -70,8 +70,8 @@ if ($.isNode()) {
                     console.log(`签到不给京豆，不跑！`)
                     break
                 }
-                if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-                if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 2000, 10))
+                if ($.index % 2 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+                if ($.index % 2 == 0) await $.wait(parseInt(Math.random() * 50000 + 2000, 10))
             }
         }
     }
@@ -108,6 +108,8 @@ async function jdmodule() {
 
     await takePostRequest("getSimpleActInfoVo");
 
+    await takePostRequest("getOpenStatus");
+
     await takePostRequest("getMyPing");
 
     await takePostRequest("accessLogWithAD")
@@ -115,8 +117,6 @@ async function jdmodule() {
     await takePostRequest("getSignInfo")
 
     await takePostRequest("getShopInfo")
-
-    await takePostRequest("getActMemberInfo");
 
     if (!$.signFlag) {
         $.stop = true

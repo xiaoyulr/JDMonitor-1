@@ -39,7 +39,6 @@ if ($.isNode()) {
     cookiesArr = [$.getdata('CookieJD'), $.getdata('CookieJD2'), ...jsonParse($.getdata('CookiesJD') || "[]").map(item => item.cookie)].filter(item => !!item);
 }
 !(async () => {
-    console.log('入口下拉：https://prodev.m.jd.com/mall/active/3z1Vesrhx3GCCcBn2HgbFR4Jq68o/index.html')
     if (!cookiesArr[0]) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
@@ -107,7 +106,7 @@ if ($.isNode()) {
     }
     if ($.isNode()) {
         // await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}如需开卡，开卡命令为\n\n并重跑一次该任务！`)
-        await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}开奖时间：${$.drawTime}\n如果出现加购0件，则需要开卡后重跑任务，开卡命令：\nexport VENDER_ID=${$.venderId}\n跳转链接: ${$.activityUrl}\n`);
+        await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}开奖时间：${$.drawTime}\n跳转链接: ${$.activityUrl}\n`);
         await notify.sendNotify(`将以下参数写进配置文件：`, `\n${exports}`)
     }
 })()

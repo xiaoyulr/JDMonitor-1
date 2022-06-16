@@ -122,7 +122,7 @@ async function jdmodule() {
 
 function dealExportByUrl(url, id) {
     // 七日签到
-    if (url.indexOf("sevenDay") != -1) {
+    if (url.indexOf("sevenDay") != -1 && url.indexOf("cjhy") == -1) {
         if ($.recordSign.indexOf(id) == -1) {
             $.signChange = true
             $.recordSign += `&${id}`

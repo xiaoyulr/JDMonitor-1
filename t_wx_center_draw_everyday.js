@@ -14,7 +14,6 @@ $.activityPrefix = "https://lzkj-isv.isvjcloud.com/drawCenter/activity?activityI
 $.activityId = ""
 $.Token = "";
 $.stop = false
-$.message = '';
 $.notifyExport = '';
 $.needExpire = 0
 //IOS等用户直接用NobyDa的jd cookie
@@ -31,7 +30,6 @@ if ($.isNode()) {
     cookiesArr = [$.getdata('CookieJD'), $.getdata('CookieJD2'), ...jsonParse($.getdata('CookiesJD') || "[]").map(item => item.cookie)].filter(item => !!item);
 }
 !(async () => {
-    console.log('入口下拉：https://prodev.m.jd.com/mall/active/3z1Vesrhx3GCCcBn2HgbFR4Jq68o/index.html')
     if (!cookiesArr[0]) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
@@ -40,6 +38,7 @@ if ($.isNode()) {
         $.activityId = id
         $.activityUrl = $.activityPrefix + id
         $.stop = false
+        $.message = '';
         for (let i = 0; i < cookiesArr.length; i++) {
             if (cookiesArr[i]) {
                 cookie = cookiesArr[i];
@@ -68,25 +67,8 @@ if ($.isNode()) {
                 $.notifyExport += $.notifyExport == '' ? id : `&${id}`
             }
         }
-        console.log(`重跑第一个号`)
-        cookie = cookiesArr[0];
-        $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
-        $.isLogin = true;
-        $.nickName = '';
-        console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
-        if (!$.isLogin) {
-            $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
-
-            if ($.isNode()) {
-                await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
-            }
-        }
-        await jdmodule();
-        if ($.isNode()) {
-            if ($.message != '') {
-                await notify.sendNotify(`${$.activityName}`, `${$.message}\n 跳转链接：${$.activityPrefix}${id}`);
-            }
-
+        if ($.message != '') {
+            await notify.sendNotify(`${$.activityName}`, `${$.message}\n 跳转链接：${$.activityPrefix}${id}`);
         }
     }
     if ($.isNode() && $.needExpire == 1) {
