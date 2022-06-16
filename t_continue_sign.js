@@ -319,10 +319,11 @@ async function dealReturn(type, data) {
                 break;
             case 'signUp':
                 if (typeof res == 'object') {
+                    console.log(JSON.stringify(res))
                     if (res.isOk) {
-                        signResult = res.signResult
+                        signResult = res.gift
                         // console.log(JSON.stringify(signResult))
-                        giftName = signResult.gift == null ? '未知' : signResult.gift.giftName
+                        giftName = signResult.giftName
                         console.log(`签到成功，获得${giftName}`)
                         $.message += `京东账号${$.UserName} 获得 ${giftName}\n`
                     } else {
@@ -348,15 +349,15 @@ async function dealReturn(type, data) {
                 break;
             case 'getActivity':
                 if (typeof res == 'object') {
-                    if (res.ok && res.ok === true) {
+                    if (res.isOk && res.isOk === true) {
                         act = res.act
-                        wxSignActivityGiftBean = act.wxSignActivityGiftBean
-                        for (let info of wxSignActivityGiftBean) {
+                        giftConditions = act.wxSignActivityGiftBean.giftConditions
+                        for (let info of giftConditions) {
                             $.dayNum = info.dayNum
                             if (info.gift != null && info.gift.giftName.indexOf(`京豆`) != -1) {
                                 $.signFlag = true
                             }
-                            console.log(`签到${$.dayNum}可获得${info.gift.giftName}`)
+                            console.log(`签到${$.dayNum}天，可获得${info.gift.giftName}`)
                         }
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
