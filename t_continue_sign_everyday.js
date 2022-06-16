@@ -1,9 +1,9 @@
 /*
 [task_local]
-# 连续签到
-7 7 7 7 7  t_countinue_sign.js, tag=连续签到, enabled=true
+# 连续签到每日版
+0 0 * * *  t_countinue_sign_everyday.js, tag=连续签到每日版, enabled=true
  */
-const $ = new Env('连续签到');
+const $ = new Env('连续签到每日版');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
