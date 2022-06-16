@@ -61,8 +61,11 @@ if ($.isNode()) {
             }
             for (let a of $.activityUrls.split(";")) {
                 $.activityUrl = a
+                console.log(a)
                 $.activityId = getQueryString($.activityUrl, 'activityId')
                 await jdmodule()
+                console.log('店铺签到完成，请等待...')
+                await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
             }
         }
         if ($.index % 2 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
@@ -118,10 +121,8 @@ async function jdmodule() {
         return
     }
     if ($.actMemberStatus == 1 && !$.openCardStatus && $.signFlag) {
-        await opencard()
-        if ($.joinErrorTimes > 4) {
-            return
-        }
+        console.log(`不开卡`)
+        return
     }
 
     if ($.isSign === 'y') {
@@ -129,8 +130,6 @@ async function jdmodule() {
         return
     }
     await takePostRequest("signUp")
-
-    await $.wait(parseInt(Math.random() * 10000 + 1000, 10))
 }
 
 //运行
@@ -338,7 +337,8 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     if (res.isOk) {
                         signResult = res.signResult
-                        giftName = signResult.gift.giftName == null ? '空气' : signResult.gift.giftName
+                        // console.log(JSON.stringify(signResult))
+                        giftName = signResult.gift == null ? '未知' : signResult.gift.giftName
                         console.log(`签到成功，获得${giftName}`)
                         $.message += `京东账号${$.UserName} 获得 ${giftName}\n`
                     } else {
