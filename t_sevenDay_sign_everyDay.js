@@ -8,7 +8,7 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
-$.activityUrls = process.env.T_SEVENDAY_SIGN_URLS ? process.env.T_SEVENDAY_SIGN_URLS : "";
+$.activityIds = process.env.T_SEVENDAY_SIGN_IDS ? process.env.T_SEVENDAY_SIGN_IDS : "";
 $.Token = "";
 $.openCard = false
 $.exportActivityIds = ""
@@ -23,6 +23,7 @@ $.signFlag = false
 $.giftInfoId = []
 $.giftName = []
 $.exportResult = ""
+$.prefix = "https://lzkj-isv.isvjcloud.com/sign/sevenDay/signActivity?activityId="
 CryptoScripts()
 $.CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;
 //IOS等用户直接用NobyDa的jd cookie
@@ -59,10 +60,10 @@ if ($.isNode()) {
                 }
                 continue
             }
-            for (let a of $.activityUrls.split(";")) {
-                $.activityUrl = a
+            for (let a of $.activityIds.split("&")) {
+                $.activityId = a
                 console.log(a)
-                $.activityId = getQueryString($.activityUrl, 'activityId')
+                $.activityUrl = $.prefix + $.activityId
                 await jdmodule()
                 console.log('店铺签到完成，请等待...')
                 await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
@@ -71,7 +72,7 @@ if ($.isNode()) {
         if ($.index % 2 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
         if ($.index % 2 == 0) await $.wait(parseInt(Math.random() * 50000 + 2000, 10))
         if ($.message != '' && $.index == 1) {
-            await notify.sendNotify("7日签到", `export T_SEVENDAY_SIGN_URLS=\"${$.exportResult}\"`)
+            await notify.sendNotify("7日签到", `export T_SEVENDAY_SIGN_IDS=\"${$.exportResult}\"`)
         }
     }
 })()
@@ -114,7 +115,7 @@ async function jdmodule() {
     }
 
     if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
-        $.exportResult += $.exportResult == "" ? $.activityUrl : `;${$.activityUrl}`
+        $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
     }
 
     if (!$.signFlag) {

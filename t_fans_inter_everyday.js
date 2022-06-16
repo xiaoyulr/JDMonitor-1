@@ -40,6 +40,7 @@ let activityList = []
 		let _0x58a1ac = Date.now();
 		if (_0x58a1ac < activityList[_0x2e674b].endTime) {
 			let _0x3d2098 = 'https://lzkjdz-isv.isvjcloud.com/wxFansInterActionActivity/activity/' + _0x38a02d + '?activityId=' + _0x38a02d;
+			$.activityUrl = _0x3d2098
 			console.log('\n活动URL：' + _0x3d2098);
 			$.thisActivityUrl = _0x3d2098;
 			$.host = 'lzkjdz-isv.isvjcloud.com';
@@ -72,7 +73,7 @@ async function main(_0x3f7ec5) {
 		} catch (_0x404e8e) { }
 		await _0x3f7ec5.wait(3000);
 	} if (message) {
-		await notify.sendNotify('粉丝互动ID：' + _0x3f7ec5.activityId, message);
+		await notify.sendNotify('粉丝互动ID：' + _0x3f7ec5.activityId, message + `跳转链接：${$.activityUrl}`);
 	}
 }
 async function doInfo() {

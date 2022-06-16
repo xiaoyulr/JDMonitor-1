@@ -19,6 +19,8 @@ $.pageNo = 0
 $.keyWord = '签到'
 $.recordSign = process.env.RECORD_SIGN ? process.env.RECORD_SIGN : "RECORD_SIGN";
 $.signChange = false
+$.recordConSign = process.env.RECORD_CON_SIGN ? process.env.RECORD_CON_SIGN : "RECORD_CON_SIGN";
+$.signConChange = false
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
 let activityCookie = ''
@@ -118,19 +120,31 @@ async function jdmodule() {
     if ($.signChange) {
         await notify.sendNotify(`检测到七日签到变量变动`, `export RECORD_SIGN=\"${$.recordSign}\"`)
     }
+    if ($.conSignChange) {
+        await notify.sendNotify(`检测到连续签到变量变动`, `export RECORD_CON_SIGN=\"${$.recordConSign}\"`)
+    }
 }
 
 function dealExportByUrl(url, id) {
     // 七日签到
+    // https://lzkj-isv.isvjcloud.com/sign/sevenDay/signActivity?activityId=
     if (url.indexOf("sevenDay") != -1 && url.indexOf("cjhy") == -1) {
         if ($.recordSign.indexOf(id) == -1) {
             $.signChange = true
             $.recordSign += `&${id}`
-            url = url.split("&")[0]
-            return `export T_SEVENDAY_SIGN_URL=\"${url}\"`
+            return `export T_SEVENDAY_SIGN_ID=\"${id}\"`
         }
     } else {
         return null
+    }
+    // 连续签到
+    // https://lzkj-isv.isvjcloud.com/sign/signActivity2?activityId=
+    if(url.indexOf("sign/signActivity2") !=-1 && url.indexOf("cjhy") == -1) {
+        if ($.recordConSign.indexOf(id) == -1) {
+            $.conSignChange = true
+            $.recordConSign += `&${id}`
+            return `export T_CON_SIGN_ID=\"${id}\"`
+        }
     }
 }
 

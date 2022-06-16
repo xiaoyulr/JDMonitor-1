@@ -1,16 +1,16 @@
 /*
 [task_local]
-# 7日签到
-7 7 7 7 7  t_sevenDay_sign.js, tag=7日签到, enabled=true
+# 连续签到
+7 7 7 7 7  t_countinue_sign.js, tag=连续签到, enabled=true
  */
-const $ = new Env('7日签到');
+const $ = new Env('连续签到');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
-$.activityUrl = process.env.T_SEVENDAY_SIGN_URL ? process.env.T_SEVENDAY_SIGN_URL : "";
-$.activityUrls = process.env.T_SEVENDAY_SIGN_URLS ? process.env.T_SEVENDAY_SIGN_URLS : "";
-$.activityId = getQueryString($.activityUrl, 'activityId')
+$.activityId = process.env.T_CON_SIGN_ID ? process.env.T_CON_SIGN_ID : "";
+$.activityIds = process.env.T_CON_SIGN_IDS ? process.env.T_CON_SIGN_IDS : "";
+$.activityUrl = `https://lzkj-isv.isvjcloud.com/sign/signActivity2?activityId=${$.activityId}`
 $.Token = "";
 $.openCard = false
 $.exportActivityIds = ""
@@ -44,11 +44,11 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    if ($.activityUrls.indexOf($.activityId) != -1) {
+    if ($.activityIds.indexOf($.activityId) != -1) {
         console.log(`签到ID已存在，退出`)
     } else {
         console.log(`跳转链接：\n${$.activityUrl}`)
-        result = $.activityUrls == null || $.activityUrls == "" ? $.activityUrl : $.activityUrls + `&${$.activityUrl}`
+        result = $.activityIds == null || $.activityIds == "" ? $.activityId : $.activityIds + `&${$.activityId}`
         for (let i = 0; i < cookiesArr.length; i++) {
             if (cookiesArr[i]) {
                 cookie = cookiesArr[i];
@@ -77,8 +77,8 @@ if ($.isNode()) {
     }
     if ($.isNode()) {
         if ($.message != '') {
-            await notify.sendNotify("7日签到", `${$.message}\n跳转链接\n${$.activityUrl}`)
-            await notify.sendNotify("7日签到变量", `export T_SEVENDAY_SIGN_IDS=\"${result}\"`)
+            await notify.sendNotify("连续签到", `${$.message}\n跳转链接\n${$.activityUrl}`)
+            await notify.sendNotify("连续签到变量", `export T_CON_SIGN_IDS=\"${result}\"`)
         }
     }
 
@@ -114,6 +114,8 @@ async function jdmodule() {
 
     await takePostRequest("accessLogWithAD")
 
+    await takePostRequest("getActivity")
+
     await takePostRequest("getSignInfo")
 
     await takePostRequest("getShopInfo")
@@ -127,10 +129,6 @@ async function jdmodule() {
         return
     }
 
-    if ($.isSign === 'y') {
-        console.log(`已经签到过了~`)
-        return
-    }
     await takePostRequest("signUp")
 }
 
@@ -193,10 +191,10 @@ async function takePostRequest(type) {
             url = `https://${$.domain}/wxCommonInfo/getActMemberInfo`;
             body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&venderId=${$.venderId}`
             break;
-        case 'followShop':
-            url = `https://${$.domain}/wxActionCommon/followShop`;
+        case 'getActivity':
+            url = `https://${$.domain}/sign/wx/getActivity`;
             // url = `${domain}/dingzhi/dz/openCard/saveTask`;
-            body = `activityId=${$.activityId}&buyerNick=${encodeURIComponent($.Pin)}&userId=${$.venderId}&activityType=${$.activityType}`
+            body = `actId=${$.activityId}&venderId=${$.venderId}`
             break;
         default:
             console.log(`错误${type}`);
@@ -295,21 +293,7 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     if (res.isOk && res.isOk === true) {
                         console.log(JSON.stringify(res))
-                        if ($.index == 1) {
-                            giftConditions = res.giftConditions
-                            for (let giftCondition of giftConditions) {
-                                // console.log(JSON.stringify(giftCondition))
-                                $.dayNum = giftCondition.dayNum
-                                $.giftInfoId.push(giftCondition.giftInfoId)
-                                $.giftName.push(giftCondition.gift == null ? `空气` : giftCondition.gift.giftName)
-                                if (giftCondition.gift != null && giftCondition.gift.giftName.indexOf(`京豆`) != -1) {
-                                    $.signFlag = true
-                                }
-                            }
-                        }
-                        $.isOver = res.isOver
-                        $.isSign = res.isSign
-                        $.contiSignDays = res.contiSignDays
+                        $.totalSignNum = res.signRecord.totalSignNum
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
@@ -362,13 +346,17 @@ async function dealReturn(type, data) {
                     console.log(`${type} ${data}`)
                 }
                 break;
-            case 'hasPrize':
+            case 'getActivity':
                 if (typeof res == 'object') {
                     if (res.ok && res.ok === true) {
-                        $.uuid = res.data.uuid
-                        if ($.index == 1) {
-                            $.friendUuid = $.uuid
-                            console.log(`接下来都会助力${$.friendUuid}}`)
+                        act = res.act
+                        wxSignActivityGiftBean = act.wxSignActivityGiftBean
+                        for (let info of wxSignActivityGiftBean) {
+                            $.dayNum = info.dayNum
+                            if (info.gift != null && info.gift.giftName.indexOf(`京豆`) != -1) {
+                                $.signFlag = true
+                            }
+                            console.log(`签到${$.dayNum}可获得${info.gift.giftName}`)
                         }
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
