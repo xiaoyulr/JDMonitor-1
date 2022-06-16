@@ -34,7 +34,6 @@ if ($.isNode()) {
     cookiesArr = [$.getdata('CookieJD'), $.getdata('CookieJD2'), ...jsonParse($.getdata('CookiesJD') || "[]").map(item => item.cookie)].filter(item => !!item);
 }
 !(async () => {
-    console.log('入口下拉：https://prodev.m.jd.com/mall/active/3z1Vesrhx3GCCcBn2HgbFR4Jq68o/index.html')
     if (!cookiesArr[0]) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
@@ -56,33 +55,8 @@ if ($.isNode()) {
                 continue
             }
             await jdmodule();
-            // if ($.helpTimes != 0 && $.helpTimes == $.hasHelpedTimes) {
-            //     $.friendUuidId++
-            //     $.friendUuid = $.friendUuids[$.friendUuidId]
-            //     $.hasHelpedTimes = 0
-            //     console.log(`上一个账号已助力完成，接下来都会助力${$.friendUuid}`)
-            // }
         }
     }
-    // if ($.isNode()) {
-    //     let restartTime = cookiesArr.length
-    //     if ($.helpTimes != 0) {
-    //         restartTime = Math.ceil(cookiesArr.length / $.helpTimes)
-    //     }
-    //     console.log(`重新跑前${restartTime}个号`)
-    //     for (let i = 0; i < restartTime; i++) {
-    //         if (cookiesArr[i]) {
-    //             cookie = cookiesArr[0];
-    //             await jdmodule(true);
-    //             $.message += `被助力账号${i + 1}本次加购${$.addCarts}/${$.totals}件商品\n`
-    //         }
-    //     }
-    //     let st = timeToTimestamp($.drawTime)
-    //     let temp = `${$.activityId};${st}`
-    //     let exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}&${temp}\"`
-    //     // await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}如需开卡，开卡命令为\n\n并重跑一次该任务！`)
-    //     await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}开奖时间：${$.drawTime}\n如果出现加购0件，则需要开卡后重跑任务，开卡命令：export VENDER_ID=${$.venderId}\n跳转链接: ${$.activityUrl}\n将以下参数写进配置文件：\n${exports}`);
-    // }
 })()
     .catch((e) => {
         $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
@@ -117,42 +91,24 @@ async function jdmodule() {
 
     await takePostRequest("getMyPing");
 
-    await takePostRequest("accessLogWithAD")
-
-    if ($.index != 1) {
-        // $.message += `京东账号 ${$.UserName} 已成功助力\n`
-        console.log(`京东账号${$.UserName}成功助力 ${$.friendUuid}`)
-        $.hasHelpedTimes++
-    }
-
+    await takePostRequest("accessLog")
 
     await takePostRequest("getUserInfo")
-    // await takePostRequest("activityContent")
-
-    // if ($.isGameEnd) {
-    //     $.putMsg(`活动已结束`)
-    //     stop = true;
-    //     return;
-    // }
-    // if ($.needFollow && !$.hasFollow) {
-    //     console.log(`关注店铺`)
-    //     await takePostRequest("followShop")
-    // }
-
-    await takePostRequest("getActMemberInfo");
-    // if ($.actMemberStatus == 1 && !$.openCardStatus) {
-    //     $.message += `京东账号 ${$.UserName} 需要开卡\n`
-    //     return
-    // }
-
-    await takePostRequest("getInviterByUUid")
 
     if ($.index == 1) {
+        $.inviterImgUrl = $.attrTouXiang
+    }
+
+    await takePostRequest("getActMemberInfo");
+
+    // await takePostRequest("getInviterByUUid")
+
+    if ($.index == 1) {
+        await takePostRequest("saveHbShare")
         await takePostRequest("getSendUUid")
     } else {
         await takePostRequest("addShareOpen")
     }
-
 
     // await takePostRequest("getCountByPin")
 }
@@ -213,18 +169,14 @@ async function takePostRequest(type) {
             url = `https://${$.domain}/customer/getMyPing`;
             body = `userId=${$.venderId}&token=${$.Token}&fromType=APP`;
             break;
-        case 'accessLogWithAD':
-            url = `https://${$.domain}/common/accessLogWithAD`;
+        case 'accessLog':
+            url = `https://${$.domain}/common/accessLog`;
             let pageurl = `${$.activityUrl}&friendUuid=${$.friendUuid}`
-            body = `venderId=${$.venderId}&code=2004&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
+            body = `venderId=${$.venderId}&code=66&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app`
             break;
         case 'getUserInfo':
             url = `https://${$.domain}/wxActionCommon/getUserInfo`;
             body = `pin=${encodeURIComponent($.Pin)}`;
-            break;
-        case 'activityContent':
-            url = `https://${$.domain}/wxCartKoi//cartkoi/activityContent`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&pinImg=${encodeURIComponent($.attrTouXiang)}&status=1&friendUuid=${$.friendUuid}`
             break;
         case 'getSendUUid':
             url = `https://${$.domain}/wxHbShareActivity/getSendUUid`;
@@ -246,9 +198,9 @@ async function takePostRequest(type) {
             url = `https://${$.domain}/wxCommonInfo/getActMemberInfo`;
             body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&venderId=${$.venderId}`
             break;
-        case 'info':
-            url = `https://${$.domain}/drawCenter/myInfo`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+        case 'saveHbShare':
+            url = `https://${$.domain}/wxHbShareActivity/saveHbShare`;
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&venderId=${$.venderId}&imageUrl=${encodeURIComponent($.inviterImgUrl)}&phone=`
             break;
         case 'startDraw':
             url = `${domain}/joint/order/draw`;
@@ -391,7 +343,7 @@ async function dealReturn(type, data) {
             case 'getUserInfo':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
-                        if (res.data && typeof res.data.yunMidImageUrl != 'undefined') $.attrTouXiang = res.data.yunMidImageUrl || "https://img10.360buyimg.com/imgzone/jfs/t1/7020/27/13511/6142/5c5138d8E4df2e764/5a1216a3a5043c5d.png"
+                        if (res.data && typeof res.data.yunSmaImageUrl != 'undefined') $.attrTouXiang = res.data.yunSmaImageUrl || "https://img10.360buyimg.com/imgzone/jfs/t1/21383/2/6633/3879/5c5138d8E0967ccf2/91da57c5e2166005.jpg"
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
@@ -401,38 +353,12 @@ async function dealReturn(type, data) {
                     console.log(`${type} ${data}`)
                 }
                 break;
-            case 'activityContent':
+            case 'saveHbShare':
                 if (typeof res == 'object') {
-                    if (res.result && res.result === true) {
-                        let activityVo = res.data.activityVo
-                        if (typeof activityVo == 'object') {
-                            $.activityName = activityVo.activityName
-                            $.drawTime = activityVo.drawTime
-                            $.needFollow = activityVo.needFollow
-                            $.actRule = activityVo.actRule
-                            $.activityType = activityVo.activityType
-                        }
-                        $.productVos = res.data.prodectVos
-                        $.hasFollow = res.data.hasFollow
-                        let joinRecord = res.data.joinRecord
-                        if (typeof joinRecord == 'object') {
-                            $.uuid = joinRecord.myUuid
-                            $.friendUuids.push($.uuid)
-                            // if ($.index == 1) {
-                            //     $.friendUuid = $.uuid
-                            // }
-                            // $.friendUuidArrays.push($.uuid)
-                            // console.log("当前助力池为:" + JSON.stringify($.friendUuidArrays))
-                        }
-                        $.addCarts = res.data.addCarts
-                        $.jsNum = res.data.jsNum
-                        $.totals = res.data.totals
-                        if ($.index == 1) {
-                            $.helpTimes = $.totals - $.jsNum
-                            console.log(`每个账号需要助力的次数为${$.helpTimes}次`)
-                            $.friendUuid = $.friendUuids[0]
-                            console.log(`接下来都会助力${$.friendUuid}`)
-                        }
+                    if (res.ok && res.ok === true) {
+                        data = res.data
+                        $.friendUuid = data.uuid
+                        console.loe(`当前助力账号为 ${$.friendUuid}`)
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
@@ -506,7 +432,7 @@ async function dealReturn(type, data) {
             case 'addShareOpen':
                 if (typeof res == 'object') {
                     if (res.ok && res.ok === true) {
-                        console.log(`助力成功！`)
+                        console.log(`京东账号${$.UserName}成功助力 ${$.friendUuid}`)
                     } else {
                         console.log(res.errorMessage)
                     }
