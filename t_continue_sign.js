@@ -329,6 +329,7 @@ async function dealReturn(type, data) {
                             $.message += `京东账号${$.UserName} 获得 ${giftName}\n`
                         } else {
                             console.log(`签到成功，签了个寂寞...`)
+                            $.message += `京东账号${$.UserName} 签到成功，签了个寂寞...\n`
                         }
 
                     } else {
