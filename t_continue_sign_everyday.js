@@ -8,15 +8,13 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
-$.activityId = process.env.T_CON_SIGN_ID ? process.env.T_CON_SIGN_ID : "";
 $.activityIds = process.env.T_CON_SIGN_IDS ? process.env.T_CON_SIGN_IDS : "";
-$.activityUrl = `https://lzkj-isv.isvjcloud.com/sign/signActivity2?activityId=${$.activityId}`
+$.prefixUrl = `https://lzkj-isv.isvjcloud.com/sign/signActivity2?activityId=`
 $.Token = "";
 $.openCard = false
 $.exportActivityIds = ""
 $.friendUuid = ""
 $.friendUuids = []
-$.message = ""
 $.helpTimes = -1
 $.hasHelpedTimes = 0
 $.restartNo = 1
@@ -25,6 +23,7 @@ $.signFlag = false
 $.giftInfoId = []
 $.priseMsg = ""
 $.giftName = []
+$.exportResult == ""
 CryptoScripts()
 $.CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;
 //IOS等用户直接用NobyDa的jd cookie
@@ -45,11 +44,11 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    if ($.activityIds.indexOf($.activityId) != -1) {
-        console.log(`签到ID已存在，退出`)
-    } else {
+    for (let id of activityIds) {
+        $.activityUrl = $.prefixUrl + id
+        $.activityId = id
         console.log(`跳转链接：\n${$.activityUrl}`)
-        result = $.activityIds == null || $.activityIds == "" ? $.activityId : $.activityIds + `&${$.activityId}`
+        $.message = ""
         for (let i = 0; i < cookiesArr.length; i++) {
             if (cookiesArr[i]) {
                 cookie = cookiesArr[i];
@@ -67,21 +66,22 @@ if ($.isNode()) {
                     continue
                 }
                 await jdmodule();
-                if ($.stop) {
-                    console.log(`签到只给积分或优惠券，不跑！`)
-                    break
-                }
                 if ($.index % 2 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
                 if ($.index % 2 == 0) await $.wait(parseInt(Math.random() * 50000 + 2000, 10))
+                if ($.stop) {
+                    console.log(`已结束！`)
+                    break
+                }
+
+            }
+        }
+        if ($.isNode()) {
+            if ($.exportResult != "") {
+                await notify.sendNotify("连续签到每日变量", `export T_CON_SIGN_IDS=\"${$.exportResult}\"`)
             }
         }
     }
-    if ($.isNode()) {
-        if ($.message != '') {
-            await notify.sendNotify("连续签到", `${$.shopName}\n${$.message}\n奖励内容\n${$.priseMsg}\n跳转链接\n${$.activityUrl}`)
-            await notify.sendNotify("连续签到变量", `export T_CON_SIGN_IDS=\"${result}\"`)
-        }
-    }
+
 
 })()
     .catch((e) => {
@@ -125,9 +125,20 @@ async function jdmodule() {
         $.stop = true
         return
     }
+
+    if ($.totalSignNum == $.dayNum) {
+        console.log(`已签到至最大天数`)
+        $.stop = true
+        return
+    }
+
     if ($.actMemberStatus == 1 && !$.openCardStatus && $.signFlag) {
         console.log(`不开卡`)
         return
+    }
+
+    if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
+        $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
     }
 
     await takePostRequest("signUp")
