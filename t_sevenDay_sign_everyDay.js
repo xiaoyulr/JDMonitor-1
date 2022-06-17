@@ -70,7 +70,7 @@ if ($.isNode()) {
             }
         }
         if ($.index % 2 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-        if ($.index % 2 == 0) await $.wait(parseInt(Math.random() * 50000 + 2000, 10))
+        if ($.index % 2 == 0) await sleep(60 * 1000)
         if ($.message != '' && $.index == 1) {
             await notify.sendNotify("7日签到", `export T_SEVENDAY_SIGN_IDS=\"${$.exportResult}\"`)
         }
@@ -83,7 +83,10 @@ if ($.isNode()) {
         $.done();
     })
 
-
+async function sleep(ms) {
+    // Unit is ms
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
 
 async function jdmodule() {
     $.domain = $.activityUrl.match(/https?:\/\/([^/]+)/) && $.activityUrl.match(

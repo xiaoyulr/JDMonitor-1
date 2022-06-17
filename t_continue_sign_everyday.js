@@ -66,19 +66,23 @@ if ($.isNode()) {
                     continue
                 }
                 await jdmodule();
-                if ($.index % 2 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-                if ($.index % 2 == 0) await $.wait(parseInt(Math.random() * 50000 + 2000, 10))
+                console.log('店铺签到完成，请等待...')
+                await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
+
                 if ($.stop) {
                     console.log(`已结束！`)
                     break
                 }
+            }
 
-            }
         }
-        if ($.isNode()) {
-            if ($.exportResult != "") {
-                await notify.sendNotify("连续签到每日变量", `export T_CON_SIGN_IDS=\"${$.exportResult}\"`)
-            }
+        await notify.sendNotify(`${$.shopName}每日签到`, `${$.message}`)
+        console.log('休息一下，别被黑ip了\n可持续发展')
+        await sleep(60 * 1000)
+    }
+    if ($.isNode()) {
+        if ($.exportResult != "") {
+            await notify.sendNotify("连续签到每日变量", `export T_CON_SIGN_IDS=\"${$.exportResult}\"`)
         }
     }
 })()
@@ -89,7 +93,10 @@ if ($.isNode()) {
         $.done();
     })
 
-
+async function sleep(ms) {
+    // Unit is ms
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
 
 async function jdmodule() {
     $.domain = $.activityUrl.match(/https?:\/\/([^/]+)/) && $.activityUrl.match(
