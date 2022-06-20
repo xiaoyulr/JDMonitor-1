@@ -44,7 +44,7 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    cklen = cookie.length > 3 ? 3 : cookie.length
+    cklen = cookiesArr.length > 3 ? 3 : cookiesArr.length
     for (let i = 0; i < cklen; i++) {
         if (cookiesArr[i]) {
             cookie = cookiesArr[i];
@@ -52,6 +52,7 @@ if ($.isNode()) {
             $.index = i + 1;
             $.isLogin = true;
             $.nickName = '';
+            $.message = ""
             console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
             if (!$.isLogin) {
                 $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
@@ -65,20 +66,14 @@ if ($.isNode()) {
                 $.activityUrl = $.prefixUrl + id
                 $.activityId = id
                 console.log(`跳转链接：\n${$.activityUrl}`)
-                $.message = ""
                 await jdmodule();
                 console.log('店铺签到完成，请等待...')
                 await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
-                if ($.stop) {
-                    console.log(`已结束！`)
-                    break
-                }
             }
-
+            await notify.sendNotify(`连续签到--账号 ${$.index} ${$.nickName || $.UserName}`, `${$.message}`)
+            console.log('休息一下，别被黑ip了\n可持续发展')
+            await sleep(60 * 1000)
         }
-        await notify.sendNotify(`${$.shopName}每日签到`, `${$.message}`)
-        console.log('休息一下，别被黑ip了\n可持续发展')
-        await sleep(60 * 1000)
     }
     if ($.isNode()) {
         if ($.exportResult != "") {
@@ -127,13 +122,11 @@ async function jdmodule() {
     await takePostRequest("getShopInfo")
 
     if (!$.signFlag) {
-        $.stop = true
         return
     }
 
     if ($.totalSignNum == $.dayNum) {
         console.log(`已签到至最大天数`)
-        $.stop = true
         return
     }
 
@@ -142,8 +135,10 @@ async function jdmodule() {
         return
     }
 
-    if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
+    if ($.exportResult.indexOf($.activityId) == -1) {
+        console.log(`添加至export队列中`)
         $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
+        console.log($.exportResult)
     }
 
     await takePostRequest("signUp")
@@ -343,10 +338,14 @@ async function dealReturn(type, data) {
                         if (signResult != null && signResult.giftName) {
                             giftName = signResult.giftName
                             console.log(`签到成功，获得${giftName}`)
-                            $.message += `京东账号${$.UserName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
+                            $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
+                            if ($.giftName.indexOf(`京豆`) < 0 || $.giftName.indexOf(`积分`) < 0) {
+                                $.message += `跳转链接: ${$.activityUrl}\n`
+                            }
+
                         } else {
                             console.log(`签到成功，签了个寂寞...`)
-                            $.message += `京东账号${$.UserName} 签到成功，签了个寂寞...，总签到天数 ${$.totalSignNum + 1}\n`
+                            $.message += `${$.shopName} 签到成功，签了个寂寞...，总签到天数 ${$.totalSignNum + 1}\n`
                         }
 
                     } else {

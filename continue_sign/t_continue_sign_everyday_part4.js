@@ -44,7 +44,7 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    cklen = cookie.length > 12 ? 12 : cookie.length
+    cklen = cookiesArr.length > 12 ? 12 : cookiesArr.length
     if (cklen <= 9) {
         return
     }
@@ -56,6 +56,7 @@ if ($.isNode()) {
             $.index = i + 1;
             $.isLogin = true;
             $.nickName = '';
+            $.message = ""
             console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
             if (!$.isLogin) {
                 $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
@@ -69,24 +70,13 @@ if ($.isNode()) {
                 $.activityUrl = $.prefixUrl + id
                 $.activityId = id
                 console.log(`跳转链接：\n${$.activityUrl}`)
-                $.message = ""
                 await jdmodule();
                 console.log('店铺签到完成，请等待...')
                 await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
-                if ($.stop) {
-                    console.log(`已结束！`)
-                    break
-                }
             }
-
-        }
-        await notify.sendNotify(`${$.shopName}每日签到`, `${$.message}`)
-        console.log('休息一下，别被黑ip了\n可持续发展')
-        await sleep(60 * 1000)
-    }
-    if ($.isNode()) {
-        if ($.exportResult != "") {
-            await notify.sendNotify("连续签到每日变量", `export T_CON_SIGN_IDS=\"${$.exportResult}\"`)
+            await notify.sendNotify(`连续签到--账号 ${$.index} ${$.nickName || $.UserName}`, `${$.message}`)
+            console.log('休息一下，别被黑ip了\n可持续发展')
+            await sleep(60 * 1000)
         }
     }
 })()
@@ -338,29 +328,33 @@ async function dealReturn(type, data) {
                     console.log(`${type} ${data}`)
                 }
                 break;
-            case 'signUp':
-                if (typeof res == 'object') {
-                    console.log(JSON.stringify(res))
-                    if (res.isOk) {
-                        signResult = res.gift
-                        // console.log(JSON.stringify(signResult))
-                        if (signResult != null && signResult.giftName) {
-                            giftName = signResult.giftName
-                            console.log(`签到成功，获得${giftName}`)
-                            $.message += `京东账号${$.UserName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
+                case 'signUp':
+                    if (typeof res == 'object') {
+                        console.log(JSON.stringify(res))
+                        if (res.isOk) {
+                            signResult = res.gift
+                            // console.log(JSON.stringify(signResult))
+                            if (signResult != null && signResult.giftName) {
+                                giftName = signResult.giftName
+                                console.log(`签到成功，获得${giftName}`)
+                                $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
+                                if ($.giftName.indexOf(`京豆`) < 0 || $.giftName.indexOf(`积分`) < 0) {
+                                    $.message += `跳转链接: ${$.activityUrl}\n`
+                                }
+    
+                            } else {
+                                console.log(`签到成功，签了个寂寞...`)
+                                $.message += `${$.shopName} 签到成功，签了个寂寞...，总签到天数 ${$.totalSignNum + 1}\n`
+                            }
+    
                         } else {
-                            console.log(`签到成功，签了个寂寞...`)
-                            $.message += `京东账号${$.UserName} 签到成功，签了个寂寞...，总签到天数 ${$.totalSignNum + 1}\n`
+                            console.log(`签到失败 ${res.msg}`)
+                            $.message += `京东账号${$.UserName} 签到失败，总签到天数 ${$.totalSignNum}\n`
                         }
-
                     } else {
-                        console.log(`签到失败 ${res.msg}`)
-                        $.message += `京东账号${$.UserName} 签到失败，总签到天数 ${$.totalSignNum}\n`
+                        console.log(`${type} ${data}`)
                     }
-                } else {
-                    console.log(`${type} ${data}`)
-                }
-                break;
+                    break;
             case 'getActMemberInfo':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {

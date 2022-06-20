@@ -44,7 +44,7 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    cklen = cookie.length > 3 ? 3 : cookie.length
+    cklen = cookiesArr.length > 3 ? 3 : cookiesArr.length
     for (let i = 0; i < cklen; i++) {
         if (cookiesArr[i]) {
             cookie = cookiesArr[i];
@@ -52,6 +52,7 @@ if ($.isNode()) {
             $.index = i + 1;
             $.isLogin = true;
             $.nickName = '';
+            $.message = "";
             console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
             if (!$.isLogin) {
                 $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
@@ -70,8 +71,10 @@ if ($.isNode()) {
                 await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
             }
         }
+        console.log('休息一下，别被黑ip了\n可持续发展')
         await sleep(60 * 1000)
         if ($.message != '' && $.index == 1) {
+            await notify.sendNotify(`7日签到--账号${$.nickName || $.UserName}`, `${$.message}`)
             await notify.sendNotify("7日签到", `export T_SEVENDAY_SIGN_IDS=\"${$.exportResult}\"`)
         }
     }
@@ -339,14 +342,26 @@ async function dealReturn(type, data) {
                 break;
             case 'signUp':
                 if (typeof res == 'object') {
+                    console.log(JSON.stringify(res))
                     if (res.isOk) {
-                        signResult = res.signResult
+                        signResult = res.gift
                         // console.log(JSON.stringify(signResult))
-                        giftName = signResult.gift == null ? '未知' : signResult.gift.giftName
-                        console.log(`签到成功，获得${giftName}`)
-                        $.message += `京东账号${$.UserName} 获得 ${giftName}\n`
+                        if (signResult != null && signResult.giftName) {
+                            giftName = signResult.giftName
+                            console.log(`签到成功，获得${giftName}`)
+                            $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
+                            if ($.giftName.indexOf(`京豆`) < 0 || $.giftName.indexOf(`积分`) < 0) {
+                                $.message += `跳转链接: ${$.activityUrl}\n`
+                            }
+
+                        } else {
+                            console.log(`签到成功，签了个寂寞...`)
+                            $.message += `${$.shopName} 签到成功，签了个寂寞...，总签到天数 ${$.totalSignNum + 1}\n`
+                        }
+
                     } else {
                         console.log(`签到失败 ${res.msg}`)
+                        $.message += `京东账号${$.UserName} 签到失败，总签到天数 ${$.totalSignNum}\n`
                     }
                 } else {
                     console.log(`${type} ${data}`)
