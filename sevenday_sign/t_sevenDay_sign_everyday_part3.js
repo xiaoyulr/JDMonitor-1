@@ -120,22 +120,10 @@ async function jdmodule() {
         return
     }
 
-    if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
+    if ($.exportResult.indexOf($.activityId) == -1) {
         $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
     }
 
-    if (!$.signFlag) {
-        return
-    }
-    if ($.actMemberStatus == 1 && !$.openCardStatus && $.signFlag) {
-        console.log(`不开卡`)
-        return
-    }
-
-    if ($.isSign === 'y') {
-        console.log(`已经签到过了~`)
-        return
-    }
     await takePostRequest("signUp")
 }
 

@@ -122,14 +122,6 @@ async function jdmodule() {
     if ($.exportResult.indexOf($.activityId) == -1) {
         $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
     }
-    if (!$.signFlag) {
-        return
-    }
-
-    if ($.isSign === 'y') {
-        console.log(`已经签到过了~`)
-        return
-    }
 
     await takePostRequest("signUp")
 }
