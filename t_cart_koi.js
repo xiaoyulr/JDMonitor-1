@@ -463,15 +463,15 @@ async function dealReturn(type, data) {
                         $.jsNum = res.data.jsNum
                         $.totals = res.data.totals
                         $.drawCondition = res.data.activityVo.drawCondition
-                        // if ($.index == 1) {
-                        $.headHelpTimes = $.totals - $.jsNum
-                        console.log(`车头账号需要助力的次数为${$.headHelpTimes}次`)
-                        $.otherHelpTime = $.drawCondition - $.jsNum <= 0 ? $.headHelpTimes : $.drawCondition - $.jsNum
-                        console.log(`每个账号需要助力的次数为${$.otherHelpTime}次即可达到开奖要求！`)
-                        $.friendUuid = $.friendUuids[0]
-                        console.log(`接下来都会助力${$.friendUuid}`)
-                        $.helpTimes = $.otherHelpTime
-                        // }
+                        if ($.index == 1) {
+                            $.headHelpTimes = $.totals - $.jsNum
+                            console.log(`车头账号需要助力的次数为${$.headHelpTimes}次`)
+                            $.otherHelpTime = $.drawCondition - $.jsNum <= 0 ? $.headHelpTimes : $.drawCondition - $.jsNum
+                            console.log(`每个账号需要助力的次数为${$.otherHelpTime}次即可达到开奖要求！`)
+                            $.friendUuid = $.friendUuids[0]
+                            console.log(`接下来都会助力${$.friendUuid}`)
+                            $.helpTimes = $.otherHelpTime
+                        }
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
                     } else {
