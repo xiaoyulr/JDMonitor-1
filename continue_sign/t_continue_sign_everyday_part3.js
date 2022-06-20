@@ -73,7 +73,7 @@ if ($.isNode()) {
                 console.log('店铺签到完成，请等待...')
                 await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
             }
-            await notify.sendNotify(`连续签到--账号${$.nickName || $.UserName}`, `${$.message}`)
+            await notify.sendNotify(`连续签到`, `账号名称 ${$.nickName || $.UserName}\n${$.message}`)
             console.log('休息一下，别被黑ip了\n可持续发展')
             await sleep(60 * 1000)
         }
@@ -327,33 +327,33 @@ async function dealReturn(type, data) {
                     console.log(`${type} ${data}`)
                 }
                 break;
-                case 'signUp':
-                    if (typeof res == 'object') {
-                        console.log(JSON.stringify(res))
-                        if (res.isOk) {
-                            signResult = res.gift
-                            // console.log(JSON.stringify(signResult))
-                            if (signResult != null && signResult.giftName) {
-                                giftName = signResult.giftName
-                                console.log(`签到成功，获得${giftName}`)
-                                $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
-                                if ($.giftName.indexOf(`京豆`) < 0 || $.giftName.indexOf(`积分`) < 0) {
-                                    $.message += `跳转链接: ${$.activityUrl}\n`
-                                }
-    
-                            } else {
-                                console.log(`签到成功，签了个寂寞...`)
-                                $.message += `${$.shopName} 签到成功，签了个寂寞...，总签到天数 ${$.totalSignNum + 1}\n`
+            case 'signUp':
+                if (typeof res == 'object') {
+                    console.log(JSON.stringify(res))
+                    if (res.isOk) {
+                        signResult = res.gift
+                        // console.log(JSON.stringify(signResult))
+                        if (signResult != null && signResult.giftName) {
+                            giftName = signResult.giftName
+                            console.log(`签到成功，获得${giftName}`)
+                            $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
+                            if ($.giftName.indexOf(`京豆`) < 0 || $.giftName.indexOf(`积分`) < 0) {
+                                $.message += `跳转链接: ${$.activityUrl}\n`
                             }
-    
+
                         } else {
-                            console.log(`签到失败 ${res.msg}`)
-                            $.message += `京东账号${$.UserName} 签到失败，总签到天数 ${$.totalSignNum}\n`
+                            console.log(`签到成功，签了个寂寞...`)
+                            $.message += `${$.shopName} 签到成功，签了个寂寞...，总签到天数 ${$.totalSignNum + 1}\n`
                         }
+
                     } else {
-                        console.log(`${type} ${data}`)
+                        console.log(`签到失败 ${res.msg}`)
+                        $.message += `京东账号${$.UserName} 签到失败：${res.msg}，总签到天数 ${$.totalSignNum}\n`
                     }
-                    break;
+                } else {
+                    console.log(`${type} ${data}`)
+                }
+                break;
             case 'getActMemberInfo':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {

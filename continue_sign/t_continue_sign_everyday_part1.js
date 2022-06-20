@@ -70,7 +70,7 @@ if ($.isNode()) {
                 console.log('店铺签到完成，请等待...')
                 await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
             }
-            await notify.sendNotify(`连续签到--账号 ${$.index} ${$.nickName || $.UserName}`, `${$.message}`)
+            await notify.sendNotify(`连续签到`, `账号名称 ${$.nickName || $.UserName}\n${$.message}`)
             console.log('休息一下，别被黑ip了\n可持续发展')
             await sleep(60 * 1000)
         }
@@ -350,7 +350,7 @@ async function dealReturn(type, data) {
 
                     } else {
                         console.log(`签到失败 ${res.msg}`)
-                        $.message += `京东账号${$.UserName} 签到失败，总签到天数 ${$.totalSignNum}\n`
+                        $.message += `${$.shopName} 签到失败：${res.msg}，总签到天数 ${$.totalSignNum}\n`
                     }
                 } else {
                     console.log(`${type} ${data}`)

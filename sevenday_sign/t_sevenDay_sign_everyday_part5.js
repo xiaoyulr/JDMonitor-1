@@ -76,9 +76,7 @@ if ($.isNode()) {
         }
         console.log('休息一下，别被黑ip了\n可持续发展')
         await sleep(60 * 1000)
-        if ($.message != '' && $.index == 1) {
-            await notify.sendNotify(`7日签到--账号 ${$.nickName || $.UserName}`, `${$.message}`)
-        }
+        await notify.sendNotify(`7日签到`, `账号名称 ${$.nickName || $.UserName}\n${$.message}`)
     }
 })()
     .catch((e) => {
@@ -348,11 +346,11 @@ async function dealReturn(type, data) {
                     if (res.isOk) {
                         signResult = res.gift
                         // console.log(JSON.stringify(signResult))
-                        if (signResult != null && signResult.giftName) {
-                            giftName = signResult.giftName
+                        if (signResult != null && signResult.gift) {
+                            giftName = signResult.gift.giftName
                             console.log(`签到成功，获得${giftName}`)
                             $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
-                            if ($.giftName.indexOf(`京豆`) < 0 || $.giftName.indexOf(`积分`) < 0) {
+                            if ($.giftName.indexOf(`京豆`) < 0 && $.giftName.indexOf(`积分`) < 0) {
                                 $.message += `跳转链接: ${$.activityUrl}\n`
                             }
 
@@ -363,7 +361,7 @@ async function dealReturn(type, data) {
 
                     } else {
                         console.log(`签到失败 ${res.msg}`)
-                        $.message += `京东账号${$.UserName} 签到失败，总签到天数 ${$.totalSignNum}\n`
+                        $.message += `${$.shopName} 签到失败，总签到天数 ${$.totalSignNum}\n`
                     }
                 } else {
                     console.log(`${type} ${data}`)

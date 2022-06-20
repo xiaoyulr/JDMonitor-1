@@ -73,8 +73,10 @@ if ($.isNode()) {
         }
         console.log('休息一下，别被黑ip了\n可持续发展')
         await sleep(60 * 1000)
-        if ($.message != '' && $.index == 1) {
-            await notify.sendNotify(`7日签到--账号${$.nickName || $.UserName}`, `${$.message}`)
+        if ($.message != '') {
+            await notify.sendNotify(`7日签到`, `账号名称 ${$.nickName || $.UserName}\n${$.message}`)
+        }
+        if ($.index == 1) {
             await notify.sendNotify("7日签到", `export T_SEVENDAY_SIGN_IDS=\"${$.exportResult}\"`)
         }
     }
@@ -113,22 +115,14 @@ async function jdmodule() {
 
     await takePostRequest("getShopInfo")
 
-    await takePostRequest("getActMemberInfo");
-
     if ($.isOver === 'y' || $.contiSignDays == 7) {
         console.log(`活动已结束或已签到7天`)
         return
     }
-
-    if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
+    if ($.exportResult.indexOf($.activityId) == -1) {
         $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
     }
-
     if (!$.signFlag) {
-        return
-    }
-    if ($.actMemberStatus == 1 && !$.openCardStatus && $.signFlag) {
-        console.log(`不开卡`)
         return
     }
 
@@ -136,6 +130,7 @@ async function jdmodule() {
         console.log(`已经签到过了~`)
         return
     }
+
     await takePostRequest("signUp")
 }
 
@@ -350,7 +345,7 @@ async function dealReturn(type, data) {
                             giftName = signResult.giftName
                             console.log(`签到成功，获得${giftName}`)
                             $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
-                            if ($.giftName.indexOf(`京豆`) < 0 || $.giftName.indexOf(`积分`) < 0) {
+                            if ($.giftName.indexOf(`京豆`) < 0 && $.giftName.indexOf(`积分`) < 0) {
                                 $.message += `跳转链接: ${$.activityUrl}\n`
                             }
 
@@ -361,7 +356,7 @@ async function dealReturn(type, data) {
 
                     } else {
                         console.log(`签到失败 ${res.msg}`)
-                        $.message += `京东账号${$.UserName} 签到失败，总签到天数 ${$.totalSignNum}\n`
+                        $.message += `${$.shopName} 签到失败：${res.msg}，总签到天数 ${$.totalSignNum}\n`
                     }
                 } else {
                     console.log(`${type} ${data}`)
