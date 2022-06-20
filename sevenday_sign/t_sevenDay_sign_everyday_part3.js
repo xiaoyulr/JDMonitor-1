@@ -1,9 +1,9 @@
 /*
 [task_local]
-# 7日签到每日版
-0 0 * * *  t_sevenDay_sign.js, tag=7日签到每日版, enabled=true
+# 7日签到每日版_part3
+0 3 * * *  t_sevenDay_sign_everyday_part3.js, tag=7日签到每日版_part3, enabled=true
  */
-const $ = new Env('7日签到每日版');
+const $ = new Env('7日签到每日版_part3');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
@@ -44,7 +44,11 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    for (let i = 0; i < cookiesArr.length; i++) {
+    cklen = cookie.length > 9 ? 9 : cookie.length
+    if (cklen <= 6) {
+        return
+    }
+    for (let i = 6; i < cklen; i++) {
         if (cookiesArr[i]) {
             cookie = cookiesArr[i];
             $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
@@ -69,8 +73,7 @@ if ($.isNode()) {
                 await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
             }
         }
-        if ($.index % 2 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-        if ($.index % 2 == 0) await sleep(60 * 1000)
+        await sleep(60 * 1000)
         if ($.message != '' && $.index == 1) {
             await notify.sendNotify("7日签到", `export T_SEVENDAY_SIGN_IDS=\"${$.exportResult}\"`)
         }

@@ -77,24 +77,22 @@ if ($.isNode()) {
                 $.friendUuidId++
                 $.friendUuid = $.friendUuids[$.friendUuidId]
                 $.hasHelpedTimes = 0
-                if ($.friendUuidId > 0) {
-                    $.helpTimes = $.otherHelpTime
-                }
+                $.helpTimes = $.otherHelpTime
                 console.log(`上一个账号已助力完成，接下来都会助力${$.friendUuid}`)
             }
-            if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-            if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
+            if ($.index % 3 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+            if ($.index % 3 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
         }
     }
     console.log(`重新跑前10个号`)
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < cookiesArr.length; i++) {
         if (cookiesArr[i]) {
             cookie = cookiesArr[i];
             await jdmodule(true);
             $.message += `被助力账号${i + 1}本次加购${$.hasAddCartSize}/${$.drawCondition}/${$.totals}件商品\n`
         }
-        if (i + 1 % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-        if (i + 1 % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
+        if (i + 1 % 3 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+        if (i + 1 % 3 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
     }
     let st = timeToTimestamp($.drawTime)
     let temp = `${$.activityId};${st}`
@@ -469,8 +467,8 @@ async function dealReturn(type, data) {
                         if ($.index == 1) {
                             $.headHelpTimes = $.totals - $.jsNum
                             console.log(`车头账号需要助力的次数为${$.headHelpTimes}次`)
-                            $.otherHelpTime = $.drawCondition - $.jsNum <=0 ? $.headHelpTimes : $.drawCondition - $.jsNum
-                            console.log(`其他账号需要助力的次数为${$.otherHelpTime}次`)
+                            $.otherHelpTime = $.drawCondition - $.jsNum <= 0 ? $.headHelpTimes : $.drawCondition - $.jsNum
+                            console.log(`每个账号需要助力的次数为${$.otherHelpTime}次即可达到开奖要求！`)
                             $.friendUuid = $.friendUuids[0]
                             console.log(`接下来都会助力${$.friendUuid}`)
                             $.helpTimes = $.headHelpTimes

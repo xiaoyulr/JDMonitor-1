@@ -1,9 +1,9 @@
 /*
 [task_local]
-# 连续签到每日版
-0 0 * * *  t_countinue_sign_everyday.js, tag=连续签到每日版, enabled=true
+# 连续签到每日版_part1
+0 0 * * *  t_countinue_sign_everyday_part1.js, tag=连续签到每日版_part1, enabled=true
  */
-const $ = new Env('连续签到每日版');
+const $ = new Env('连续签到每日版_part1');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
@@ -44,31 +44,31 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    for (let id of $.activityIds.split("&")) {
-        $.activityUrl = $.prefixUrl + id
-        $.activityId = id
-        console.log(`跳转链接：\n${$.activityUrl}`)
-        $.message = ""
-        for (let i = 0; i < cookiesArr.length; i++) {
-            if (cookiesArr[i]) {
-                cookie = cookiesArr[i];
-                $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
-                $.index = i + 1;
-                $.isLogin = true;
-                $.nickName = '';
-                console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
-                if (!$.isLogin) {
-                    $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
+    cklen = cookie.length > 3 ? 3 : cookie.length
+    for (let i = 0; i < cklen; i++) {
+        if (cookiesArr[i]) {
+            cookie = cookiesArr[i];
+            $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+            $.index = i + 1;
+            $.isLogin = true;
+            $.nickName = '';
+            console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
+            if (!$.isLogin) {
+                $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
 
-                    if ($.isNode()) {
-                        await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
-                    }
-                    continue
+                if ($.isNode()) {
+                    await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
                 }
+                continue
+            }
+            for (let id of $.activityIds.split("&")) {
+                $.activityUrl = $.prefixUrl + id
+                $.activityId = id
+                console.log(`跳转链接：\n${$.activityUrl}`)
+                $.message = ""
                 await jdmodule();
                 console.log('店铺签到完成，请等待...')
                 await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
-
                 if ($.stop) {
                     console.log(`已结束！`)
                     break
