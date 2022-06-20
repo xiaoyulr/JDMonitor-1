@@ -123,7 +123,7 @@ async function jdmodule() {
     if ($.exportResult.indexOf($.activityId) == -1) {
         $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
     }
-    
+
     await takePostRequest("signUp")
 }
 
@@ -332,10 +332,10 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     console.log(JSON.stringify(res))
                     if (res.isOk) {
-                        signResult = res.gift
+                        signResult = res.signResult.gift
                         // console.log(JSON.stringify(signResult))
-                        if (signResult != null && signResult.gift) {
-                            giftName = signResult.gift.giftName
+                        if (signResult != null && signResult.giftName) {
+                            giftName = signResult.giftName
                             console.log(`签到成功，获得${giftName}`)
                             $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
                             if ($.giftName.indexOf(`京豆`) < 0 && $.giftName.indexOf(`积分`) < 0) {
@@ -349,7 +349,7 @@ async function dealReturn(type, data) {
 
                     } else {
                         console.log(`签到失败 ${res.msg}`)
-                        $.message += `${$.shopName} 签到失败，总签到天数 ${$.totalSignNum}\n`
+                        $.message += `${$.shopName} 签到失败：${res.msg}，总签到天数 ${$.totalSignNum}\n`
                     }
                 } else {
                     console.log(`${type} ${data}`)
