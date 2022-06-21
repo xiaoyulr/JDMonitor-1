@@ -76,6 +76,9 @@ if ($.isNode()) {
             await notify.sendNotify(`连续签到`, `账号名称 ${$.nickName || $.UserName}\n${$.message}`)
             console.log('休息一下，别被黑ip了\n可持续发展')
             await sleep(60 * 1000)
+            if ($.exportResult != "") {
+                await notify.sendNotify("连续签到每日变量", `export T_CON_SIGN_IDS=\"${$.exportResult}\"`)
+            }
         }
     }
 })()
@@ -133,10 +136,6 @@ async function jdmodule() {
     if ($.actMemberStatus == 1 && !$.openCardStatus && $.signFlag) {
         console.log(`不开卡`)
         return
-    }
-
-    if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
-        $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
     }
 
     await takePostRequest("signUp")
@@ -337,7 +336,7 @@ async function dealReturn(type, data) {
                             giftName = signResult.giftName
                             console.log(`签到成功，获得${giftName}`)
                             $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
-                            if ($.giftName.indexOf(`京豆`) < 0 || $.giftName.indexOf(`积分`) < 0) {
+                            if ($.giftName.indexOf(`京豆`) < 0 && $.giftName.indexOf(`积分`) < 0) {
                                 $.message += `跳转链接: ${$.activityUrl}\n`
                             }
 
@@ -345,10 +344,18 @@ async function dealReturn(type, data) {
                             console.log(`签到成功，签了个寂寞...`)
                             $.message += `${$.shopName} 签到成功，签了个寂寞...，总签到天数 ${$.totalSignNum + 1}\n`
                         }
-
+                        if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
+                            $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
+                        }
                     } else {
                         console.log(`签到失败 ${res.msg}`)
                         $.message += `京东账号${$.UserName} 签到失败：${res.msg}，总签到天数 ${$.totalSignNum}\n`
+                        if (res.msg.indexOf(`已经结束`) != -1) {
+                            return
+                        }
+                        if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
+                            $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
+                        }
                     }
                 } else {
                     console.log(`${type} ${data}`)

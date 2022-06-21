@@ -288,16 +288,14 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     if (res.isOk && res.isOk === true) {
                         // console.log(JSON.stringify(res))
-                        if ($.index == 1) {
-                            giftConditions = res.giftConditions
-                            for (let giftCondition of giftConditions) {
-                                // console.log(JSON.stringify(giftCondition))
-                                $.dayNum = giftCondition.dayNum
-                                $.giftInfoId.push(giftCondition.giftInfoId)
-                                $.giftName.push(giftCondition.gift == null ? `空气` : giftCondition.gift.giftName)
-                                if (giftCondition.gift != null && giftCondition.gift.giftName.indexOf(`京豆`) != -1) {
-                                    $.signFlag = true
-                                }
+                        giftConditions = res.giftConditions
+                        for (let giftCondition of giftConditions) {
+                            // console.log(JSON.stringify(giftCondition))
+                            $.dayNum = giftCondition.dayNum
+                            $.giftInfoId.push(giftCondition.giftInfoId)
+                            $.giftName.push(giftCondition.gift == null ? `空气` : giftCondition.gift.giftName)
+                            if (giftCondition.gift != null && giftCondition.gift.giftName.indexOf(`京豆`) != -1) {
+                                $.signFlag = true
                             }
                         }
                         $.isOver = res.isOver
@@ -337,19 +335,19 @@ async function dealReturn(type, data) {
                         if (signResult != null && signResult.giftName) {
                             giftName = signResult.giftName
                             console.log(`签到成功，获得${giftName}`)
-                            $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
+                            $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.contiSignDays + 1}\n`
                             if ($.giftName.indexOf(`京豆`) < 0 && $.giftName.indexOf(`积分`) < 0) {
                                 $.message += `跳转链接: ${$.activityUrl}\n`
                             }
 
                         } else {
                             console.log(`签到成功，签了个寂寞...`)
-                            $.message += `${$.shopName} 签到成功，签了个寂寞...，总签到天数 ${$.totalSignNum + 1}\n`
+                            $.message += `${$.shopName} 签到成功，签了个寂寞...，总签到天数 ${$.contiSignDays + 1}\n`
                         }
 
                     } else {
                         console.log(`签到失败 ${res.msg}`)
-                        $.message += `${$.shopName} 签到失败：${res.msg}，总签到天数 ${$.totalSignNum}\n`
+                        $.message += `${$.shopName} 签到失败：${res.msg}，总签到天数 ${$.contiSignDays}\n`
                     }
                 } else {
                     console.log(`${type} ${data}`)

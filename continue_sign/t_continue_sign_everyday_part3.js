@@ -135,10 +135,6 @@ async function jdmodule() {
         return
     }
 
-    if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
-        $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
-    }
-
     await takePostRequest("signUp")
 }
 
@@ -337,7 +333,7 @@ async function dealReturn(type, data) {
                             giftName = signResult.giftName
                             console.log(`签到成功，获得${giftName}`)
                             $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
-                            if ($.giftName.indexOf(`京豆`) < 0 || $.giftName.indexOf(`积分`) < 0) {
+                            if ($.giftName.indexOf(`京豆`) < 0 && $.giftName.indexOf(`积分`) < 0) {
                                 $.message += `跳转链接: ${$.activityUrl}\n`
                             }
 

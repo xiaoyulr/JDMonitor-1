@@ -75,11 +75,6 @@ if ($.isNode()) {
             await sleep(60 * 1000)
         }
     }
-    if ($.isNode()) {
-        if ($.exportResult != "") {
-            await notify.sendNotify("连续签到每日变量", `export T_CON_SIGN_IDS=\"${$.exportResult}\"`)
-        }
-    }
 })()
     .catch((e) => {
         $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
@@ -133,12 +128,6 @@ async function jdmodule() {
     if ($.actMemberStatus == 1 && !$.openCardStatus && $.signFlag) {
         console.log(`不开卡`)
         return
-    }
-
-    if ($.exportResult.indexOf($.activityId) == -1) {
-        console.log(`添加至export队列中`)
-        $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
-        console.log($.exportResult)
     }
 
     await takePostRequest("signUp")
@@ -339,7 +328,7 @@ async function dealReturn(type, data) {
                             giftName = signResult.giftName
                             console.log(`签到成功，获得${giftName}`)
                             $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
-                            if ($.giftName.indexOf(`京豆`) < 0 || $.giftName.indexOf(`积分`) < 0) {
+                            if ($.giftName.indexOf(`京豆`) < 0 && $.giftName.indexOf(`积分`) < 0) {
                                 $.message += `跳转链接: ${$.activityUrl}\n`
                             }
 

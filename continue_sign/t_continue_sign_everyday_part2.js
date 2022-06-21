@@ -135,10 +135,6 @@ async function jdmodule() {
         return
     }
 
-    if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
-        $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
-    }
-
     await takePostRequest("signUp")
 }
 
