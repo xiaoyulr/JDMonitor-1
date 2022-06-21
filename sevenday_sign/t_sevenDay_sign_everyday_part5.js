@@ -123,10 +123,6 @@ async function jdmodule() {
         return
     }
 
-    if ($.exportResult.indexOf($.activityId) == -1) {
-        $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
-    }
-
     await takePostRequest("signUp")
 }
 
@@ -357,7 +353,7 @@ async function dealReturn(type, data) {
                         if (res.msg.indexOf(`已经结束`) != -1) {
                             return
                         }
-                        if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
+                        if ($.exportResult.indexOf($.activityId) == -1) {
                             $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
                         }
                     }

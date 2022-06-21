@@ -344,7 +344,7 @@ async function dealReturn(type, data) {
                             console.log(`签到成功，签了个寂寞...`)
                             $.message += `${$.shopName} 签到成功，签了个寂寞...，总签到天数 ${$.totalSignNum + 1}\n`
                         }
-                        if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
+                        if ( $.exportResult.indexOf($.activityId) == -1) {
                             $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
                         }
                     } else {
@@ -353,7 +353,7 @@ async function dealReturn(type, data) {
                         if (res.msg.indexOf(`已经结束`) != -1) {
                             return
                         }
-                        if ($.exportResult == "" || ($.exportResult != "" && $.exportResult.indexOf($.activityId) == -1)) {
+                        if ( $.exportResult.indexOf($.activityId) == -1) {
                             $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
                         }
                     }
