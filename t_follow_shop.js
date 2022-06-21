@@ -624,7 +624,7 @@ function getPostRequest(url, body, method = "POST") {
         "X-Requested-With": "XMLHttpRequest"
     }
     if (url.indexOf($.domain) > -1) {
-        headers["Referer"] = `${$.activityUrl}&sid=&un_area=13_1007_4909_59742&friendUuid=${$.friendUuid}`
+        headers["Referer"] = `${$.activityUrl}&sid=&un_area=13_1007_4909_59742`
         headers["Origin"] = `https://${$.domain}`
         headers["Cookie"] = `${lz_jdpin_token_cookie && lz_jdpin_token_cookie || ''}${$.Pin && "AUTH_C_USER=" + $.Pin + ";" || ""}${activityCookie}`
         // headers["Cookie"] = `IsvToken=${$.Token};` + `${lz_jdpin_token_cookie && lz_jdpin_token_cookie || ''}${$.Pin && "AUTH_C_USER=" + $.Pin + ";" || ""}${activityCookie}`
