@@ -16,6 +16,7 @@ $.exportActivityIds = ""
 $.friendUuid = ""
 $.friendUuids = []
 $.helpTimes = -1
+$.LZ_AES_PIN = ""
 $.hasHelpedTimes = 0
 $.restartNo = 1
 $.friendUuidId = 0
@@ -635,13 +636,15 @@ function setActivityCookie(resp) {
                 if (name.indexOf('LZ_TOKEN_KEY=') > -1) LZ_TOKEN_KEY = name.replace(/ /g, '') + ';'
                 if (name.indexOf('LZ_TOKEN_VALUE=') > -1) LZ_TOKEN_VALUE = name.replace(/ /g, '') + ';'
                 if (name.indexOf('lz_jdpin_token=') > -1) lz_jdpin_token = '' + name.replace(/ /g, '') + ';'
+                if (name.indexOf('LZ_AES_PIN=') > -1) $.LZ_AES_PIN = '' + name.replace(/ /g, '') + ';'
             }
         }
     }
-    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE}`
+    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && !$.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE}`
+    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && $.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE} ${$.LZ_AES_PIN}`   
     if (lz_jdpin_token) lz_jdpin_token_cookie = lz_jdpin_token
+    // console.log(activityCookie)
 }
-
 function getQueryString(url, name) {
     let reg = new RegExp("(^|[&?])" + name + "=([^&]*)(&|$)");
     let r = url.match(reg);

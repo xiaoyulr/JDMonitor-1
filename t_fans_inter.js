@@ -13,6 +13,8 @@ $.activityId = process.env.T_FANS_INTER_ACTIVITY_ID ? process.env.T_FANS_INTER_A
 $.activityIds = process.env.T_FANS_INTER_ACTIVITY_IDS ? process.env.T_FANS_INTER_ACTIVITY_IDS : ""
 let cookiesArr = [], message = '';
 $.cookie = ''
+$.LZ_AES_PIN = ""
+
 CryptoScripts()
 $.CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;
 $.exportActivityIds = "";
@@ -424,6 +426,33 @@ async function getHtml(_0x4addca) {
         });
     });
 }
+
+function setActivityCookie(resp) {
+    let LZ_TOKEN_KEY = ''
+    let LZ_TOKEN_VALUE = ''
+    let lz_jdpin_token = ''
+    let setcookies = resp && resp['headers'] && (resp['headers']['set-cookie'] || resp['headers']['Set-Cookie'] || '') || ''
+    let setcookie = ''
+    if (setcookies) {
+        if (typeof setcookies != 'object') {
+            setcookie = setcookies.split(',')
+        } else setcookie = setcookies
+        for (let ck of setcookie) {
+            let name = ck.split(";")[0].trim()
+            if (name.split("=")[1]) {
+                // console.log(name.replace(/ /g,''))
+                if (name.indexOf('LZ_TOKEN_KEY=') > -1) LZ_TOKEN_KEY = name.replace(/ /g, '') + ';'
+                if (name.indexOf('LZ_TOKEN_VALUE=') > -1) LZ_TOKEN_VALUE = name.replace(/ /g, '') + ';'
+                if (name.indexOf('lz_jdpin_token=') > -1) lz_jdpin_token = '' + name.replace(/ /g, '') + ';'
+                if (name.indexOf('LZ_AES_PIN=') > -1) $.LZ_AES_PIN = '' + name.replace(/ /g, '') + ';'
+            }
+        }
+    }
+    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && !$.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE}`
+    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && $.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE} ${$.LZ_AES_PIN}`   
+    if (lz_jdpin_token) lz_jdpin_token_cookie = lz_jdpin_token
+    // console.log(activityCookie)
+}
 function dealCK(_0x1ea343, _0x122b40) {
     if (_0x122b40 === undefined) {
         return;
@@ -443,6 +472,11 @@ function dealCK(_0x1ea343, _0x122b40) {
         if (_0x381ba3 && _0x381ba3.indexOf('LZ_TOKEN_VALUE=') > -1) {
             let _0x1f6cc4 = _0x381ba3.split(';') && _0x381ba3.split(';')[0] || '';
             _0x1ea343.LZ_TOKEN_VALUE = _0x1f6cc4.replace('LZ_TOKEN_VALUE=', '');
+        }
+        let aespin = _0x3d9911.filter(c => c.indexOf('LZ_AES_PIN') !== -1)[0];
+        if (aespin && aespin.indexOf('LZ_AES_PIN=') > -1) {
+            let aesvalue = aespin.split(';') && aespin.split(';')[0] || '';
+            _0x1ea343.LZ_AES_PIN = aesvalue.replace('LZ_AES_PIN=', '');
         }
     }
 }
@@ -477,7 +511,14 @@ async function takePostRequest(_0x22084a, _0x4d19d2, _0x4cee5b = 'activityId=' +
             _0x4cee5b = '222';
             break;
     }
-    const _0x2993f8 = { 'X-Requested-With': 'XMLHttpRequest', 'Connection': 'keep-alive', 'Accept-Encoding': 'gzip, deflate, br', 'Content-Type': 'application/x-www-form-urlencoded', 'Origin': 'https://' + _0x22084a.host, 'User-Agent': _0x22084a.UA, 'Cookie': _0x22084a.cookie + ' LZ_TOKEN_KEY=' + _0x22084a.LZ_TOKEN_KEY + '; LZ_TOKEN_VALUE=' + _0x22084a.LZ_TOKEN_VALUE + '; AUTH_C_USER=' + _0x22084a.pin + '; ' + _0x22084a.lz_jdpin_token, 'Host': _0x22084a.host, 'Referer': _0x22084a.thisActivityUrl, 'Accept-Language': 'zh-cn', 'Accept': 'application/json' };
+    let ck = ""
+    if ($.LZ_AES_PIN) {
+        ck = _0x22084a.cookie + ' LZ_TOKEN_KEY=' + _0x22084a.LZ_TOKEN_KEY + '; LZ_TOKEN_VALUE=' + _0x22084a.LZ_TOKEN_VALUE + '; AUTH_C_USER=' + _0x22084a.pin + '; ' + `LZ_AES_PIN=${$.LZ_AES_PIN};` + _0x22084a.lz_jdpin_token
+    }else {
+        ck = _0x22084a.cookie + ' LZ_TOKEN_KEY=' + _0x22084a.LZ_TOKEN_KEY + '; LZ_TOKEN_VALUE=' + _0x22084a.LZ_TOKEN_VALUE + '; AUTH_C_USER=' + _0x22084a.pin + '; ' + _0x22084a.lz_jdpin_token
+    }
+    console.log(ck)
+    const _0x2993f8 = { 'X-Requested-With': 'XMLHttpRequest', 'Connection': 'keep-alive', 'Accept-Encoding': 'gzip, deflate, br', 'Content-Type': 'application/x-www-form-urlencoded', 'Origin': 'https://' + _0x22084a.host, 'User-Agent': _0x22084a.UA, 'Cookie':  ck, 'Host': _0x22084a.host, 'Referer': _0x22084a.thisActivityUrl, 'Accept-Language': 'zh-cn', 'Accept': 'application/json' };
     let _0x1e0fb8 = { 'url': _0x3e5e9, 'method': 'POST', 'headers': _0x2993f8, 'body': _0x4cee5b };
     return new Promise(async _0x4afe88 => {
         _0x22084a.post(_0x1e0fb8, (_0xa06eab, _0x445f4b, _0x1ac3a4) => {

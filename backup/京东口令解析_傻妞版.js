@@ -5,6 +5,7 @@ var jcode = "(" + param(1) + ")";
 
 function main() {
     var ret = call("jd_cmd")(jcode)
+    sendText(JSON.stringify(ret))
     var exports = {}
     if (!ret) {
         return

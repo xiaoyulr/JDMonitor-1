@@ -10,6 +10,7 @@ const RUNCK = $.isNode() ? (process.env.RUNCK ? process.env.RUNCK : `9999`) : `9
 $.activityIds = process.env.T_FANS_INTER_ACTIVITY_IDS ? process.env.T_FANS_INTER_ACTIVITY_IDS : ""
 let cookiesArr = [], message = '';
 $.exportParam = ""
+$.LZ_AES_PIN = ""
 if ($.isNode()) {
 	Object.keys(jdCookieNode).forEach((item) => {
 		cookiesArr.push(jdCookieNode[item])
@@ -406,26 +407,31 @@ async function getHtml(_0x4addca) {
 	});
 }
 function dealCK(_0x1ea343, _0x122b40) {
-	if (_0x122b40 === undefined) {
-		return;
-	}
-	let _0x3d9911 = _0x122b40.headers['set-cookie'] || _0x122b40.headers['Set-Cookie'] || '';
-	if (_0x3d9911) {
-		let _0x2fabb2 = _0x3d9911.filter(_0x942508 => _0x942508.indexOf('lz_jdpin_token') !== -1)[0];
-		if (_0x2fabb2 && (_0x2fabb2.indexOf('lz_jdpin_token=') > -1)) {
-			_0x1ea343.lz_jdpin_token = _0x2fabb2.split(';') && (_0x2fabb2.split(';')[0] + ';') || '';
-		}
-		let _0x23a7e9 = _0x3d9911.filter(_0x41bf1f => _0x41bf1f.indexOf('LZ_TOKEN_KEY') !== -1)[0];
-		if (_0x23a7e9 && (_0x23a7e9.indexOf('LZ_TOKEN_KEY=') > -1)) {
-			let _0x22583b = _0x23a7e9.split(';') && _0x23a7e9.split(';')[0] || '';
-			_0x1ea343.LZ_TOKEN_KEY = _0x22583b.replace('LZ_TOKEN_KEY=', '');
-		}
-		let _0x381ba3 = _0x3d9911.filter(_0x29a259 => _0x29a259.indexOf('LZ_TOKEN_VALUE') !== -1)[0];
-		if (_0x381ba3 && _0x381ba3.indexOf('LZ_TOKEN_VALUE=') > -1) {
-			let _0x1f6cc4 = _0x381ba3.split(';') && _0x381ba3.split(';')[0] || '';
-			_0x1ea343.LZ_TOKEN_VALUE = _0x1f6cc4.replace('LZ_TOKEN_VALUE=', '');
-		}
-	}
+    if (_0x122b40 === undefined) {
+        return;
+    }
+    let _0x3d9911 = _0x122b40.headers['set-cookie'] || _0x122b40.headers['Set-Cookie'] || '';
+    if (_0x3d9911) {
+        let _0x2fabb2 = _0x3d9911.filter(_0x942508 => _0x942508.indexOf('lz_jdpin_token') !== -1)[0];
+        if (_0x2fabb2 && (_0x2fabb2.indexOf('lz_jdpin_token=') > -1)) {
+            _0x1ea343.lz_jdpin_token = _0x2fabb2.split(';') && (_0x2fabb2.split(';')[0] + ';') || '';
+        }
+        let _0x23a7e9 = _0x3d9911.filter(_0x41bf1f => _0x41bf1f.indexOf('LZ_TOKEN_KEY') !== -1)[0];
+        if (_0x23a7e9 && (_0x23a7e9.indexOf('LZ_TOKEN_KEY=') > -1)) {
+            let _0x22583b = _0x23a7e9.split(';') && _0x23a7e9.split(';')[0] || '';
+            _0x1ea343.LZ_TOKEN_KEY = _0x22583b.replace('LZ_TOKEN_KEY=', '');
+        }
+        let _0x381ba3 = _0x3d9911.filter(_0x29a259 => _0x29a259.indexOf('LZ_TOKEN_VALUE') !== -1)[0];
+        if (_0x381ba3 && _0x381ba3.indexOf('LZ_TOKEN_VALUE=') > -1) {
+            let _0x1f6cc4 = _0x381ba3.split(';') && _0x381ba3.split(';')[0] || '';
+            _0x1ea343.LZ_TOKEN_VALUE = _0x1f6cc4.replace('LZ_TOKEN_VALUE=', '');
+        }
+        let aespin = _0x3d9911.filter(c => c.indexOf('LZ_AES_PIN') !== -1)[0];
+        if (aespin && aespin.indexOf('LZ_AES_PIN=') > -1) {
+            let aesvalue = aespin.split(';') && aespin.split(';')[0] || '';
+            _0x1ea343.LZ_AES_PIN = aesvalue.replace('LZ_AES_PIN=', '');
+        }
+    }
 }
 async function takePostRequest(_0x22084a, _0x4d19d2, _0x4cee5b = 'activityId=' + _0x22084a.activityId + '&pin=' + encodeURIComponent(_0x22084a.pin)) {
 	let _0x3e5e9 = 'https://' + _0x22084a.host + '/' + _0x4d19d2;

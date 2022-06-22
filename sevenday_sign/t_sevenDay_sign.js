@@ -8,9 +8,10 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
-$.activityUrl = process.env.T_SEVENDAY_SIGN_URL ? process.env.T_SEVENDAY_SIGN_URL : "";
-$.activityUrls = process.env.T_SEVENDAY_SIGN_URLS ? process.env.T_SEVENDAY_SIGN_URLS : "";
-$.activityId = getQueryString($.activityUrl, 'activityId')
+$.activityId = process.env.T_SEVENDAY_SIGN_ID ? process.env.T_SEVENDAY_SIGN_ID : "";
+$.activityIds = process.env.T_SEVENDAY_SIGN_IDS ? process.env.T_SEVENDAY_SIGN_IDS : "";
+$.prefix = "https://lzkj-isv.isvjcloud.com/sign/sevenDay/signActivity?activityId=";
+$.activityUrl = $.prefix + $.activityId
 $.Token = "";
 $.openCard = false
 $.exportActivityIds = ""
@@ -22,6 +23,7 @@ $.hasHelpedTimes = 0
 $.restartNo = 1
 $.friendUuidId = 0
 $.signFlag = false
+$.LZ_AES_PIN = ""
 $.giftInfoId = []
 $.giftName = []
 CryptoScripts()
@@ -44,11 +46,10 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    if ($.activityUrls.indexOf($.activityId) != -1) {
+    if ($.activityIds.indexOf($.activityId) != -1) {
         console.log(`签到ID已存在，退出`)
     } else {
         console.log(`跳转链接：\n${$.activityUrl}`)
-        result = $.activityUrls == null || $.activityUrls == "" ? $.activityUrl : $.activityUrls + `&${$.activityUrl}`
         for (let i = 0; i < cookiesArr.length; i++) {
             if (cookiesArr[i]) {
                 cookie = cookiesArr[i];
@@ -70,6 +71,9 @@ if ($.isNode()) {
                     console.log(`签到不给京豆，不跑！`)
                     break
                 }
+                if ($.index == 1) {
+                    result = $.activityIds == null || $.activityIds == "" ? $.activityId : $.activityIds + `&${$.activityId}`
+                }
                 if ($.index % 2 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
                 if ($.index % 2 == 0) await $.wait(parseInt(Math.random() * 50000 + 2000, 10))
             }
@@ -78,8 +82,8 @@ if ($.isNode()) {
     if ($.isNode()) {
         if ($.message != '') {
             await notify.sendNotify("7日签到", `${$.message}\n跳转链接\n${$.activityUrl}`)
-            await notify.sendNotify("7日签到变量", `export T_SEVENDAY_SIGN_IDS=\"${result}\"`)
         }
+        await notify.sendNotify("7日签到变量", `export T_SEVENDAY_SIGN_IDS=\"${result}\"`)
     }
 
 })()
@@ -98,17 +102,13 @@ async function jdmodule() {
     $.UA = `jdapp;iPhone;10.2.2;13.1.2;${uuid()};M/5.0;network/wifi;ADID/;model/iPhone8,1;addressid/2308460611;appBuild/167863;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS 13_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
 
     await getCK();
-    console.log("lzToken=" + activityCookie)
     await takePostRequest("isvObfuscator");
-    console.log('Token:' + $.Token)
     if ($.Token == '') {
         $.putMsg(`获取Token失败`);
         return
     }
 
     await takePostRequest("getSimpleActInfoVo");
-
-    await takePostRequest("getOpenStatus");
 
     await takePostRequest("getMyPing");
 
@@ -118,19 +118,11 @@ async function jdmodule() {
 
     await takePostRequest("getShopInfo")
 
-    if (!$.signFlag) {
-        $.stop = true
-        return
-    }
-    if ($.actMemberStatus == 1 && !$.openCardStatus && $.signFlag) {
-        console.log(`不开卡`)
+    if ($.isOver === 'y' || $.contiSignDays == 7) {
+        console.log(`活动已结束或已签到7天`)
         return
     }
 
-    if ($.isSign === 'y') {
-        console.log(`已经签到过了~`)
-        return
-    }
     await takePostRequest("signUp")
 }
 
@@ -207,6 +199,7 @@ async function takePostRequest(type) {
     return new Promise(async resolve => {
         $.post(myRequest, (err, resp, data) => {
             try {
+                console.log(type + "--->>> cookie")
                 setActivityCookie(resp)
                 if (err) {
                     if (resp && typeof resp.statusCode != 'undefined') {
@@ -625,11 +618,14 @@ function setActivityCookie(resp) {
                 if (name.indexOf('LZ_TOKEN_KEY=') > -1) LZ_TOKEN_KEY = name.replace(/ /g, '') + ';'
                 if (name.indexOf('LZ_TOKEN_VALUE=') > -1) LZ_TOKEN_VALUE = name.replace(/ /g, '') + ';'
                 if (name.indexOf('lz_jdpin_token=') > -1) lz_jdpin_token = '' + name.replace(/ /g, '') + ';'
+                if (name.indexOf('LZ_AES_PIN=') > -1) $.LZ_AES_PIN = '' + name.replace(/ /g, '') + ';'
             }
         }
     }
-    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE}`
+    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && !$.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE}`
+    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && $.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE} ${$.LZ_AES_PIN}`   
     if (lz_jdpin_token) lz_jdpin_token_cookie = lz_jdpin_token
+    console.log(activityCookie)
 }
 
 function getQueryString(url, name) {

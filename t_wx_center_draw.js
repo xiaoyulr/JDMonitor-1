@@ -12,6 +12,8 @@ $.activityIds = process.env.M_WX_CENTER_DRAW_ACTIVITY_IDS ? process.env.M_WX_CEN
 $.activityId = process.env.jd_drawCenter_activityId ? process.env.jd_drawCenter_activityId : "";
 $.activityUrl = `https://lzkj-isv.isvjcloud.com/drawCenter/activity?activityId=${$.activityId}`;
 $.Token = "";
+$.LZ_AES_PIN = ""
+
 $.stop = false
 $.message = ""
 //IOS等用户直接用NobyDa的jd cookie
@@ -694,11 +696,14 @@ function setActivityCookie(resp) {
                 if (name.indexOf('LZ_TOKEN_KEY=') > -1) LZ_TOKEN_KEY = name.replace(/ /g, '') + ';'
                 if (name.indexOf('LZ_TOKEN_VALUE=') > -1) LZ_TOKEN_VALUE = name.replace(/ /g, '') + ';'
                 if (name.indexOf('lz_jdpin_token=') > -1) lz_jdpin_token = '' + name.replace(/ /g, '') + ';'
+                if (name.indexOf('LZ_AES_PIN=') > -1) $.LZ_AES_PIN = '' + name.replace(/ /g, '') + ';'
             }
         }
     }
-    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE}`
+    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && !$.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE}`
+    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && $.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE} ${$.LZ_AES_PIN}`   
     if (lz_jdpin_token) lz_jdpin_token_cookie = lz_jdpin_token
+    // console.log(activityCookie)
 }
 
 async function getToken() {

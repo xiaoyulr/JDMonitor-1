@@ -110,9 +110,9 @@ if ($.isNode()) {
             $.activityShopId = activityShopId
             // $.activityUrl = `https://lzkjdz-isv.isvjcloud.com/wxShareActivity/activity/${$.authorNum}?activityId=${$.activityId}&friendUuid=${encodeURIComponent($.authorCode)}&shareuserid4minipg=null&shopid=${$.activityShopId}`
             $.activityUrl = `https://lzkjdz-isv.isvjcloud.com/wxShareActivity/activity/${$.activityId}?activityId=${$.activityId}&adsource=tg_xuanFuTuBiao`
-            for(let i in authorCodeList){
+            for (let i in authorCodeList) {
                 $.authorCode = authorCodeList[i]
-                console.log('去助力: '+$.authorCode)
+                console.log('去助力: ' + $.authorCode)
 
                 await share();
                 if ($.errorMessage === '活动太火爆，还是去买买买吧') {
@@ -180,7 +180,7 @@ async function getPrize() {
         await getMyPing();
         if ($.secretPin) {
             await task('activityContent', `activityId=${$.activityId}&pin=${encodeURIComponent($.secretPin)}&friendUuid=${encodeURIComponent($.authorCode)}`)
-            for(let d in $.drawContentVOs){
+            for (let d in $.drawContentVOs) {
                 await task('getPrize', `activityId=${$.activityId}&pin=${encodeURIComponent($.secretPin)}&drawInfoId=${$.drawContentVOs[d]['drawInfoId']}`)
             }
         } else {
@@ -209,8 +209,8 @@ function task(function_id, body, isCommon = 0) {
                                     break;
                                 case 'activityContent':
                                     $.activityContent = data.data;
-                                    if(isGetAuthorCodeList){
-                                        console.log('将助力码 '+data.data.myUuid+' 加入助力数组');
+                                    if (isGetAuthorCodeList) {
+                                        console.log('将助力码 ' + data.data.myUuid + ' 加入助力数组');
                                         authorCodeList.push(data.data.myUuid);
                                     }
                                     console.log(data.data.myUuid);
@@ -278,44 +278,40 @@ function getMyPing() {
                 if (err) {
                     $.log(err)
                 } else {
-                    if (resp['headers']['set-cookie']) {
+                    let setcookies = resp && resp['headers'] && (resp['headers']['set-cookie'] || resp['headers']['Set-Cookie'] || '') || ''
+                    if (setcookies) {
                         cookie = `${originCookie}`
-                        if ($.isNode()) {
-                            for (let sk of resp['headers']['set-cookie']) {
-                                cookie = `${cookie}${sk.split(";")[0]};`
-                            }
-                        } else {
-                            for (let ck of resp['headers']['Set-Cookie'].split(',')) {
-                                cookie = `${cookie}${ck.split(";")[0]};`
+                        let setcookie = ""
+                        if (typeof setcookies != 'object') {
+                            setcookie = setcookies.split(',')
+                        } else setcookie = setcookies
+                        for (let ck of setcookie) {
+                            let name = ck.split(";")[0].trim()
+                            if (name.split("=")[1]) {
+                                // console.log(name.replace(/ /g,''))
+                                if (name.indexOf('LZ_TOKEN_KEY=') > -1) LZ_TOKEN_KEY = name.replace(/ /g, '') + ';'
+                                if (name.indexOf('LZ_TOKEN_VALUE=') > -1) LZ_TOKEN_VALUE = name.replace(/ /g, '') + ';'
+                                if (name.indexOf('lz_jdpin_token=') > -1) lz_jdpin_token = '' + name.replace(/ /g, '') + ';'
+                                if (name.indexOf('LZ_AES_PIN=') > -1) $.LZ_AES_PIN = '' + name.replace(/ /g, '') + ';'
                             }
                         }
                     }
-                    if (resp['headers']['Set-Cookie']) {
-                        cookie = `${originCookie}`
-                        if ($.isNode()) {
-                            for (let sk of resp['headers']['set-cookie']) {
-                                cookie = `${cookie}${sk.split(";")[0]};`
-                            }
-                        } else {
-                            for (let ck of resp['headers']['Set-Cookie'].split(',')) {
-                                cookie = `${cookie}${ck.split(";")[0]};`
-                            }
-                        }
-                    }
-                    if (data) {
-                        data = JSON.parse(data)
-                        if (data.result) {
-                            $.log(`你好：${data.data.nickname}`)
-                            $.pin = data.data.nickname;
-                            $.secretPin = data.data.secretPin;
-                            cookie = `${cookie};AUTH_C_USER=${data.data.secretPin}`
-                        } else {
-                            $.errorMessage = data.errorMessage
-                            $.log($.errorMessage)
-                        }
+                    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && !$.LZ_AES_PIN) cookie = `${cookie}${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE}`
+                    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && $.LZ_AES_PIN) cookie = `${cookie}${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE} ${$.LZ_AES_PIN}`
+                }
+                if (data) {
+                    data = JSON.parse(data)
+                    if (data.result) {
+                        $.log(`你好：${data.data.nickname}`)
+                        $.pin = data.data.nickname;
+                        $.secretPin = data.data.secretPin;
+                        cookie = `${cookie};AUTH_C_USER=${data.data.secretPin}`
                     } else {
-                        $.log("京东返回了空数据")
+                        $.errorMessage = data.errorMessage
+                        $.log($.errorMessage)
                     }
+                } else {
+                    $.log("京东返回了空数据")
                 }
             } catch (error) {
                 $.log(error)
@@ -328,35 +324,32 @@ function getMyPing() {
 }
 function getFirstLZCK() {
     return new Promise(resolve => {
-        $.get({ url: $.activityUrl ,headers:{"user-agent":$.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1")}}, (err, resp, data) => {
+        $.get({ url: $.activityUrl, headers: { "user-agent": $.isNode() ? (process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : (require('./USER_AGENTS').USER_AGENT)) : ($.getdata('JDUA') ? $.getdata('JDUA') : "jdapp;iPhone;9.4.4;14.3;network/4g;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1") } }, (err, resp, data) => {
             try {
                 if (err) {
                     console.log(err)
                 } else {
-                    if (resp['headers']['set-cookie']) {
+                    let setcookies = resp && resp['headers'] && (resp['headers']['set-cookie'] || resp['headers']['Set-Cookie'] || '') || ''
+                    if (setcookies) {
                         cookie = `${originCookie}`
-                        if ($.isNode()) {
-                            for (let sk of resp['headers']['set-cookie']) {
-                                cookie = `${cookie}${sk.split(";")[0]};`
-                            }
-                        } else {
-                            for (let ck of resp['headers']['Set-Cookie'].split(',')) {
-                                cookie = `${cookie}${ck.split(";")[0]};`
+                        let setcookie = ""
+                        if (typeof setcookies != 'object') {
+                            setcookie = setcookies.split(',')
+                        } else setcookie = setcookies
+                        for (let ck of setcookie) {
+                            let name = ck.split(";")[0].trim()
+                            if (name.split("=")[1]) {
+                                // console.log(name.replace(/ /g,''))
+                                if (name.indexOf('LZ_TOKEN_KEY=') > -1) LZ_TOKEN_KEY = name.replace(/ /g, '') + ';'
+                                if (name.indexOf('LZ_TOKEN_VALUE=') > -1) LZ_TOKEN_VALUE = name.replace(/ /g, '') + ';'
+                                if (name.indexOf('lz_jdpin_token=') > -1) lz_jdpin_token = '' + name.replace(/ /g, '') + ';'
+                                if (name.indexOf('LZ_AES_PIN=') > -1) $.LZ_AES_PIN = '' + name.replace(/ /g, '') + ';'
                             }
                         }
                     }
-                    if (resp['headers']['Set-Cookie']) {
-                        cookie = `${originCookie}`
-                        if ($.isNode()) {
-                            for (let sk of resp['headers']['set-cookie']) {
-                                cookie = `${cookie}${sk.split(";")[0]};`
-                            }
-                        } else {
-                            for (let ck of resp['headers']['Set-Cookie'].split(',')) {
-                                cookie = `${cookie}${ck.split(";")[0]};`
-                            }
-                        }
-                    }
+                    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && !$.LZ_AES_PIN) cookie = `${cookie}${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE}`
+                    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && $.LZ_AES_PIN) cookie = `${cookie}${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE} ${$.LZ_AES_PIN}`
+
                 }
             } catch (error) {
                 console.log(error)
