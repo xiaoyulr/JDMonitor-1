@@ -1,7 +1,7 @@
 /*
 [task_local]
-# 拆福袋
-7 7 7 7 7  t_wx_unpacking.js, tag=拆福袋, enabled=true
+# 加购有礼
+7 7 7 7 7  m_jd_wx_addCart.js, tag=加购有礼, enabled=true
  */
 const $ = new Env('加购有礼');
 const notify = $.isNode() ? require('./sendNotify') : '';
@@ -117,17 +117,17 @@ async function jdmodule() {
     //         return
     //     }
     // }
-
+    // $.log('content', JSON.stringify($.content));
     $.needCollectionSize = $.content.needCollectionSize;
     $.hasCollectionSize = $.content.hasCollectionSize;
     $.oneKeyAddCart = $.content.oneKeyAddCart * 1 === 1;
     if ($.hasCollectionSize >= $.needCollectionSize) {
-        $.putMsg('已经加购过了')
+        $.message += `京东账号${$.UserName}已经加购过了`
         return
     }
     //$.log(`needCollectionSize:${needCollectionSize} needFollow:${needFollow}`, );
     $.log('drawInfo', JSON.stringify($.content.drawInfo));
-    $.log('products', JSON.stringify($.content.cpvos))
+    // $.log('products', JSON.stringify($.content.cpvos))
     $.productIds = [];
     for (let cpvo of $.content.cpvos) {
 
@@ -135,12 +135,12 @@ async function jdmodule() {
             $.productIds.push(cpvo.skuId)
             continue
         }
-        try {
-            $.cpvo = cpvo
-            $.log('products', JSON.stringify($.cpvo.skuId))
-            await takePostRequest('addCart')
-            await $.wait(1500, 1800)
-        } catch (e) {
+        $.cpvo = cpvo
+        // $.log('products', JSON.stringify($.cpvo.skuId))
+        await takePostRequest('addCart')
+        await $.wait(1500, 1800)
+        if($.hasAddCartSize>=$.needCollectionSize) {
+            break
         }
     }
     if ($.oneKeyAddCart) {
@@ -204,7 +204,7 @@ async function takePostRequest(type) {
             break;
         case 'addCart':
             url = `https://${$.domain}/wxCollectionActivity/addCart`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&productId=${$.cpvos.skuId}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&productId=${$.cpvo.skuId}`
             break;
         case 'oneKeyAddCart':
             url = `https://${$.domain}/wxCollectionActivity/oneKeyAddCart`;
@@ -294,7 +294,7 @@ async function takePostRequest(type) {
                     console.log(`${$.toStr(err, err)}`)
                     console.log(`${type} API请求失败，请检查网路重试`)
                 } else {
-                    console.log(`${type}----->${data}`);
+                    // console.log(`${type}----->${data}`);
                     dealReturn(type, data);
                 }
             } catch (e) {
@@ -465,8 +465,10 @@ async function dealReturn(type, data) {
             case 'toShop':
             case 'addCart':
                 if (typeof res == 'object') {
+                    console.log(JSON.stringify(res))
                     if (res.result && res.result === true) {
                         if (res.data.hasAddCartSize >= $.needCollectionSize) {
+                            $.hasAddCartSize = res.data.hasAddCartSize
                             $.log(`加购完成，本次加购${res.data.hasAddCartSize}个商品`)
                             break;
                         }
@@ -498,59 +500,6 @@ async function dealReturn(type, data) {
                         console.log(`${res.errorMessage}`);
                         $.message += `京东账号${$.UserName}  ${res.errorMessage}\n`
                     }
-                }
-                break;
-                break;
-            case 'browseGoods':
-            case '抽奖':
-                if (typeof res == 'object') {
-                    if (res.result && res.result === true) {
-                        if (typeof res.data == 'object') {
-                            let msg = ''
-                            let title = '抽奖'
-                            if (res.data.addBeanNum) {
-                                msg = `${res.data.addBeanNum}京豆`
-                            }
-                            if (res.data.addPoint) {
-                                msg += ` ${res.data.addPoint}游戏机会`
-                            }
-                            if (type == 'followShop') {
-                                title = '关注'
-                                if (res.data.beanNumMember && res.data.assistSendStatus) {
-                                    msg += ` 额外获得:${res.data.beanNumMember}京豆`
-                                }
-                            } else if (type == 'addSku' || type == 'addCart') {
-                                title = '加购'
-                            } else if (type == 'viewVideo') {
-                                title = '热门文章'
-                            } else if (type == 'toShop') {
-                                title = '浏览店铺'
-                            } else if (type == 'visitSku' || type == 'browseGoods') {
-                                title = '浏览商品'
-                            } else if (type == 'sign') {
-                                title = '签到'
-                            } else {
-                                let drawData = typeof res.data.drawOk === 'object' && res.data.drawOk || res.data
-                                msg = drawData.drawOk == true && drawData.name || ''
-                            }
-                            if (title == "抽奖" && msg && msg.indexOf('京豆') == -1) {
-                                if ($.isNode()) await notify.sendNotify(`${$.name}`, `【京东账号${$.index}】${$.nickName || $.UserName}\n${title}成功,获得 ${msg}\n活动地址: https://3.cn/-106MEjSh`);
-                            }
-                            if (!msg) {
-                                msg = '空气💨'
-                            }
-                            console.log(`${title}获得:${msg || data}`)
-                        } else {
-                            console.log(`${type} ${data}`)
-                        }
-                    } else if (res.errorMessage) {
-                        $.runFalag = false;
-                        console.log(`${type} ${res.errorMessage || ''}`)
-                    } else {
-                        console.log(`${type} ${data}`)
-                    }
-                } else {
-                    console.log(`${type} ${data}`)
                 }
                 break;
             case 'getDrawRecordHasCoupon':
