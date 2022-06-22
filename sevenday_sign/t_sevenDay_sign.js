@@ -67,7 +67,7 @@ if ($.isNode()) {
                     continue
                 }
                 await jdmodule();
-                if ($.stop) {
+                if (!$.signFlag) {
                     console.log(`签到不给京豆，不跑！`)
                     break
                 }
@@ -295,7 +295,9 @@ async function dealReturn(type, data) {
                                 $.dayNum = giftCondition.dayNum
                                 $.giftInfoId.push(giftCondition.giftInfoId)
                                 $.giftName.push(giftCondition.gift == null ? `空气` : giftCondition.gift.giftName)
-                                if (giftCondition.gift != null && giftCondition.gift.giftName.indexOf(`京豆`) != -1) {
+                                if (giftCondition.gift != null && ((giftCondition.gift.giftType == 9 || giftCondition.gift.giftType == 1 || giftCondition.gift.giftName.indexOf('积分') != -1 || giftCondition.gift.giftName.indexOf("优惠券") != -1))) {
+                                    $.signFlag = false
+                                } else {
                                     $.signFlag = true
                                 }
                             }
@@ -623,7 +625,7 @@ function setActivityCookie(resp) {
         }
     }
     if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && !$.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE}`
-    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && $.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE} ${$.LZ_AES_PIN}`   
+    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && $.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE} ${$.LZ_AES_PIN}`
     if (lz_jdpin_token) lz_jdpin_token_cookie = lz_jdpin_token
     console.log(activityCookie)
 }
