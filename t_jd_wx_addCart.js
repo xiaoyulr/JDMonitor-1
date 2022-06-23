@@ -103,7 +103,12 @@ async function jdmodule() {
 
     await takePostRequest("getMyPing");
 
-    await takePostRequest("accessLogWithAD")
+    if ($.domain.indexOf('cjhy') != -1) {
+        await takePostRequest("accessLog")
+    } else {
+        await takePostRequest("accessLogWithAD")
+    }
+
 
     // await takePostRequest("getUserInfo")
 
@@ -122,6 +127,7 @@ async function jdmodule() {
     $.hasCollectionSize = $.content.hasCollectionSize;
     $.oneKeyAddCart = $.content.oneKeyAddCart * 1 === 1;
     if ($.hasCollectionSize >= $.needCollectionSize) {
+        console.log(`已经加购过了`)
         $.message += `京东账号${$.UserName}已经加购过了`
         return
     }
@@ -139,9 +145,9 @@ async function jdmodule() {
         // $.log('products', JSON.stringify($.cpvo.skuId))
         await takePostRequest('addCart')
         await $.wait(1500, 1800)
-        console.log("需要加购"+$.needCollectionSize)
-        console.log("已加购"+$.hasAddCartSize)
-        if($.hasAddCartSize>=$.needCollectionSize) {
+        console.log("需要加购" + $.needCollectionSize)
+        console.log("已加购" + $.hasAddCartSize)
+        if ($.hasAddCartSize >= $.needCollectionSize) {
             break
         }
     }
@@ -191,34 +197,35 @@ async function takePostRequest(type) {
             url = `https://${$.domain}/customer/getMyPing`;
             body = `userId=${$.venderId}&token=${$.Token}&fromType=APP`;
             break;
+        case 'accessLog':
+            url = `https://${$.domain}/common/accessLog`;
+            let pageurl = `${$.activityUrl}`
+            body = `venderId=${$.venderId}&code=6&pin=${encodeURIComponent(encodeURIComponent($.Pin))}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
+            break;
         case 'accessLogWithAD':
             url = `https://${$.domain}/common/accessLogWithAD`;
-            let pageurl = `${$.activityUrl}&friendUuid=${$.friendUuid}`
-            body = `venderId=${$.venderId}&code=3&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
+            let pageurl1 = `${$.activityUrl}`
+            body = `venderId=${$.venderId}&code=3&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl1)}&subType=app&adSource=`
             break;
         case 'getUserInfo':
             url = `https://${$.domain}/wxActionCommon/getUserInfo`;
-            body = `pin=${encodeURIComponent($.Pin)}`;
+            body = `pin=${encodeURIComponent(encodeURIComponent($.Pin))}`;
             break;
         case 'activityContent':
             url = `https://${$.domain}/wxCollectionActivity/activityContent`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}`
             break;
         case 'addCart':
             url = `https://${$.domain}/wxCollectionActivity/addCart`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&productId=${$.cpvo.skuId}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}&productId=${$.cpvo.skuId}`
             break;
         case 'oneKeyAddCart':
             url = `https://${$.domain}/wxCollectionActivity/oneKeyAddCart`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&productIds=${encodeURIComponent(JSON.stringify($.productIds))}`
-            break;
-        case 'unPacking':
-            url = `https://${$.domain}/wxUnPackingActivity/unPacking`;
-            body = `activityId=${$.activityId}&mySelfId=${$.uuid}&friendUuid=${$.friendUuid}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}&productIds=${encodeURIComponent(JSON.stringify($.productIds))}`
             break;
         case 'getPrize':
             url = `https://${$.domain}/wxCollectionActivity/getPrize`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}`
             break;
         case 'getActMemberInfo':
             url = `https://${$.domain}/wxCommonInfo/getActMemberInfo`;
@@ -355,7 +362,9 @@ async function dealReturn(type, data) {
             case 'getMyPing':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
-                        console.log("MyPin" + res.data.secretPin)
+                        console.log("MyPin-->" + res.data.secretPin)
+                        // console.log("一层加密-->" + encodeURIComponent(res.data.secretPin))
+                        // console.log("两层加密-->" + encodeURIComponent(encodeURIComponent(res.data.secretPin)))
                         if (res.data && typeof res.data.secretPin != 'undefined') $.Pin = res.data.secretPin
                         if (res.data && typeof res.data.nickname != 'undefined') $.nickname = res.data.nickname
                     } else if (res.errorMessage) {
@@ -469,9 +478,9 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     console.log(JSON.stringify(res))
                     if (res.result && res.result === true) {
-                    $.hasAddCartSize = res.data.hasAddCartSize
+                        $.hasAddCartSize = res.data.hasAddCartSize
                         if (res.data.hasAddCartSize >= $.needCollectionSize) {
-                            
+
                             $.log(`加购完成，本次加购${res.data.hasAddCartSize}个商品`)
                             break;
                         }
@@ -496,6 +505,7 @@ async function dealReturn(type, data) {
                 break;
             case 'getPrize':
                 if (typeof res == 'object') {
+                    console.log(JSON.stringify(res))
                     if (res.result && res.data.drawOk) {
                         console.log(`获得 ${res.data.name}`);
                         $.message += `京东账号${$.UserName} 获得 ${res.data.name}\n`
@@ -652,7 +662,7 @@ function getPostRequest(url, body, method = "POST") {
         // headers["Cookie"] = `IsvToken=${$.Token};` + `${lz_jdpin_token_cookie && lz_jdpin_token_cookie || ''}${$.Pin && "AUTH_C_USER=" + $.Pin + ";" || ""}${activityCookie}`
     }
     // console.log(headers)
-    // console.log(headers.Cookie)
+    // console.log(`cookie---->>>>` + headers.Cookie)
     return { url: url, method: method, headers: headers, body: body, timeout: 30000 };
 }
 

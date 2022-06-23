@@ -111,7 +111,11 @@ async function jdmodule() {
 
     await takePostRequest("getMyPing");
 
-    await takePostRequest("accessLogWithAD")
+    if ($.domain.indexOf('cjhy') != -1) {
+        await takePostRequest("accessLog")
+    } else {
+        await takePostRequest("accessLogWithAD")
+    }
 
     // await takePostRequest("getUserInfo")
     if ($.domain.indexOf('cjhy') != -1) {
@@ -196,24 +200,24 @@ async function takePostRequest(type) {
             break;
         case 'getUserInfo':
             url = `https://${$.domain}/wxActionCommon/getUserInfo`;
-            body = `pin=${encodeURIComponent($.Pin)}`;
+            body = `pin=${encodeURIComponent(encodeURIComponent($.Pin))}`;
             break;
         case 'activityContent':
             url = `https://${$.domain}/wxDrawActivity/activityContent`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}`
             break;
 
         case 'cjactivityContent':
             url = `https://${$.domain}/wxDrawActivity/activityContent`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}`
             break;
         case 'addCart':
             url = `https://${$.domain}/wxCollectionActivity/addCart`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&productId=${$.cpvo.skuId}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}&productId=${$.cpvo.skuId}`
             break;
         case 'oneKeyAddCart':
             url = `https://${$.domain}/wxCollectionActivity/oneKeyAddCart`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&productIds=${encodeURIComponent(JSON.stringify($.productIds))}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}&productIds=${encodeURIComponent(JSON.stringify($.productIds))}`
             break;
         case 'unPacking':
             url = `https://${$.domain}/wxUnPackingActivity/unPacking`;
@@ -221,33 +225,33 @@ async function takePostRequest(type) {
             break;
         case 'getPrize':
             url = `https://${$.domain}/wxCollectionActivity/getPrize`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}`
             break;
         case 'getActMemberInfo':
             url = `https://${$.domain}/wxCommonInfo/getActMemberInfo`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&venderId=${$.venderId}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}&venderId=${$.venderId}`
             break;
         case 'info':
             url = `https://${$.domain}/drawCenter/myInfo`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}`
             break;
         case 'start':
             url = `https://${domain}/wxDrawActivity/start`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}`
             break;
         case 'followShop':
             url = `https://${$.domain}/wxActionCommon/followShop`;
             // url = `${domain}/dingzhi/dz/openCard/saveTask`;
-            body = `activityId=${$.activityId}&buyerNick=${encodeURIComponent($.Pin)}&userId=${$.venderId}&activityType=${$.activityType}`
+            body = `activityId=${$.activityId}&buyerNick=${encodeURIComponent(encodeURIComponent($.Pin))}&userId=${$.venderId}&activityType=${$.activityType}`
             break;
         case 'sign':
         case 'quickAddSku':
             url = `https://${$.domain}/wxCartKoi/cartkoi/quickAddCart`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&productIds=${encodeURIComponent(JSON.stringify($.productIds))}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}&productIds=${encodeURIComponent(JSON.stringify($.productIds))}`
             break;
         case 'browseGoods':
             url = `${domain}/dingzhi/opencard/${type}`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}`
             if (type == 'browseGoods') body += `&value=${$.visitSkuValue}`
             break;
         case '邀请':
@@ -257,26 +261,26 @@ async function takePostRequest(type) {
             } else {
                 url = `${domain}/dingzhi/linkgame/assist/status`;
             }
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&shareUuid=${$.shareUuid}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}&shareUuid=${$.shareUuid}`
             break;
         case 'viewVideo':
         case 'visitSku':
         case 'toShop':
         case 'addSku':
             url = `https://${$.domain}/drawCenter/doTask`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&taskId=${$.task.taskId}&param=${$.pro.skuId}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}&taskId=${$.task.taskId}&param=${$.pro.skuId}`
             break;
         case 'getDrawRecordHasCoupon':
             url = `${domain}/dingzhi/linkgame/draw/record`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&actorUuid=${$.actorUuid}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}&actorUuid=${$.actorUuid}`
             break;
         case 'getShareRecord':
             url = `${domain}/dingzhi/linkgame/help/list`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}`
             break;
         case '抽奖':
             url = `https://${$.domain}/drawCenter/draw/luckyDraw`;;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}`
             break;
         default:
             console.log(`错误${type}`);
