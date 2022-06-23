@@ -64,11 +64,11 @@ if ($.isNode()) {
             if ($.index % 3 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
         }
     }
-    if ($.isNode()) {
-        if ($.message != '') {
-            await notify.sendNotify("加购有礼", `${$.message}\n跳转链接\n${$.activityUrl}`)
-        }
+
+    if ($.message != '') {
+        await notify.sendNotify("幸运抽奖", `${$.message}\n跳转链接\n${$.activityUrl}`)
     }
+
 })()
     .catch((e) => {
         $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
@@ -86,6 +86,8 @@ function showMsg() {
 
 
 async function jdmodule() {
+
+    $.message += `\n京东账号${$.index} ${$.UserName} `
     $.domain = $.activityUrl.match(/https?:\/\/([^/]+)/) && $.activityUrl.match(
         /https?:\/\/([^/]+)/)[1] || ''
     $.UA = `jdapp;iPhone;10.2.2;13.1.2;${uuid()};M/5.0;network/wifi;ADID/;model/iPhone8,1;addressid/2308460611;appBuild/167863;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS 13_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
@@ -101,13 +103,22 @@ async function jdmodule() {
 
     await takePostRequest("getSimpleActInfoVo");
 
+    await takePostRequest("getOpenStatus")
+
+    if ($.needOpenCard == 1) {
+        console.log(`需要开卡`)
+    }
+
     await takePostRequest("getMyPing");
 
     await takePostRequest("accessLogWithAD")
 
     // await takePostRequest("getUserInfo")
-
-    await takePostRequest("activityContent")
+    if ($.domain.indexOf('cjhy') != -1) {
+        await takePostRequest("cjactivityContent")
+    } else {
+        await takePostRequest("activityContent")
+    }
 
     console.log(
         `抽奖次数 ${$.canDrawTimes} ${$.drawConsume > 0 && $.drawConsume + "积分抽奖一次"
@@ -170,6 +181,10 @@ async function takePostRequest(type) {
             url = `https://${$.domain}/customer/getSimpleActInfoVo`;
             body = `activityId=${$.activityId}`;
             break;
+        case 'getOpenStatus':
+            url = `https://${$.domain}/assembleConfig/getOpenStatus`;
+            body = `activityId=${$.activityId}`;
+            break;
         case 'getMyPing':
             url = `https://${$.domain}/customer/getMyPing`;
             body = `userId=${$.venderId}&token=${$.Token}&fromType=APP`;
@@ -184,6 +199,11 @@ async function takePostRequest(type) {
             body = `pin=${encodeURIComponent($.Pin)}`;
             break;
         case 'activityContent':
+            url = `https://${$.domain}/wxDrawActivity/activityContent`;
+            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            break;
+
+        case 'cjactivityContent':
             url = `https://${$.domain}/wxDrawActivity/activityContent`;
             body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
             break;
@@ -336,6 +356,19 @@ async function dealReturn(type, data) {
                     console.log(`${type} ${data}`)
                 }
                 break;
+            case 'getOpenStatus':
+                if (typeof res == 'object') {
+                    if (res.result && res.result === true) {
+                        $.needOpenCard = res.data
+                    } else if (res.errorMessage) {
+                        console.log(`${type} ${res.errorMessage || ''}`)
+                    } else {
+                        console.log(`${type} ${data}`)
+                    }
+                } else {
+                    console.log(`${type} ${data}`)
+                }
+                break;
             case 'getMyPing':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
@@ -384,13 +417,37 @@ async function dealReturn(type, data) {
                     console.log(`${type} ${data}`)
                 }
                 break;
+            case 'cjactivityContent':
+                if (typeof res == 'object') {
+                    if (res.result && res.result === true) {
+                        console.log(JSON.stringify(res.data))
+                        // console.log(JSON.stringify(res.data))
+                        $.hasJoinMan = res.data.hasJoinMan || 0
+                        $.member = res.data.member || false
+                        $.canDrawTimes = res.data.canDrawTimes || 0
+                        $.content = res.data.content || []
+                        $.drawConsume = res.data.drawConsume || 0
+                        $.startTime = res.data.startTime || 0
+                        $.endTime = res.data.endTime || 0
+                    } else if (res.errorMessage) {
+                        console.log(`${type} ${res.errorMessage || ''}`)
+                    } else {
+                        console.log(`${type} ${data}`)
+                    }
+                } else {
+                    console.log(`${type} ${data}`)
+                }
+                break;
             case 'start':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
+                        console.log(JSON.stringify(res))
                         if (res.drawOk) {
-                            $.canDrawTimes = res.data.canDrawTimes
+                            console.log(`获得${res.data.name}`)
+                            console.log(`还能抽` + res.data.canDrawTimes + `次`)
                             $.message += `${res.data.name} `;
                         } else {
+                            console.log(`${res.errorMessage}`)
                             $.message += `${res.errorMessage}`
                             $.break = true
                         }
@@ -588,7 +645,8 @@ async function dealReturn(type, data) {
 function getCK() {
     return new Promise(resolve => {
         let get = {
-            url: `https://${$.domain}/wxCommonInfo/token`,
+            url: $.domain.indexOf('cjhy') != -1 ? `https://${$.domain}/wxDrawActivity/activity?activityId=${$.activityId}` 
+            : `https://${$.domain}/wxCommonInfo/token`,
             followRedirect: false,
             headers: {
                 'Accept-Encoding': 'gzip, deflate, br',
