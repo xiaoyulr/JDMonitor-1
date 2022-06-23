@@ -139,6 +139,8 @@ async function jdmodule() {
         // $.log('products', JSON.stringify($.cpvo.skuId))
         await takePostRequest('addCart')
         await $.wait(1500, 1800)
+        console.log("需要加购"+$.needCollectionSize)
+        console.log("已加购"+$.hasAddCartSize)
         if($.hasAddCartSize>=$.needCollectionSize) {
             break
         }
@@ -467,8 +469,9 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     console.log(JSON.stringify(res))
                     if (res.result && res.result === true) {
+                    $.hasAddCartSize = res.data.hasAddCartSize
                         if (res.data.hasAddCartSize >= $.needCollectionSize) {
-                            $.hasAddCartSize = res.data.hasAddCartSize
+                            
                             $.log(`加购完成，本次加购${res.data.hasAddCartSize}个商品`)
                             break;
                         }
