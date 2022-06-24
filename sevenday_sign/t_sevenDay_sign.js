@@ -230,7 +230,7 @@ async function takePostRequest(type) {
     return new Promise(async resolve => {
         $.post(myRequest, (err, resp, data) => {
             try {
-                console.log(type + "--->>> cookie")
+//                 console.log(type + "--->>> cookie")
                 setActivityCookie(resp)
                 if (err) {
                     if (resp && typeof resp.statusCode != 'undefined') {
