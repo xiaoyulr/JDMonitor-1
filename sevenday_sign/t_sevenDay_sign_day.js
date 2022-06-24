@@ -48,7 +48,12 @@ if ($.isNode()) {
         idx = 0
     } else {
         dayFlag = $.sevenSignIndex.split("_")[0]
-        idx = Number($.sevenSignIndex.split("_")[1])
+        if (dayFlag != today) {
+            dayFlag = today
+            idx = 0
+        } else {
+            idx = Number($.sevenSignIndex.split("_")[1])
+        }
     }
     if (dayFlag == today && idx >= cookiesArr.length) {
         console.log(`已全部签到完毕`)
