@@ -26,7 +26,6 @@ $.giftName = []
 var moment = require('moment');
 $.exportResult = ""
 $.sevenSignIndex = process.env.SEVEN_SIGN_INDEX ? process.env.SEVEN_SIGN_INDEX : "";
-$.prefix = "https://lzkj-isv.isvjcloud.com/sign/sevenDay/signActivity?activityId="
 CryptoScripts()
 $.CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;
 //IOS等用户直接用NobyDa的jd cookie
@@ -72,12 +71,12 @@ if ($.isNode()) {
         }
         for (let id of $.activityIds.split("&")) {
             $.rawId = id
-            if (id.indexOf(`cj`) != -1) {
-                $.activityUrl = $.cjprefixUrl + id.split("_")[1]
-                $.activityId = id.split("_")[1]
+            if ($.rawId.indexOf("cj") != -1) {
+                $.activityId = $.rawId.split("_")[1]
+                $.activityUrl = `https://cjhy-isv.isvjcloud.com/sign/sevenDay/signActivity?activityId=${$.activityId}`
             } else {
-                $.activityUrl = $.prefixUrl + id
-                $.activityId = id
+                $.activityId = $.rawId
+                $.activityUrl = `https://lzkj-isv.isvjcloud.com/sign/sevenDay/signActivity?activityId=${$.activityId}`
             }
             await jdmodule()
             console.log('店铺签到完成，请等待...')
@@ -119,7 +118,7 @@ async function jdmodule() {
 
     await takePostRequest("getSimpleActInfoVo");
 
-    await takePostRequest("getOpenStatus")
+    // await takePostRequest("getOpenStatus")
 
     await takePostRequest("getMyPing");
 
@@ -140,10 +139,10 @@ async function jdmodule() {
         return
     }
 
-    if ($.needOpenCard == 1) {
-        console.log(`去开卡`)
-        await opencard()
-    }
+    // if ($.needOpenCard == 1) {
+    //     console.log(`去开卡`)
+    //     await opencard()
+    // }
 
     await takePostRequest("signUp")
 }
