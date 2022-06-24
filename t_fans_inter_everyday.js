@@ -31,7 +31,7 @@ let activityList = []
 // ];
 !(async () => {
 	for (let activity of $.activityIds.split("&")) {
-        let activityId = activity.split(";")[0]
+		let activityId = activity.split(";")[0]
 		activityList.push({ "id": activityId, "endTime": 2053932176000 })
 	}
 	activityList = getRandomArrayElements(activityList, activityList.length);
@@ -407,31 +407,31 @@ async function getHtml(_0x4addca) {
 	});
 }
 function dealCK(_0x1ea343, _0x122b40) {
-    if (_0x122b40 === undefined) {
-        return;
-    }
-    let _0x3d9911 = _0x122b40.headers['set-cookie'] || _0x122b40.headers['Set-Cookie'] || '';
-    if (_0x3d9911) {
-        let _0x2fabb2 = _0x3d9911.filter(_0x942508 => _0x942508.indexOf('lz_jdpin_token') !== -1)[0];
-        if (_0x2fabb2 && (_0x2fabb2.indexOf('lz_jdpin_token=') > -1)) {
-            _0x1ea343.lz_jdpin_token = _0x2fabb2.split(';') && (_0x2fabb2.split(';')[0] + ';') || '';
-        }
-        let _0x23a7e9 = _0x3d9911.filter(_0x41bf1f => _0x41bf1f.indexOf('LZ_TOKEN_KEY') !== -1)[0];
-        if (_0x23a7e9 && (_0x23a7e9.indexOf('LZ_TOKEN_KEY=') > -1)) {
-            let _0x22583b = _0x23a7e9.split(';') && _0x23a7e9.split(';')[0] || '';
-            _0x1ea343.LZ_TOKEN_KEY = _0x22583b.replace('LZ_TOKEN_KEY=', '');
-        }
-        let _0x381ba3 = _0x3d9911.filter(_0x29a259 => _0x29a259.indexOf('LZ_TOKEN_VALUE') !== -1)[0];
-        if (_0x381ba3 && _0x381ba3.indexOf('LZ_TOKEN_VALUE=') > -1) {
-            let _0x1f6cc4 = _0x381ba3.split(';') && _0x381ba3.split(';')[0] || '';
-            _0x1ea343.LZ_TOKEN_VALUE = _0x1f6cc4.replace('LZ_TOKEN_VALUE=', '');
-        }
-        let aespin = _0x3d9911.filter(c => c.indexOf('LZ_AES_PIN') !== -1)[0];
-        if (aespin && aespin.indexOf('LZ_AES_PIN=') > -1) {
-            let aesvalue = aespin.split(';') && aespin.split(';')[0] || '';
-            _0x1ea343.LZ_AES_PIN = aesvalue.replace('LZ_AES_PIN=', '');
-        }
-    }
+	if (_0x122b40 === undefined) {
+		return;
+	}
+	let _0x3d9911 = _0x122b40.headers['set-cookie'] || _0x122b40.headers['Set-Cookie'] || '';
+	if (_0x3d9911) {
+		let _0x2fabb2 = _0x3d9911.filter(_0x942508 => _0x942508.indexOf('lz_jdpin_token') !== -1)[0];
+		if (_0x2fabb2 && (_0x2fabb2.indexOf('lz_jdpin_token=') > -1)) {
+			_0x1ea343.lz_jdpin_token = _0x2fabb2.split(';') && (_0x2fabb2.split(';')[0] + ';') || '';
+		}
+		let _0x23a7e9 = _0x3d9911.filter(_0x41bf1f => _0x41bf1f.indexOf('LZ_TOKEN_KEY') !== -1)[0];
+		if (_0x23a7e9 && (_0x23a7e9.indexOf('LZ_TOKEN_KEY=') > -1)) {
+			let _0x22583b = _0x23a7e9.split(';') && _0x23a7e9.split(';')[0] || '';
+			_0x1ea343.LZ_TOKEN_KEY = _0x22583b.replace('LZ_TOKEN_KEY=', '');
+		}
+		let _0x381ba3 = _0x3d9911.filter(_0x29a259 => _0x29a259.indexOf('LZ_TOKEN_VALUE') !== -1)[0];
+		if (_0x381ba3 && _0x381ba3.indexOf('LZ_TOKEN_VALUE=') > -1) {
+			let _0x1f6cc4 = _0x381ba3.split(';') && _0x381ba3.split(';')[0] || '';
+			_0x1ea343.LZ_TOKEN_VALUE = _0x1f6cc4.replace('LZ_TOKEN_VALUE=', '');
+		}
+		let aespin = _0x3d9911.filter(c => c.indexOf('LZ_AES_PIN') !== -1)[0];
+		if (aespin && aespin.indexOf('LZ_AES_PIN=') > -1) {
+			let aesvalue = aespin.split(';') && aespin.split(';')[0] || '';
+			_0x1ea343.LZ_AES_PIN = aesvalue.replace('LZ_AES_PIN=', '');
+		}
+	}
 }
 async function takePostRequest(_0x22084a, _0x4d19d2, _0x4cee5b = 'activityId=' + _0x22084a.activityId + '&pin=' + encodeURIComponent(_0x22084a.pin)) {
 	let _0x3e5e9 = 'https://' + _0x22084a.host + '/' + _0x4d19d2;
@@ -464,7 +464,13 @@ async function takePostRequest(_0x22084a, _0x4d19d2, _0x4cee5b = 'activityId=' +
 			_0x4cee5b = '222';
 			break;
 	}
-	const _0x2993f8 = { 'X-Requested-With': 'XMLHttpRequest', 'Connection': 'keep-alive', 'Accept-Encoding': 'gzip, deflate, br', 'Content-Type': 'application/x-www-form-urlencoded', 'Origin': 'https://' + _0x22084a.host, 'User-Agent': _0x22084a.UA, 'Cookie': _0x22084a.cookie + ' LZ_TOKEN_KEY=' + _0x22084a.LZ_TOKEN_KEY + '; LZ_TOKEN_VALUE=' + _0x22084a.LZ_TOKEN_VALUE + '; AUTH_C_USER=' + _0x22084a.pin + '; ' + _0x22084a.lz_jdpin_token, 'Host': _0x22084a.host, 'Referer': _0x22084a.thisActivityUrl, 'Accept-Language': 'zh-cn', 'Accept': 'application/json' };
+    let ck = ''
+	if ($.LZ_AES_PIN) {
+		ck = _0x22084a.cookie + ' LZ_TOKEN_KEY=' + _0x22084a.LZ_TOKEN_KEY + '; LZ_TOKEN_VALUE=' + _0x22084a.LZ_TOKEN_VALUE + '; AUTH_C_USER=' + _0x22084a.pin + '; ' + `LZ_AES_PIN=${$.LZ_AES_PIN};` + _0x22084a.lz_jdpin_token
+	} else {
+		ck = _0x22084a.cookie + ' LZ_TOKEN_KEY=' + _0x22084a.LZ_TOKEN_KEY + '; LZ_TOKEN_VALUE=' + _0x22084a.LZ_TOKEN_VALUE + '; AUTH_C_USER=' + _0x22084a.pin + '; ' + _0x22084a.lz_jdpin_token
+	}
+	const _0x2993f8 = { 'X-Requested-With': 'XMLHttpRequest', 'Connection': 'keep-alive', 'Accept-Encoding': 'gzip, deflate, br', 'Content-Type': 'application/x-www-form-urlencoded', 'Origin': 'https://' + _0x22084a.host, 'User-Agent': _0x22084a.UA, 'Cookie': ck, 'Host': _0x22084a.host, 'Referer': _0x22084a.thisActivityUrl, 'Accept-Language': 'zh-cn', 'Accept': 'application/json' };
 	let _0x1e0fb8 = { 'url': _0x3e5e9, 'method': 'POST', 'headers': _0x2993f8, 'body': _0x4cee5b };
 	return new Promise(async _0x4afe88 => {
 		_0x22084a.post(_0x1e0fb8, (_0xa06eab, _0x445f4b, _0x1ac3a4) => {

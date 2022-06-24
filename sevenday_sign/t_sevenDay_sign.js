@@ -8,10 +8,8 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
-$.activityId = process.env.T_SEVENDAY_SIGN_ID ? process.env.T_SEVENDAY_SIGN_ID : "";
+$.rawId = process.env.T_SEVENDAY_SIGN_ID ? process.env.T_SEVENDAY_SIGN_ID : "";
 $.activityIds = process.env.T_SEVENDAY_SIGN_IDS ? process.env.T_SEVENDAY_SIGN_IDS : "";
-$.prefix = "https://lzkj-isv.isvjcloud.com/sign/sevenDay/signActivity?activityId=";
-$.activityUrl = $.prefix + $.activityId
 $.Token = "";
 $.openCard = false
 $.exportActivityIds = ""
@@ -49,6 +47,13 @@ if ($.isNode()) {
     if ($.activityIds.indexOf($.activityId) != -1) {
         console.log(`签到ID已存在，退出`)
     } else {
+        if ($.rawId.indexOf("cj") != -1) {
+            $.activityId = $.rawId.split("_")[1]
+            $.activityUrl = `https://cjhy-isv.isvjcloud.com/sign/sevenDay/signActivity?activityId=${$.activityId}`
+        } else {
+            $.activityId = $.rawId
+            $.activityUrl = `https://lzkj-isv.isvjcloud.com/sign/sevenDay/signActivity?activityId=${$.activityId}`
+        }
         console.log(`跳转链接：\n${$.activityUrl}`)
         for (let i = 0; i < cookiesArr.length; i++) {
             if (cookiesArr[i]) {
@@ -67,7 +72,7 @@ if ($.isNode()) {
                     continue
                 }
                 await jdmodule();
-                if (!$.signFlag) {
+                if ($.stop) {
                     console.log(`签到不给京豆，不跑！`)
                     break
                 }
@@ -80,10 +85,12 @@ if ($.isNode()) {
         }
     }
     if ($.isNode()) {
-        if ($.message != '') {
-            await notify.sendNotify("7日签到", `${$.message}\n跳转链接\n${$.activityUrl}`)
-        }
+        result = $.activityIds == null || $.activityIds == "" ? $.rawId : $.activityIds + `&${$.rawId}`
         await notify.sendNotify("7日签到变量", `export T_SEVENDAY_SIGN_IDS=\"${result}\"`)
+        if ($.message != '') {
+            await notify.sendNotify("7日签到", `${$.shopName}\n${$.message}\n奖励内容\n${$.priseMsg}\n跳转链接\n${$.activityUrl}`)
+
+        }
     }
 
 })()
@@ -93,8 +100,6 @@ if ($.isNode()) {
     .finally(() => {
         $.done();
     })
-
-
 
 async function jdmodule() {
     $.domain = $.activityUrl.match(/https?:\/\/([^/]+)/) && $.activityUrl.match(
@@ -112,15 +117,31 @@ async function jdmodule() {
 
     await takePostRequest("getMyPing");
 
-    await takePostRequest("accessLogWithAD")
+    if ($.domain.indexOf('cjhy') != -1) {
+        $.enPin = encodeURIComponent(encodeURIComponent($.Pin))
+        await takePostRequest("accessLog")
+    } else {
+        $.enPin = encodeURIComponent($.Pin)
+        await takePostRequest("accessLogWithAD")
+    }
 
     await takePostRequest("getSignInfo")
 
     await takePostRequest("getShopInfo")
 
+    if (!$.signFlag) {
+        $.stop = true
+        return
+    }
+
     if ($.isOver === 'y' || $.contiSignDays == 7) {
         console.log(`活动已结束或已签到7天`)
         return
+    }
+
+    if ($.needOpenCard == 1) {
+        console.log(`去开卡`)
+        await opencard()
     }
 
     await takePostRequest("signUp")
@@ -166,12 +187,17 @@ async function takePostRequest(type) {
             break;
         case 'accessLogWithAD':
             url = `https://${$.domain}/common/accessLogWithAD`;
-            let pageurl = `${$.activityUrl}&friendUuid=${$.friendUuid}`
-            body = `venderId=${$.venderId}&code=3&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
+            let pageurl1 = `${$.activityUrl}&friendUuid=${$.friendUuid}`
+            body = `venderId=${$.venderId}&code=3&pin=${$.enPin}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl1)}&subType=app&adSource=`
+            break;
+        case 'accessLog':
+            url = `https://${$.domain}/common/accessLog`;
+            let pageurl = `${$.activityUrl}`
+            body = `venderId=${$.venderId}&code=18&pin=${$.enPin}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
             break;
         case 'getSignInfo':
             url = `https://${$.domain}/sign/sevenDay/wx/getSignInfo`;
-            body = `actId=${$.activityId}&venderId=${$.venderId}&pin=${encodeURIComponent($.Pin)}`;
+            body = `actId=${$.activityId}&venderId=${$.venderId}&pin=${$.enPin}`;
             break;
         case 'getShopInfo':
             url = `https://${$.domain}/sign/wx/getShopInfo`;
@@ -179,16 +205,21 @@ async function takePostRequest(type) {
             break;
         case 'signUp':
             url = `https://${$.domain}/sign/sevenDay/wx/signUp`;
-            body = `actId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            body = `actId=${$.activityId}&pin=${$.enPin}`
             break;
         case 'getActMemberInfo':
             url = `https://${$.domain}/wxCommonInfo/getActMemberInfo`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&venderId=${$.venderId}`
+            body = `activityId=${$.activityId}&pin=${$.enPin}&venderId=${$.venderId}`
             break;
         case 'followShop':
             url = `https://${$.domain}/wxActionCommon/followShop`;
             // url = `${domain}/dingzhi/dz/openCard/saveTask`;
-            body = `activityId=${$.activityId}&buyerNick=${encodeURIComponent($.Pin)}&userId=${$.venderId}&activityType=${$.activityType}`
+            body = `activityId=${$.activityId}&buyerNick=${$.enPin}&userId=${$.venderId}&activityType=${$.activityType}`
+            break;
+        case 'getOpenStatus':
+            url = `https://${$.domain}/assembleConfig/getOpenStatus`;
+            // url = `${domain}/dingzhi/dz/openCard/saveTask`;
+            body = `activityId=${$.activityId}`
             break;
         default:
             console.log(`错误${type}`);
@@ -267,6 +298,13 @@ async function dealReturn(type, data) {
                     }
                 } else {
                     console.log(`${type} ${data}`)
+                }
+                break;
+            case 'getOpenStatus':
+                if (typeof res == 'object') {
+                    if (res.result) {
+                        $.needOpenCard = res.data
+                    }
                 }
                 break;
             case 'getMyPing':

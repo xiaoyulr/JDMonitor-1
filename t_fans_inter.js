@@ -9,7 +9,7 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 const RUHUI = '1'
 const RUNCK = $.isNode() ? (process.env.RUNCK ? process.env.RUNCK : `9999`) : `9999`;
-$.activityId = process.env.T_FANS_INTER_ACTIVITY_ID ? process.env.T_FANS_INTER_ACTIVITY_ID : "";
+$.activityId = process.env.jd_wxFansInterActionActivity_activityId ? process.env.jd_wxFansInterActionActivity_activityId : "";
 $.activityIds = process.env.T_FANS_INTER_ACTIVITY_IDS ? process.env.T_FANS_INTER_ACTIVITY_IDS : ""
 let cookiesArr = [], message = '';
 $.cookie = ''
@@ -517,7 +517,7 @@ async function takePostRequest(_0x22084a, _0x4d19d2, _0x4cee5b = 'activityId=' +
     }else {
         ck = _0x22084a.cookie + ' LZ_TOKEN_KEY=' + _0x22084a.LZ_TOKEN_KEY + '; LZ_TOKEN_VALUE=' + _0x22084a.LZ_TOKEN_VALUE + '; AUTH_C_USER=' + _0x22084a.pin + '; ' + _0x22084a.lz_jdpin_token
     }
-    console.log(ck)
+    // console.log(ck)
     const _0x2993f8 = { 'X-Requested-With': 'XMLHttpRequest', 'Connection': 'keep-alive', 'Accept-Encoding': 'gzip, deflate, br', 'Content-Type': 'application/x-www-form-urlencoded', 'Origin': 'https://' + _0x22084a.host, 'User-Agent': _0x22084a.UA, 'Cookie':  ck, 'Host': _0x22084a.host, 'Referer': _0x22084a.thisActivityUrl, 'Accept-Language': 'zh-cn', 'Accept': 'application/json' };
     let _0x1e0fb8 = { 'url': _0x3e5e9, 'method': 'POST', 'headers': _0x2993f8, 'body': _0x4cee5b };
     return new Promise(async _0x4afe88 => {

@@ -8,9 +8,8 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
-$.activityId = process.env.T_CON_SIGN_ID ? process.env.T_CON_SIGN_ID : "";
+$.rawId = process.env.T_CON_SIGN_ID ? process.env.T_CON_SIGN_ID : "";
 $.activityIds = process.env.T_CON_SIGN_IDS ? process.env.T_CON_SIGN_IDS : "";
-$.activityUrl = `https://lzkj-isv.isvjcloud.com/sign/signActivity2?activityId=${$.activityId}`
 $.Token = "";
 $.openCard = false
 $.exportActivityIds = ""
@@ -49,8 +48,14 @@ if ($.isNode()) {
     if ($.activityIds.indexOf($.activityId) != -1) {
         console.log(`签到ID已存在，退出`)
     } else {
+        if ($.rawId.indexOf("cj") != -1) {
+            $.activityId = $.rawId.split("_")[1]
+            $.activityUrl = `https://cjhy-isv.isvjcloud.com/sign/signActivity?activityId=${$.activityId}`
+        } else {
+            $.activityId = $.rawId
+            $.activityUrl = `https://lzkj-isv.isvjcloud.com/sign/signActivity2?activityId=${$.activityId}`
+        }
         console.log(`跳转链接：\n${$.activityUrl}`)
-        result = $.activityIds == null || $.activityIds == "" ? $.activityId : $.activityIds + `&${$.activityId}`
         for (let i = 0; i < cookiesArr.length; i++) {
             if (cookiesArr[i]) {
                 cookie = cookiesArr[i];
@@ -78,9 +83,11 @@ if ($.isNode()) {
         }
     }
     if ($.isNode()) {
+        result = $.activityIds == null || $.activityIds == "" ? $.rawId : $.activityIds + `&${$.rawId}`
+        await notify.sendNotify("连续签到变量", `export T_CON_SIGN_IDS=\"${result}\"`)
         if ($.message != '') {
             await notify.sendNotify("连续签到", `${$.shopName}\n${$.message}\n奖励内容\n${$.priseMsg}\n跳转链接\n${$.activityUrl}`)
-            await notify.sendNotify("连续签到变量", `export T_CON_SIGN_IDS=\"${result}\"`)
+
         }
     }
 
@@ -114,7 +121,13 @@ async function jdmodule() {
 
     await takePostRequest("getMyPing");
 
-    await takePostRequest("accessLogWithAD")
+    if ($.domain.indexOf('cjhy') != -1) {
+        $.enPin = encodeURIComponent(encodeURIComponent($.Pin))
+        await takePostRequest("accessLog")
+    } else {
+        $.enPin = encodeURIComponent($.Pin)
+        await takePostRequest("accessLogWithAD")
+    }
 
     await takePostRequest("getActivity")
 
@@ -126,9 +139,10 @@ async function jdmodule() {
         $.stop = true
         return
     }
-    if ($.actMemberStatus == 1 && !$.openCardStatus && $.signFlag) {
-        console.log(`不开卡`)
-        return
+
+    if ($.needOpenCard == 1) {
+        console.log(`去开卡`)
+        await opencard()
     }
 
     await takePostRequest("signUp")
@@ -172,14 +186,19 @@ async function takePostRequest(type) {
             url = `https://${$.domain}/customer/getMyPing`;
             body = `userId=${$.venderId}&token=${$.Token}&fromType=APP`;
             break;
+        case 'accessLog':
+            url = `https://${$.domain}/common/accessLog`;
+            let pageurl = `${$.activityUrl}`
+            body = `venderId=${$.venderId}&code=15&pin=${$.enPin}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
+            break;
         case 'accessLogWithAD':
             url = `https://${$.domain}/common/accessLogWithAD`;
-            let pageurl = `${$.activityUrl}&friendUuid=${$.friendUuid}`
-            body = `venderId=${$.venderId}&code=3&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
+            let pageurl1 = `${$.activityUrl}&friendUuid=${$.friendUuid}`
+            body = `venderId=${$.venderId}&code=3&pin=${$.enPin}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl1)}&subType=app&adSource=`
             break;
         case 'getSignInfo':
             url = `https://${$.domain}/sign/wx/getSignInfo`;
-            body = `actId=${$.activityId}&venderId=${$.venderId}&pin=${encodeURIComponent($.Pin)}`;
+            body = `actId=${$.activityId}&venderId=${$.venderId}&pin=${$.enPin}`;
             break;
         case 'getShopInfo':
             url = `https://${$.domain}/sign/wx/getShopInfo`;
@@ -187,16 +206,21 @@ async function takePostRequest(type) {
             break;
         case 'signUp':
             url = `https://${$.domain}/sign/wx/signUp`;
-            body = `actId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            body = `actId=${$.activityId}&pin=${$.enPin}`
             break;
         case 'getActMemberInfo':
             url = `https://${$.domain}/wxCommonInfo/getActMemberInfo`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&venderId=${$.venderId}`
+            body = `activityId=${$.activityId}&pin=${$.enPin}&venderId=${$.venderId}`
             break;
         case 'getActivity':
             url = `https://${$.domain}/sign/wx/getActivity`;
             // url = `${domain}/dingzhi/dz/openCard/saveTask`;
             body = `actId=${$.activityId}&venderId=${$.venderId}`
+            break;
+        case 'getOpenStatus':
+            url = `https://${$.domain}/assembleConfig/getOpenStatus`;
+            // url = `${domain}/dingzhi/dz/openCard/saveTask`;
+            body = `activityId=${$.activityId}`
             break;
         default:
             console.log(`错误${type}`);
@@ -274,6 +298,13 @@ async function dealReturn(type, data) {
                     }
                 } else {
                     console.log(`${type} ${data}`)
+                }
+                break;
+            case 'getOpenStatus':
+                if (typeof res == 'object') {
+                    if (res.result) {
+                        $.needOpenCard = res.data
+                    }
                 }
                 break;
             case 'getMyPing':
@@ -634,7 +665,7 @@ function setActivityCookie(resp) {
         }
     }
     if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && !$.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE}`
-    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && $.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE} ${$.LZ_AES_PIN}`   
+    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && $.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE} ${$.LZ_AES_PIN}`
     if (lz_jdpin_token) lz_jdpin_token_cookie = lz_jdpin_token
     // console.log(activityCookie)
 }

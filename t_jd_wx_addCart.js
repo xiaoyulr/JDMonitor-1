@@ -21,7 +21,7 @@ $.hasHelpedTimes = 0
 $.restartNo = 1
 $.friendUuidId = 0
 $.LZ_AES_PIN = ""
-
+$.stop = false
 CryptoScripts()
 $.CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;
 //IOS等用户直接用NobyDa的jd cookie
@@ -60,13 +60,21 @@ if ($.isNode()) {
                 continue
             }
             await jdmodule();
-            if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-            if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
         }
+        if ($.stop) {
+            break;
+        }
+        if ($.index % 4 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+        if ($.index % 4 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
     }
     if ($.isNode()) {
-        if ($.message != '') {
-            await notify.sendNotify("加购有礼", `${$.message}\n跳转链接\n${$.activityUrl}`)
+        if ($.stop) {
+            await notify.sendNotify("加购有礼", `活动已结束`)
+        }
+        else {
+            if ($.message != '') {
+                await notify.sendNotify("加购有礼", `${$.message}\n跳转链接\n${$.activityUrl}`)
+            }
         }
     }
 })()
@@ -77,20 +85,15 @@ if ($.isNode()) {
         $.done();
     })
 
-function showMsg() {
-    return new Promise(resolve => {
-        $.msg($.name, '', `【京东账号${$.index}】${$.nickName}\n${message}`);
-        resolve()
-    })
-}
-
-
 async function jdmodule() {
     $.domain = $.activityUrl.match(/https?:\/\/([^/]+)/) && $.activityUrl.match(
         /https?:\/\/([^/]+)/)[1] || ''
     $.UA = `jdapp;iPhone;10.2.2;13.1.2;${uuid()};M/5.0;network/wifi;ADID/;model/iPhone8,1;addressid/2308460611;appBuild/167863;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS 13_1_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1;`
 
     await getCK();
+    if ($.stop) {
+        return
+    }
     console.log("lzToken=" + activityCookie)
     await takePostRequest("isvObfuscator");
     console.log('Token:' + $.Token)
@@ -104,8 +107,10 @@ async function jdmodule() {
     await takePostRequest("getMyPing");
 
     if ($.domain.indexOf('cjhy') != -1) {
+        $.enPin = encodeURIComponent(encodeURIComponent($.Pin))
         await takePostRequest("accessLog")
     } else {
+        $.enPin = encodeURIComponent($.Pin)
         await takePostRequest("accessLogWithAD")
     }
 
@@ -200,87 +205,37 @@ async function takePostRequest(type) {
         case 'accessLog':
             url = `https://${$.domain}/common/accessLog`;
             let pageurl = `${$.activityUrl}`
-            body = `venderId=${$.venderId}&code=6&pin=${encodeURIComponent(encodeURIComponent($.Pin))}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
+            body = `venderId=${$.venderId}&code=6&pin=${$.enPin}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl)}&subType=app&adSource=`
             break;
         case 'accessLogWithAD':
             url = `https://${$.domain}/common/accessLogWithAD`;
             let pageurl1 = `${$.activityUrl}`
-            body = `venderId=${$.venderId}&code=3&pin=${encodeURIComponent($.Pin)}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl1)}&subType=app&adSource=`
+            body = `venderId=${$.venderId}&code=3&pin=${$.enPin}&activityId=${$.activityId}&pageUrl=${encodeURIComponent(pageurl1)}&subType=app&adSource=`
             break;
         case 'getUserInfo':
             url = `https://${$.domain}/wxActionCommon/getUserInfo`;
-            body = `pin=${encodeURIComponent(encodeURIComponent($.Pin))}`;
+            body = `pin=${$.enPin}`;
             break;
         case 'activityContent':
             url = `https://${$.domain}/wxCollectionActivity/activityContent`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}`
+            body = `activityId=${$.activityId}&pin=${$.enPin}`
             break;
         case 'addCart':
             url = `https://${$.domain}/wxCollectionActivity/addCart`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}&productId=${$.cpvo.skuId}`
+            body = `activityId=${$.activityId}&pin=${$.enPin}&productId=${$.cpvo.skuId}`
             break;
         case 'oneKeyAddCart':
             url = `https://${$.domain}/wxCollectionActivity/oneKeyAddCart`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}&productIds=${encodeURIComponent(JSON.stringify($.productIds))}`
+            body = `activityId=${$.activityId}&pin=${$.enPin}&productIds=${encodeURIComponent(JSON.stringify($.productIds))}`
             break;
         case 'getPrize':
             url = `https://${$.domain}/wxCollectionActivity/getPrize`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent(encodeURIComponent($.Pin))}`
-            break;
-        case 'getActMemberInfo':
-            url = `https://${$.domain}/wxCommonInfo/getActMemberInfo`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&venderId=${$.venderId}`
-            break;
-        case 'info':
-            url = `https://${$.domain}/drawCenter/myInfo`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
-            break;
-        case 'startDraw':
-            url = `${domain}/joint/order/draw`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&actorUuid=${$.actorUuid}&drawType=1`
+            body = `activityId=${$.activityId}&pin=${$.enPin}`
             break;
         case 'followShop':
             url = `https://${$.domain}/wxActionCommon/followShop`;
             // url = `${domain}/dingzhi/dz/openCard/saveTask`;
-            body = `activityId=${$.activityId}&buyerNick=${encodeURIComponent($.Pin)}&userId=${$.venderId}&activityType=${$.activityType}`
-            break;
-        case 'sign':
-        case 'quickAddSku':
-            url = `https://${$.domain}/wxCartKoi/cartkoi/quickAddCart`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&productIds=${encodeURIComponent(JSON.stringify($.productIds))}`
-            break;
-        case 'browseGoods':
-            url = `${domain}/dingzhi/opencard/${type}`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
-            if (type == 'browseGoods') body += `&value=${$.visitSkuValue}`
-            break;
-        case '邀请':
-        case '助力':
-            if (type == '助力') {
-                url = `${domain}/dingzhi/linkgame/assist`;
-            } else {
-                url = `${domain}/dingzhi/linkgame/assist/status`;
-            }
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&shareUuid=${$.shareUuid}`
-            break;
-        case 'viewVideo':
-        case 'visitSku':
-        case 'toShop':
-        case 'addSku':
-            url = `https://${$.domain}/drawCenter/doTask`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&taskId=${$.task.taskId}&param=${$.pro.skuId}`
-            break;
-        case 'getDrawRecordHasCoupon':
-            url = `${domain}/dingzhi/linkgame/draw/record`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}&actorUuid=${$.actorUuid}`
-            break;
-        case 'getShareRecord':
-            url = `${domain}/dingzhi/linkgame/help/list`;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
-            break;
-        case '抽奖':
-            url = `https://${$.domain}/drawCenter/draw/luckyDraw`;;
-            body = `activityId=${$.activityId}&pin=${encodeURIComponent($.Pin)}`
+            body = `activityId=${$.activityId}&buyerNick=${$.enPin}&userId=${$.venderId}&activityType=${$.activityType}`
             break;
         default:
             console.log(`错误${type}`);
@@ -621,11 +576,11 @@ function getCK() {
                     console.log(`${$.name} cookie API请求失败，请检查网路重试`)
                 } else {
                     // console.log(JSON.stringify(resp))
-                    // let end = data.match(/(活动已经结束)/) && data.match(/(活动已经结束)/)[1] || ''
-                    // if (end) {
-                    //     $.activityEnd = true
-                    //     console.log('活动已结束')
-                    // }
+                    let end = data.match(/(活动已经结束)/) && data.match(/(活动已经结束)/)[1] || ''
+                    if (end) {
+                        $.stop = true
+                        console.log('活动已结束')
+                    }
                     setActivityCookie(resp)
                 }
             } catch (e) {
