@@ -23,6 +23,7 @@ $.signFlag = false
 $.giftInfoId = []
 $.LZ_AES_PIN = ""
 $.giftName = []
+var moment = require('moment');
 $.exportResult = ""
 $.sevenSignIndex = process.env.SEVEN_SIGN_INDEX ? process.env.SEVEN_SIGN_INDEX : "";
 $.prefix = "https://lzkj-isv.isvjcloud.com/sign/sevenDay/signActivity?activityId="
