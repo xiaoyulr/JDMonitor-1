@@ -128,23 +128,48 @@ async function jdmodule() {
 function dealExportByUrl(url, id) {
     // 七日签到
     // https://lzkj-isv.isvjcloud.com/sign/sevenDay/signActivity?activityId=
-    if (url.indexOf("sevenDay") != -1 && url.indexOf("cjhy") == -1) {
+    if (url.indexOf("sevenDay") != -1 && url.indexOf("lzkj") != -1) {
         if ($.recordSign.indexOf(id) == -1) {
             $.signChange = true
             $.recordSign += `&${id}`
             return `export T_SEVENDAY_SIGN_ID=\"${id}\"`
         }
-        // 连续签到
-        // https://lzkj-isv.isvjcloud.com/sign/signActivity2?activityId=
-    } else if (url.indexOf("sign/signActivity2") != -1 && url.indexOf("cjhy") == -1) {
+    }
+
+    // 七日签到
+    // https://cjhy-isv.isvjcloud.com/sign/sevenDay/signActivity?activityId=
+    if (url.indexOf("sevenDay") != -1 && url.indexOf("cjhy") != -1) {
+        if ($.recordSign.indexOf(id) == -1) {
+            id = 'cj_' + id
+            $.signChange = true
+            $.recordSign += `&${id}`
+            return `export T_SEVENDAY_SIGN_ID=\"${id}\"`
+        }
+
+    }
+
+    // 连续签到
+    // https://lzkj-isv.isvjcloud.com/sign/signActivity2?activityId=
+    if (url.indexOf("sign/signActivity2") != -1 && url.indexOf("lzkj") != -1) {
         if ($.recordConSign.indexOf(id) == -1) {
             $.conSignChange = true
             $.recordConSign += `&${id}`
             return `export T_CON_SIGN_ID=\"${id}\"`
         }
-    } else {
-        return null
     }
+
+    // 连续签到
+    // https://cjhy-isv.isvjcloud.com/sign/signActivity2?activityId=
+    if (url.indexOf("sign/signActivity2") != -1 && url.indexOf("cjhy") != -1) {
+        if ($.recordConSign.indexOf(id) == -1) {
+            id = 'cj_' + id
+            $.conSignChange = true
+            $.recordConSign += `&${id}`
+            return `export T_CON_SIGN_ID=\"${id}\"`
+        }
+    }
+
+    return null
 
 
 }
