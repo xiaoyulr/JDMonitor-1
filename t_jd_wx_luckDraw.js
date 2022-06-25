@@ -21,7 +21,7 @@ $.hasHelpedTimes = 0
 $.restartNo = 1
 $.friendUuidId = 0
 $.LZ_AES_PIN = ""
-
+$.stop = false
 CryptoScripts()
 $.CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;
 //IOS等用户直接用NobyDa的jd cookie
@@ -60,12 +60,15 @@ if ($.isNode()) {
                 continue
             }
             await jdmodule();
+            if ($.stop) {
+                break
+            }
             if ($.index % 3 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
             if ($.index % 3 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
         }
     }
 
-    if ($.message != '') {
+    if ($.message != '' && !$.stop) {
         await notify.sendNotify("幸运抽奖", `${$.message}\n跳转链接\n${$.activityUrl}`)
     }
 
@@ -129,6 +132,7 @@ async function jdmodule() {
         `抽奖次数 ${$.canDrawTimes} ${$.drawConsume > 0 && $.drawConsume + "积分抽奖一次"
         || ''}`)
     if ($.canDrawTimes === 0) {
+        $.stop = true
         return
     }
     console.log(`可抽奖次数:${$.canDrawTimes}`)
