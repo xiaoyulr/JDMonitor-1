@@ -1,23 +1,23 @@
 /*
 [task_local]
-# 连续签到
-7 7 7 7 7  t_countinue_sign.js, tag=连续签到, enabled=true
+# 连续签到每日版
+0 0 * * *  t_countinue_sign_days.js, tag=连续签到每日版, enabled=true
  */
-const $ = new Env('连续签到');
+const $ = new Env('连续签到每日版');
 const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
-$.rawId = process.env.T_CON_SIGN_ID ? process.env.T_CON_SIGN_ID : "";
 $.activityIds = process.env.T_CON_SIGN_IDS ? process.env.T_CON_SIGN_IDS : "";
+$.prefixUrl = `https://lzkj-isv.isvjcloud.com/sign/signActivity2?activityId=`
+$.cjprefixUrl = `https://cjhy-isv.isvjcloud.com/sign/signActivity?activityId=`
 $.Token = "";
 $.openCard = false
 $.exportActivityIds = ""
 $.friendUuid = ""
 $.friendUuids = []
-$.LZ_AES_PIN = ""
-$.message = ""
 $.helpTimes = -1
+$.LZ_AES_PIN = ""
 $.hasHelpedTimes = 0
 $.restartNo = 1
 $.friendUuidId = 0
@@ -25,8 +25,11 @@ $.signFlag = false
 $.giftInfoId = []
 $.priseMsg = ""
 $.giftName = []
+$.exportResult = ""
+$.conSignIndex = process.env.CON_SIGN_INDEX ? process.env.CON_SIGN_INDEX : "";
 CryptoScripts()
 $.CryptoJS = $.isNode() ? require('crypto-js') : CryptoJS;
+var moment = require('moment');
 //IOS等用户直接用NobyDa的jd cookie
 let cookiesArr = [], cookie = '', message;
 let lz_jdpin_token_cookie = ''
@@ -45,52 +48,63 @@ if ($.isNode()) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
-    if ($.activityIds.indexOf($.activityId) != -1) {
-        console.log(`签到ID已存在，退出`)
+    today = moment(Date.now()).format('YYYY-MM-DD')
+    if ($.conSignIndex == "") {
+        dayFlag = today
+        idx = 0
     } else {
-        if ($.rawId.indexOf("cj") != -1) {
-            $.activityId = $.rawId.split("_")[1]
-            $.activityUrl = `https://cjhy-isv.isvjcloud.com/sign/signActivity?activityId=${$.activityId}`
+        dayFlag = $.conSignIndex.split("_")[0]
+        if (dayFlag != today) {
+            dayFlag = today
+            idx = 0
         } else {
-            $.activityId = $.rawId
-            $.activityUrl = `https://lzkj-isv.isvjcloud.com/sign/signActivity2?activityId=${$.activityId}`
+            idx = Number($.conSignIndex.split("_")[1])
         }
-        console.log(`跳转链接：\n${$.activityUrl}`)
-        for (let i = 0; i < cookiesArr.length; i++) {
-            if (cookiesArr[i]) {
-                cookie = cookiesArr[i];
-                $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
-                $.index = i + 1;
-                $.isLogin = true;
-                $.nickName = '';
-                console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
-                if (!$.isLogin) {
-                    $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
+    }
+    if (dayFlag == today && idx >= cookiesArr.length) {
+        console.log(`已全部签到完毕`)
+        return
+    }
+    if (cookiesArr[idx]) {
+        nextIdx = idx + 1
+        outputIdx = today + "_" + nextIdx
+        // console.log(outputIdx)
+        // await notify.sendNotify(`连续签到索引`, `export CON_SIGN_INDEX="${outputIdx}"`)
+        cookie = cookiesArr[idx];
+        $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+        $.isLogin = true;
+        $.nickName = '';
+        $.message = ""
+        console.log(`\n******开始 京东账号 ${$.nickName || $.UserName}*********\n`);
+        if (!$.isLogin) {
+            $.msg($.name, `【提示】cookie已失效`, `京东账号 ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
 
-                    if ($.isNode()) {
-                        await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
-                    }
-                    continue
-                }
-                await jdmodule();
-                if ($.stop) {
-                    console.log(`签到只给积分或优惠券，不跑！`)
-                    break
-                }
-                if ($.index % 2 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-                if ($.index % 2 == 0) await $.wait(parseInt(Math.random() * 50000 + 2000, 10))
+            if ($.isNode()) {
+                await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号 ${$.UserName}\n请重新登录获取cookie`);
+            }
+        }
+        for (let id of $.activityIds.split("&")) {
+            $.rawId = id
+            if (id.indexOf(`cj`) != -1) {
+                $.activityUrl = $.cjprefixUrl + id.split("_")[1]
+                $.activityId = id.split("_")[1]
+            } else {
+                $.activityUrl = $.prefixUrl + id
+                $.activityId = id
+            }
+            console.log(`跳转链接：\n${$.activityUrl}`)
+            await jdmodule();
+            console.log('店铺签到完成，请等待...')
+            await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
+        }
+        await notify.sendNotify(`连续签到`, `账号名称 ${$.nickName || $.UserName}\n${$.message}`)
+        await notify.sendNotify(`连续签到索引`, `export CON_SIGN_INDEX="${outputIdx}"`)
+        if (nextIdx == cookiesArr.length) {
+            if ($.exportResult != "") {
+                await notify.sendNotify("连续签到每日变量", `export T_CON_SIGN_IDS=\"${$.exportResult}\"`)
             }
         }
     }
-    if ($.isNode()) {
-        result = $.activityIds == null || $.activityIds == "" ? $.rawId : $.activityIds + `&${$.rawId}`
-        await notify.sendNotify("连续签到变量", `export T_CON_SIGN_IDS=\"${result}\"`)
-        if ($.message != '') {
-            await notify.sendNotify("连续签到", `${$.shopName}\n${$.message}\n奖励内容\n${$.priseMsg}\n跳转链接\n${$.activityUrl}`)
-
-        }
-    }
-
 })()
     .catch((e) => {
         $.log('', `❌ ${$.name}, 失败! 原因: ${e}!`, '')
@@ -99,7 +113,10 @@ if ($.isNode()) {
         $.done();
     })
 
-
+async function sleep(ms) {
+    // Unit is ms
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
 
 async function jdmodule() {
     $.domain = $.activityUrl.match(/https?:\/\/([^/]+)/) && $.activityUrl.match(
@@ -136,14 +153,18 @@ async function jdmodule() {
     await takePostRequest("getShopInfo")
 
     if (!$.signFlag) {
-        $.stop = true
         return
     }
 
-    if ($.needOpenCard == 1) {
-        console.log(`去开卡`)
-        await opencard()
+    if ($.totalSignNum == $.dayNum) {
+        console.log(`已签到至最大天数`)
+        return
     }
+
+    // if ($.actMemberStatus == 1 && !$.openCardStatus && $.signFlag) {
+    //     console.log(`不开卡`)
+    //     return
+    // }
 
     await takePostRequest("signUp")
 }
@@ -300,13 +321,6 @@ async function dealReturn(type, data) {
                     console.log(`${type} ${data}`)
                 }
                 break;
-            case 'getOpenStatus':
-                if (typeof res == 'object') {
-                    if (res.result) {
-                        $.needOpenCard = res.data
-                    }
-                }
-                break;
             case 'getMyPing':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
@@ -359,29 +373,27 @@ async function dealReturn(type, data) {
                         if (signResult != null && signResult.giftName) {
                             giftName = signResult.giftName
                             console.log(`签到成功，获得${giftName}`)
-                            $.message += `京东账号${$.UserName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
+                            $.message += `${$.shopName} 签到成功，获得 ${giftName}，总签到天数 ${$.totalSignNum + 1}\n`
+                            if ($.giftName.indexOf(`京豆`) < 0 && $.giftName.indexOf(`积分`) < 0) {
+                                $.message += `跳转链接: ${$.activityUrl}\n`
+                            }
+
                         } else {
                             console.log(`签到成功，签了个寂寞...`)
-                            $.message += `京东账号${$.UserName} 签到成功，签了个寂寞...，总签到天数 ${$.totalSignNum + 1}\n`
+                            $.message += `${$.shopName} 签到成功，签了个寂寞...，总签到天数 ${$.totalSignNum + 1}\n`
                         }
-
+                        if ($.exportResult.indexOf($.activityId) == -1) {
+                            $.exportResult += $.exportResult == "" ? $.rawId : `&${$.rawId}`
+                        }
                     } else {
                         console.log(`签到失败 ${res.msg}`)
-                        $.message += `京东账号${$.UserName} 签到失败，总签到天数 ${$.totalSignNum}\n`
-                    }
-                } else {
-                    console.log(`${type} ${data}`)
-                }
-                break;
-            case 'getActMemberInfo':
-                if (typeof res == 'object') {
-                    if (res.result && res.result === true) {
-                        $.actMemberStatus = res.data.actMemberStatus
-                        $.openCardStatus = res.data.openCard
-                    } else if (res.errorMessage) {
-                        console.log(`${type} ${res.errorMessage || ''}`)
-                    } else {
-                        console.log(`${type} ${data}`)
+                        $.message += `京东账号${$.UserName} 签到失败：${res.msg}，总签到天数 ${$.totalSignNum}\n`
+                        if (res.msg.indexOf(`已经结束`) != -1) {
+                            return
+                        }
+                        if ($.exportResult.indexOf($.activityId) == -1) {
+                            $.exportResult += $.exportResult == "" ? $.rawId : `&${$.rawId}`
+                        }
                     }
                 } else {
                     console.log(`${type} ${data}`)
@@ -395,15 +407,12 @@ async function dealReturn(type, data) {
                         for (let info of giftConditions) {
                             $.dayNum = info.dayNum
                             // 不跑只有积分或者优惠券的签到
-                            if (info.gift != null && (info.gift.giftType == 9 || info.gift.giftType == 1 || info.gift.giftName.indexOf('积分') != -1 || info.gift.giftName.indexOf("优惠券") != -1)) {
-                                $.signFlag = false
-                            } else {
+                            if (info.gift != null && (info.gift.giftType != 9 || info.gift.giftType != 1)) {
                                 $.signFlag = true
                             }
                             console.log(`签到${$.dayNum}天，可获得${info.gift.giftName}`)
-                            if ($.index == 1) {
-                                $.priseMsg += `签到${$.dayNum}天，可获得${info.gift.giftName}\n`
-                            }
+                            $.priseMsg += `签到${$.dayNum}天，可获得${info.gift.giftName}\n`
+
                         }
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
@@ -428,6 +437,13 @@ async function dealReturn(type, data) {
                     }
                 }
                 break;
+            case 'getOpenStatus':
+                if (typeof res == 'object') {
+                    if (res.result) {
+                        $.needOpenCard = res.data
+                    }
+                }
+                break;
             case 'followShop':
             case 'addShareOpen':
                 if (typeof res == 'object') {
@@ -436,130 +452,7 @@ async function dealReturn(type, data) {
                     }
                 }
                 break;
-            case 'visitSku':
-            case 'toShop':
-            case 'addSku':
-            case 'sign':
-            case 'browseGoods':
-            case '抽奖':
-                if (typeof res == 'object') {
-                    if (res.result && res.result === true) {
-                        if (typeof res.data == 'object') {
-                            let msg = ''
-                            let title = '抽奖'
-                            if (res.data.addBeanNum) {
-                                msg = `${res.data.addBeanNum}京豆`
-                            }
-                            if (res.data.addPoint) {
-                                msg += ` ${res.data.addPoint}游戏机会`
-                            }
-                            if (type == 'followShop') {
-                                title = '关注'
-                                if (res.data.beanNumMember && res.data.assistSendStatus) {
-                                    msg += ` 额外获得:${res.data.beanNumMember}京豆`
-                                }
-                            } else if (type == 'addSku' || type == 'addCart') {
-                                title = '加购'
-                            } else if (type == 'viewVideo') {
-                                title = '热门文章'
-                            } else if (type == 'toShop') {
-                                title = '浏览店铺'
-                            } else if (type == 'visitSku' || type == 'browseGoods') {
-                                title = '浏览商品'
-                            } else if (type == 'sign') {
-                                title = '签到'
-                            } else {
-                                let drawData = typeof res.data.drawOk === 'object' && res.data.drawOk || res.data
-                                msg = drawData.drawOk == true && drawData.name || ''
-                            }
-                            if (title == "抽奖" && msg && msg.indexOf('京豆') == -1) {
-                                if ($.isNode()) await notify.sendNotify(`${$.name}`, `【京东账号${$.index}】${$.nickName || $.UserName}\n${title}成功,获得 ${msg}\n活动地址: https://3.cn/-106MEjSh`);
-                            }
-                            if (!msg) {
-                                msg = '空气💨'
-                            }
-                            console.log(`${title}获得:${msg || data}`)
-                        } else {
-                            console.log(`${type} ${data}`)
-                        }
-                    } else if (res.errorMessage) {
-                        $.runFalag = false;
-                        console.log(`${type} ${res.errorMessage || ''}`)
-                    } else {
-                        console.log(`${type} ${data}`)
-                    }
-                } else {
-                    console.log(`${type} ${data}`)
-                }
-                break;
-            case 'getDrawRecordHasCoupon':
-                if (typeof res == 'object') {
-                    if (res.result && res.result === true) {
-                        console.log(`我的奖品：`)
-                        let num = 0
-                        let value = 0
-                        let dayShareTime = 0
-                        for (let i in res.data.recordList) {
-                            let item = res.data.recordList[i]
-                            if (item.infoName == '20京豆' && item.drawStatus == 0) {
-                                num++
-                                value = item.infoName.replace('京豆', '')
-                                dayShareTime = dayShareTime < item.createTime ? item.createTime : dayShareTime;
-                            } else {
-                                console.log(`${item.infoType != 10 && item.value && item.value + ':' || ''}${item.infoName}`)
-                            }
-                        }
-                        if (dayShareTime > 0) console.log("最新邀请奖励时间:" + $.time("yyyy-MM-dd HH:mm:ss", dayShareTime))
-                        if (num > 0) console.log(`邀请好友(${num}):${num * parseInt(value, 10) || 30}京豆`)
-                    } else if (res.errorMessage) {
-                        console.log(`${type} ${res.errorMessage || ''}`)
-                    } else {
-                        console.log(`${type} ${data}`)
-                    }
-                } else {
-                    console.log(`${type} ${data}`)
-                }
-                break;
-            case 'getShareRecord':
-                if (typeof res == 'object') {
-                    if (res.result && res.result === true && res.data) {
-                        $.ShareCount = res.data.shareList.length
-                        $.log(`=========== 你邀请了:${$.ShareCount}个\n由于接口数据只有30个 故邀请大于30个的需要自行判断\n`)
-                    } else if (res.errorMessage) {
-                        console.log(`${type} ${res.errorMessage || ''}`)
-                    } else {
-                        console.log(`${type} ${data}`)
-                    }
-                } else {
-                    console.log(`${type} ${data}`)
-                }
-                break;
-            case '邀请':
-            case '助力':
-                // console.log(data)
-                if (typeof res == 'object') {
-                    if (res.data.status == 200) {
-                        if (type == '助力') {
-                            console.log('助力成功')
-                        } else {
-                            $.yaoqing = true
-                        }
-                    } else if (res.data.status == 105) {
-                        console.log('已经助力过')
-                    } else if (res.data.status == 104) {
-                        console.log('已经助力其他人')
-                    } else if (res.data.status == 101) {
-                        // console.log('已经助力过')
-                    } else {
-                        console.log(data)
-                    }
-                } else {
-                    console.log(`${type} ${data}`)
-                }
 
-            case 'accessLogWithAD':
-            case 'drawContent':
-                break;
             default:
                 console.log(`${type}-> ${data}`);
         }
