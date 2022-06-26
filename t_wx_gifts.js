@@ -355,6 +355,7 @@ async function dealReturn(type, data) {
                         levelData = data.levelData
                         for (let d of levelData) {
                             $.message += `${d.beanNum}${d.name}`
+                            console.log(`${d.beanNum}${d.name}`)
                         }
                         $.message += `\n`
                     } else {
@@ -374,6 +375,7 @@ async function dealReturn(type, data) {
                         birthdayData = data.birthdayData
                         for (let d of birthdayData) {
                             $.message += `${d.beanNum}${d.name}`
+                            console.log(`${d.beanNum}${d.name}`)
                         }
                         $.message += `\n`
                     } else {
