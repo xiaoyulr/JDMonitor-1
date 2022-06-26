@@ -303,7 +303,7 @@ async function dealReturn(type, data) {
             case 'activityContent':
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
-                        console.log(JSON.stringify(res.data))
+                       // console.log(JSON.stringify(res.data))
                         let data = res.data
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
@@ -348,7 +348,7 @@ async function dealReturn(type, data) {
                 break;
             case 'sendLevelGifts':
                 if (typeof res == 'object') {
-                    console.log(JSON.stringify(res))
+                    // console.log(JSON.stringify(res))
                     if (res.result && res.result === true) {
                         data = res.data
                         $.message += `京东账号 ${$.nickName || $.UserName} 获得`
@@ -367,7 +367,7 @@ async function dealReturn(type, data) {
                 break;
             case 'sendBirthGifts':
                 if (typeof res == 'object') {
-                    console.log(JSON.stringify(res))
+                    // console.log(JSON.stringify(res))
                     if (res.result && res.result === true) {
                         data = res.data
                         $.message += `京东账号 ${$.nickName || $.UserName} 获得`
