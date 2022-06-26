@@ -45,67 +45,71 @@ if ($.isNode()) {
         return;
     }
     let curtimestamp = Date.parse(new Date());
-    for (let actInfo of $.activityIds.split("&")) {
-        console.log(actInfo)
-        let drawTime = actInfo.split(";")[1]
-        if ((curtimestamp - drawTime) / 60 / 1000 < 5) {
-            let actInfoId = actInfo.split(";")[0];
-            if ($.exportActivityIds.indexOf(actInfoId) != -1) {
-                continue;
-            }
-            console.log(`活动Id：` + actInfoId + `已加入export中`)
-            $.exportActivityIds = $.exportActivityIds == '' ? `${actInfo}` : `${$.exportActivityIds}&${actInfo}`
-        }
-    }
-    for (let i = 0; i < cookiesArr.length; i++) {
-        if (cookiesArr[i]) {
-            cookie = cookiesArr[i];
-            $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
-            $.index = i + 1;
-            $.isLogin = true;
-            $.nickName = '';
-            console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
-            if (!$.isLogin) {
-                $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
-
-                if ($.isNode()) {
-                    await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
-                }
-                continue
-            }
-            await jdmodule(false);
-            if ($.helpTimes != 0 && $.helpTimes == $.hasHelpedTimes) {
-                $.friendUuidId++
-                $.friendUuid = $.friendUuids[$.friendUuidId]
-                $.hasHelpedTimes = 0
-                $.helpTimes = $.otherHelpTime
-                console.log(`上一个账号已助力完成，接下来都会助力${$.friendUuid}`)
-            }
-            if ($.index % 3 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-            if ($.index % 3 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
-        }
-    }
-    for (let i = 0; i < cookiesArr.length; i++) {
-        if (cookiesArr[i]) {
-            cookie = cookiesArr[i];
-            await jdmodule(true);
-            $.message += `被助力账号${i + 1}本次加购${$.hasAddCartSize}/${$.drawCondition}/${$.totals}件商品\n`
-        }
-        if (i + 1 % 3 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
-        if (i + 1 % 3 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
-    }
-    let st = timeToTimestamp($.drawTime)
-    let temp = `${$.activityId};${st}`
-    let exports = ""
-    if ($.exportActivityIds.indexOf($.activityId) != -1) {
-        exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}\"`
+    if ($.activityIds.indexOf($.activityId) != -1) {
+        console.log("ID已存在，退出")
     } else {
-        exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}&${temp}\"`
-    }
-    if ($.isNode()) {
-        // await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}如需开卡，开卡命令为\n\n并重跑一次该任务！`)
-        await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}开奖时间：${$.drawTime}\n跳转链接: ${$.activityUrl}\n`);
-        await notify.sendNotify(`将以下参数写进配置文件：`, `\n${exports}`)
+        for (let actInfo of $.activityIds.split("&")) {
+            console.log(actInfo)
+            let drawTime = actInfo.split(";")[1]
+            if ((curtimestamp - drawTime) / 60 / 1000 < 5) {
+                let actInfoId = actInfo.split(";")[0];
+                if ($.exportActivityIds.indexOf(actInfoId) != -1) {
+                    continue;
+                }
+                console.log(`活动Id：` + actInfoId + `已加入export中`)
+                $.exportActivityIds = $.exportActivityIds == '' ? `${actInfo}` : `${$.exportActivityIds}&${actInfo}`
+            }
+        }
+        for (let i = 0; i < cookiesArr.length; i++) {
+            if (cookiesArr[i]) {
+                cookie = cookiesArr[i];
+                $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
+                $.index = i + 1;
+                $.isLogin = true;
+                $.nickName = '';
+                console.log(`\n******开始【京东账号${$.index}】${$.nickName || $.UserName}*********\n`);
+                if (!$.isLogin) {
+                    $.msg($.name, `【提示】cookie已失效`, `京东账号${$.index} ${$.nickName || $.UserName}\n请重新登录获取\nhttps://bean.m.jd.com/bean/signIndex.action`, { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
+
+                    if ($.isNode()) {
+                        await notify.sendNotify(`${$.name}cookie已失效 - ${$.UserName}`, `京东账号${$.index} ${$.UserName}\n请重新登录获取cookie`);
+                    }
+                    continue
+                }
+                await jdmodule(false);
+                if ($.helpTimes != 0 && $.helpTimes == $.hasHelpedTimes) {
+                    $.friendUuidId++
+                    $.friendUuid = $.friendUuids[$.friendUuidId]
+                    $.hasHelpedTimes = 0
+                    $.helpTimes = $.otherHelpTime
+                    console.log(`上一个账号已助力完成，接下来都会助力${$.friendUuid}`)
+                }
+                if ($.index % 3 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+                if ($.index % 3 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
+            }
+        }
+        for (let i = 0; i < cookiesArr.length; i++) {
+            if (cookiesArr[i]) {
+                cookie = cookiesArr[i];
+                await jdmodule(true);
+                $.message += `被助力账号${i + 1}本次加购${$.hasAddCartSize}/${$.drawCondition}/${$.totals}件商品\n`
+            }
+            if (i + 1 % 3 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
+            if (i + 1 % 3 == 0) await $.wait(parseInt(Math.random() * 5000 + 20000, 10))
+        }
+        let st = timeToTimestamp($.drawTime)
+        let temp = `${$.activityId};${st}`
+        let exports = ""
+        if ($.exportActivityIds.indexOf($.activityId) != -1) {
+            exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}\"`
+        } else {
+            exports = `export T_CART_KOI_ACTIVITY_IDS=\"${$.exportActivityIds}&${temp}\"`
+        }
+        if ($.isNode()) {
+            // await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}如需开卡，开卡命令为\n\n并重跑一次该任务！`)
+            await notify.sendNotify(`购物车锦鲤：${$.activityName}`, `${$.message}开奖时间：${$.drawTime}\n跳转链接: ${$.activityUrl}\n`);
+            await notify.sendNotify(`将以下参数写进配置文件：`, `\n${exports}`)
+        }
     }
 })()
     .catch((e) => {
@@ -775,7 +779,7 @@ function setActivityCookie(resp) {
         }
     }
     if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && !$.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE}`
-    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && $.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE} ${$.LZ_AES_PIN}`   
+    if (LZ_TOKEN_KEY && LZ_TOKEN_VALUE && $.LZ_AES_PIN) activityCookie = `${LZ_TOKEN_KEY} ${LZ_TOKEN_VALUE} ${$.LZ_AES_PIN}`
     if (lz_jdpin_token) lz_jdpin_token_cookie = lz_jdpin_token
     // console.log(activityCookie)
 }
