@@ -23,6 +23,7 @@ $.signFlag = false
 $.giftInfoId = []
 $.LZ_AES_PIN = ""
 $.giftName = []
+$.stop = false
 var moment = require('moment');
 $.exportResult = ""
 $.sevenSignIndex = process.env.SEVEN_SIGN_INDEX ? process.env.SEVEN_SIGN_INDEX : "";
@@ -84,17 +85,25 @@ if ($.isNode()) {
                 $.activityUrl = `https://lzkj-isv.isvjcloud.com/sign/sevenDay/signActivity?activityId=${$.activityId}`
             }
             await jdmodule()
+            if ($.stop) {
+                break
+            }
             console.log('店铺签到完成，请等待...')
             await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
         }
     }
-    await notify.sendNotify(`七日签到`, `账号名称 ${$.nickName || $.UserName}\n${$.message}`)
-    await notify.sendNotify(`连七日签到索引`, `export SEVEN_SIGN_INDEX="${outputIdx}"`)
-    if (nextIdx == cookiesArr.length) {
-        if ($.exportResult != "") {
-            await notify.sendNotify("连续签到每日变量", `export T_SEVENDAY_SIGN_IDS=\"${$.exportResult}\"`)
+    if ($.stop) {
+        console.log(`被强制停止`)
+    } else {
+        await notify.sendNotify(`七日签到`, `账号名称 ${$.nickName || $.UserName}\n${$.message}`)
+        await notify.sendNotify(`七日签到索引`, `export SEVEN_SIGN_INDEX="${outputIdx}"`)
+        if (idx == 0) {
+            if ($.exportResult != "") {
+                await notify.sendNotify("七日签到每日变量", `export T_SEVENDAY_SIGN_IDS=\"${$.exportResult}\"`)
+            }
         }
     }
+
 
 })()
     .catch((e) => {
@@ -236,6 +245,7 @@ async function takePostRequest(type) {
                         if (resp.statusCode == 493) {
                             console.log('此ip已被限制，请过10分钟后再执行脚本\n')
                             $.outFlag = true
+                            $.stop = true
                         }
                     }
                     console.log(`${$.toStr(err, err)}`)
@@ -328,6 +338,7 @@ async function dealReturn(type, data) {
                                 $.signFlag = true
 
                             }
+                            console.log(`签到${$.dayNum}天，可得${giftCondition.gift.giftName}`)
                         }
                         $.isOver = res.isOver
                         $.isSign = res.isSign
@@ -361,7 +372,7 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     console.log(JSON.stringify(res))
                     if (res.isOk) {
-                        signResult = res.signResult.gift
+                        // signResult = res.signResult.gift
                         // console.log(JSON.stringify(signResult))
                         if (signResult != null && signResult.giftName) {
                             giftName = signResult.giftName

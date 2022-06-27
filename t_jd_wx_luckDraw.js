@@ -106,7 +106,7 @@ async function jdmodule() {
 
     await takePostRequest("getSimpleActInfoVo");
 
-    await takePostRequest("getOpenStatus")
+    // await takePostRequest("getOpenStatus")
 
     if ($.needOpenCard == 1) {
         console.log(`需要开卡`)
@@ -128,9 +128,7 @@ async function jdmodule() {
         await takePostRequest("activityContent")
     }
 
-    console.log(
-        `抽奖次数 ${$.canDrawTimes} ${$.drawConsume > 0 && $.drawConsume + "积分抽奖一次"
-        || ''}`)
+    console.log(`抽奖次数 ${$.canDrawTimes} ${$.drawConsume > 0 && $.drawConsume + "积分抽奖一次" || ''}`)
     if ($.canDrawTimes === 0) {
         $.stop = true
         return

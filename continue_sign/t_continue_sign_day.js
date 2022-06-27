@@ -94,16 +94,24 @@ if ($.isNode()) {
             }
             console.log(`跳转链接：\n${$.activityUrl}`)
             await jdmodule();
+            if ($.stop) {
+                break
+            }
             console.log('店铺签到完成，请等待...')
             await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
         }
-        await notify.sendNotify(`连续签到`, `账号名称 ${$.nickName || $.UserName}\n${$.message}`)
-        await notify.sendNotify(`连续签到索引`, `export CON_SIGN_INDEX="${outputIdx}"`)
-        if (nextIdx == cookiesArr.length) {
-            if ($.exportResult != "") {
-                await notify.sendNotify("连续签到每日变量", `export T_CON_SIGN_IDS=\"${$.exportResult}\"`)
+        if ($.stop) {
+            console.log(`脚本被强制停止！`)
+        } else {
+            await notify.sendNotify(`连续签到`, `账号名称 ${$.nickName || $.UserName}\n${$.message}`)
+            await notify.sendNotify(`连续签到索引`, `export CON_SIGN_INDEX="${outputIdx}"`)
+            if (idx == 0) {
+                if ($.exportResult != "") {
+                    await notify.sendNotify("连续签到每日变量", `export T_CON_SIGN_IDS=\"${$.exportResult}\"`)
+                }
             }
         }
+
     }
 })()
     .catch((e) => {
@@ -132,9 +140,13 @@ async function jdmodule() {
         return
     }
 
+    if ($.stop) {
+        return
+    }
+
     await takePostRequest("getSimpleActInfoVo");
 
-    await takePostRequest("getOpenStatus");
+    // await takePostRequest("getOpenStatus");
 
     await takePostRequest("getMyPing");
 
@@ -258,6 +270,7 @@ async function takePostRequest(type) {
                         if (resp.statusCode == 493) {
                             console.log('此ip已被限制，请过10分钟后再执行脚本\n')
                             $.outFlag = true
+                            $.stop = true
                         }
                     }
                     console.log(`${$.toStr(err, err)}`)
@@ -366,7 +379,7 @@ async function dealReturn(type, data) {
                 break;
             case 'signUp':
                 if (typeof res == 'object') {
-                    console.log(JSON.stringify(res))
+                    // console.log(JSON.stringify(res))
                     if (res.isOk) {
                         signResult = res.gift
                         // console.log(JSON.stringify(signResult))
