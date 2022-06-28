@@ -129,10 +129,10 @@ async function jdmodule() {
     }
 
     console.log(`抽奖次数 ${$.canDrawTimes} ${$.drawConsume > 0 && $.drawConsume + "积分抽奖一次" || ''}`)
-    if ($.canDrawTimes === 0) {
-        $.stop = true
-        return
-    }
+//     if ($.canDrawTimes === 0) {
+//         $.stop = true
+//         return
+//     }
     console.log(`可抽奖次数:${$.canDrawTimes}`)
 
 
