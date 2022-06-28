@@ -160,7 +160,7 @@ function dealExportByUrl(url, id) {
 
     // 连续签到
     // https://cjhy-isv.isvjcloud.com/sign/signActivity2?activityId=
-    if (url.indexOf("sign/signActivity2") != -1 && url.indexOf("cjhy") != -1) {
+    if (url.indexOf("sign/signActivity") != -1 && url.indexOf("cjhy") != -1) {
         if ($.recordConSign.indexOf(id) == -1) {
             id = 'cj_' + id
             $.conSignChange = true

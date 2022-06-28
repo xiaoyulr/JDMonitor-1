@@ -148,8 +148,8 @@ async function jdmodule() {
 
     await takePostRequest("getShopInfo")
 
-    if ($.isOver === 'y' || $.contiSignDays == 7) {
-        console.log(`活动已结束或已签到7天`)
+    if ($.isOver === 'y') {
+        console.log(`活动已结束`)
         return
     }
 
@@ -392,12 +392,12 @@ async function dealReturn(type, data) {
                     } else {
                         console.log(`签到失败 ${res.msg}`)
                         $.message += `${$.shopName} 签到失败：${res.msg}，总签到天数 ${$.contiSignDays}\n`
-                        if (res.msg.indexOf(`已经结束`) != -1) {
-                            return
+                        if (res.msg.indexOf(`已经结束`) == -1) {
+                            if ($.exportResult.indexOf($.activityId) == -1) {
+                                $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
+                            }
                         }
-                        if ($.exportResult.indexOf($.activityId) == -1) {
-                            $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
-                        }
+
                     }
                 } else {
                     console.log(`${type} ${data}`)
