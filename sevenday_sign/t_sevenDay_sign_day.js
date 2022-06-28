@@ -372,7 +372,7 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     console.log(JSON.stringify(res))
                     if (res.isOk) {
-                        // signResult = res.signResult.gift
+                        signResult = res.signResult.gift
                         // console.log(JSON.stringify(signResult))
                         if (signResult != null && signResult.giftName) {
                             giftName = signResult.giftName
