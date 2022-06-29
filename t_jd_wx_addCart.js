@@ -69,7 +69,7 @@ if ($.isNode()) {
     }
     if ($.isNode()) {
         if ($.stop) {
-            await notify.sendNotify("加购有礼", `活动已结束`)
+            await notify.sendNotify("加购有礼", `${$.message}\n跳转链接\n${$.activityUrl}\n活动已结束`)
         }
         else {
             if ($.message != '') {
