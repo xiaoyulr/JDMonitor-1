@@ -129,10 +129,10 @@ async function jdmodule() {
     }
 
     console.log(`抽奖次数 ${$.canDrawTimes} ${$.drawConsume > 0 && $.drawConsume + "积分抽奖一次" || ''}`)
-//     if ($.canDrawTimes === 0) {
-//         $.stop = true
-//         return
-//     }
+    // if ($.canDrawTimes === 0) {
+    //     $.stop = true
+    //     return
+    // }
     console.log(`可抽奖次数:${$.canDrawTimes}`)
 
 
@@ -408,10 +408,10 @@ async function dealReturn(type, data) {
                 if (typeof res == 'object') {
                     if (res.result && res.result === true) {
                         console.log(JSON.stringify(res))
-                        if (res.drawOk) {
+                        if (res.data.drawOk) {
                             console.log(`获得${res.data.name}`)
                             console.log(`还能抽` + res.data.canDrawTimes + `次`)
-                            $.message += `${res.data.name} `;
+                            $.message += res.data.name ;
                         } else {
                             console.log(`${res.errorMessage}`)
                             $.message += `${res.errorMessage}`
