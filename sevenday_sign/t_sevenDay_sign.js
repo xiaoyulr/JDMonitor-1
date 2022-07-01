@@ -77,7 +77,7 @@ if ($.isNode()) {
                     break
                 }
                 if ($.index == 1) {
-                    result = $.activityIds == null || $.activityIds == "" ? $.activityId : $.activityIds + `&${$.activityId}`
+                    result = $.activityIds == null || $.activityIds == "" ? $.rawId : $.activityIds + `&${$.rawId}`
                 }
                 if ($.index % 2 == 0) console.log('休息一下，别被黑ip了\n可持续发展')
                 if ($.index % 2 == 0) await $.wait(parseInt(Math.random() * 50000 + 2000, 10))
@@ -85,7 +85,7 @@ if ($.isNode()) {
         }
     }
     if ($.isNode()) {
-        result = $.activityIds == null || $.activityIds == "" ? $.rawId : $.activityIds + `&${$.rawId}`
+        
         await notify.sendNotify("7日签到变量", `export T_SEVENDAY_SIGN_IDS=\"${result}\"`)
         if ($.message != '') {
             await notify.sendNotify("7日签到", `${$.shopName}\n${$.message}\n奖励内容\n${$.priseMsg}\n跳转链接\n${$.activityUrl}`)
