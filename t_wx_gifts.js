@@ -337,7 +337,7 @@ async function dealReturn(type, data) {
                         $.retry = false
                     } else if (res.errorMessage) {
                         console.log(`${type} ${res.errorMessage || ''}`)
-                        $.$.retryTime++
+                        $.retryTime++
                         $.retry = true
                     } else {
                         console.log(`${type} ${data}`)
