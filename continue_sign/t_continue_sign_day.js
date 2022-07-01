@@ -51,26 +51,26 @@ if ($.isNode()) {
     today = moment(Date.now()).format('YYYY-MM-DD')
     if ($.conSignIndex == "") {
         dayFlag = today
-        idx = 0
+        $.idx = 0
     } else {
         dayFlag = $.conSignIndex.split("_")[0]
         if (dayFlag != today) {
             dayFlag = today
-            idx = 0
+            $.idx = 0
         } else {
-            idx = Number($.conSignIndex.split("_")[1])
+            $.idx = Number($.conSignIndex.split("_")[1])
         }
     }
-    if (dayFlag == today && idx >= cookiesArr.length) {
+    if (dayFlag == today && $.idx >= cookiesArr.length) {
         console.log(`已全部签到完毕`)
         return
     }
-    if (cookiesArr[idx]) {
-        nextIdx = idx + 1
+    if (cookiesArr[$.idx]) {
+        nextIdx = $.idx + 1
         outputIdx = today + "_" + nextIdx
         // console.log(outputIdx)
         // await notify.sendNotify(`连续签到索引`, `export CON_SIGN_INDEX="${outputIdx}"`)
-        cookie = cookiesArr[idx];
+        cookie = cookiesArr[$.idx];
         $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
         $.isLogin = true;
         $.nickName = '';
@@ -105,7 +105,7 @@ if ($.isNode()) {
         } else {
             await notify.sendNotify(`连续签到`, `账号名称 ${$.nickName || $.UserName}\n${$.message}`)
             await notify.sendNotify(`连续签到索引`, `export CON_SIGN_INDEX="${outputIdx}"`)
-            if (idx == 0) {
+            if ($.idx == 0) {
                 if ($.exportResult != "") {
                     await notify.sendNotify("连续签到每日变量", `export T_CON_SIGN_IDS=\"${$.exportResult}\"`)
                 }

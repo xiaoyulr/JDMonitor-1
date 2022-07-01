@@ -8,8 +8,7 @@ const notify = $.isNode() ? require('./sendNotify') : '';
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 let jdNotify = false;//是否关闭通知，false打开通知推送，true关闭通知推送
-$.activityUrl = process.env.T_FOLLOW_SHOP_URL ? process.env.T_FOLLOW_SHOP_URL : "";
-$.activityId = getQueryString($.activityUrl, 'activityId')
+$.activityId = process.env.jd_wxShopFollowActivity_activityId ? process.env.jd_wxShopFollowActivity_activityId : "";
 $.Token = "";
 $.openCard = false
 $.exportActivityIds = ""
@@ -38,11 +37,17 @@ if ($.isNode()) {
     cookiesArr = [$.getdata('CookieJD'), $.getdata('CookieJD2'), ...jsonParse($.getdata('CookiesJD') || "[]").map(item => item.cookie)].filter(item => !!item);
 }
 !(async () => {
-    console.log('入口下拉：https://prodev.m.jd.com/mall/active/3z1Vesrhx3GCCcBn2HgbFR4Jq68o/index.html')
+    
     if (!cookiesArr[0]) {
         $.msg($.name, '【提示】请先获取京东账号一cookie\n直接使用NobyDa的京东签到获取', 'https://bean.m.jd.com/bean/signIndex.action', { "open-url": "https://bean.m.jd.com/bean/signIndex.action" });
         return;
     }
+    if($.activityId.indexOf("cj_") !=-1) {
+        $.activityUrl = `https://cjhy-isv.isvjcloud.com/wxShopFollowActivity/activity?activityId=${$.activityId.split("_")[1]}`
+    } else {
+        $.activityUrl = `https://lzkj-isv.isvjcloud.com/wxShopFollowActivity/activity?activityId=${$.activityId}`
+    }
+    console.log(`活动链接：${$.activityUrl}`)
     for (let i = 0; i < cookiesArr.length; i++) {
         if (cookiesArr[i]) {
             cookie = cookiesArr[i];
@@ -104,10 +109,9 @@ async function jdmodule() {
         $.enPin = encodeURIComponent(encodeURIComponent($.Pin))
         await takePostRequest("accessLog")
     } else {
-        $.enPin = $.enPin
+        $.enPin = encodeURIComponent($.Pin)
         await takePostRequest("accessLogWithAD")
     }
-
     await takePostRequest("getUserInfo")
 
     // await takePostRequest("getActMemberInfo");

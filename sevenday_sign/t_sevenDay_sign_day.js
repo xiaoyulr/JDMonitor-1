@@ -46,24 +46,24 @@ if ($.isNode()) {
     today = moment(Date.now()).format('YYYY-MM-DD')
     if ($.sevenSignIndex == "") {
         dayFlag = today
-        idx = 0
+        $.idx = 0
     } else {
         dayFlag = $.sevenSignIndex.split("_")[0]
         if (dayFlag != today) {
             dayFlag = today
-            idx = 0
+            $.idx = 0
         } else {
-            idx = Number($.sevenSignIndex.split("_")[1])
+            $.idx = Number($.sevenSignIndex.split("_")[1])
         }
     }
-    if (dayFlag == today && idx >= cookiesArr.length) {
+    if (dayFlag == today && $.idx >= cookiesArr.length) {
         console.log(`已全部签到完毕`)
         return
     }
-    if (cookiesArr[idx]) {
-        nextIdx = idx + 1
+    if (cookiesArr[$.idx]) {
+        nextIdx = $.idx + 1
         outputIdx = today + "_" + nextIdx
-        cookie = cookiesArr[idx];
+        cookie = cookiesArr[$.idx];
         $.UserName = decodeURIComponent(cookie.match(/pt_pin=([^; ]+)(?=;?)/) && cookie.match(/pt_pin=([^; ]+)(?=;?)/)[1])
         $.isLogin = true;
         $.nickName = '';
@@ -89,6 +89,7 @@ if ($.isNode()) {
                 break
             }
             console.log('店铺签到完成，请等待...')
+            console.log($.exportResult)
             await $.wait(parseInt(Math.random() * 20000 + 2000, 10))
         }
     }
@@ -97,7 +98,7 @@ if ($.isNode()) {
     } else {
         await notify.sendNotify(`七日签到`, `账号名称 ${$.nickName || $.UserName}\n${$.message}`)
         await notify.sendNotify(`七日签到索引`, `export SEVEN_SIGN_INDEX="${outputIdx}"`)
-        if (idx == 0) {
+        if ($.idx == 0) {
             if ($.exportResult != "") {
                 await notify.sendNotify("七日签到每日变量", `export T_SEVENDAY_SIGN_IDS=\"${$.exportResult}\"`)
             }
@@ -392,12 +393,12 @@ async function dealReturn(type, data) {
                     } else {
                         console.log(`签到失败 ${res.msg}`)
                         $.message += `${$.shopName} 签到失败：${res.msg}，总签到天数 ${$.contiSignDays}\n`
-                        if (res.msg.indexOf(`已经结束`) == -1) {
-                            if ($.exportResult.indexOf($.activityId) == -1) {
-                                $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
-                            }
+                        if (res.msg.indexOf(`已经结束`) != -1 || res.msg.indexOf(`不存在`) != -1) {
+                            return
                         }
-
+                        if ($.exportResult.indexOf($.activityId) == -1) {
+                            $.exportResult += $.exportResult == "" ? $.activityId : `&${$.activityId}`
+                        }
                     }
                 } else {
                     console.log(`${type} ${data}`)

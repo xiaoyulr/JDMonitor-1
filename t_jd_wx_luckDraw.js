@@ -216,7 +216,7 @@ async function takePostRequest(type) {
             break;
 
         case 'cjactivityContent':
-            url = `https://${$.domain}/wxDrawActivity/activityContent`;
+            url = `https://${$.domain}/wxPointDrawActivity/activityContent`;
             body = `activityId=${$.activityId}&pin=${$.enPin}`
             break;
         case 'addCart':
